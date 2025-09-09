@@ -1,0 +1,36 @@
+openapi: 3.0.3
+
+info:
+  title: Jampa Trip
+  version: 1.0.0
+  description: >
+    Aplicação mobile com base no TCC do curso de Ciência da Computação.
+
+servers:
+  - url: http://127.0.0.1:1450
+    description: Servidor da Aplicação
+
+paths:
+  /auth/login:
+    $ref: './paths/auth/login.yaml'
+
+  /auth/register:
+    $ref: './paths/auth/register.yaml'
+
+  /auth/logout:
+    $ref: './paths/auth/logout.yaml'
+    
+  /auth/refresh:
+    $ref: './paths/auth/refresh.yaml'
+
+components:
+  schemas:
+    $ref: './components/schemas.yaml'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
