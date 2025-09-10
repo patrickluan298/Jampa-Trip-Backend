@@ -61,7 +61,7 @@ func init() {
 		log.Printf("erro ao inicializar conexão com o banco de dados escrita: %s", err.Error())
 		panic("erro ao inicializar conexão com o banco de dados escrita")
 	}
-	log.Println("OK DB Escrita")
+	log.Println("Database OK")
 }
 
 func main() {

@@ -1,13 +1,17 @@
 package cmd
 
 import (
-	"net/http"
-
+	"github.com/jampa_trip/internal/app/handler"
+	"github.com/jampa_trip/internal/app/middleware"
 	"github.com/labstack/echo/v4"
 )
 
 func ConfigureRoutes(e *echo.Echo) {
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello World")
-	})
+	authHandler := handler.AuthHandler{}
+
+	// Auth
+	e.POST("/jampa-trip/api/v1/auth/login", middleware.ValidateJSONMiddleware(authHandler.Login))
+	e.POST("/jampa-trip/api/v1/auth/register", middleware.ValidateJSONMiddleware(authHandler.Register))
+	e.POST("/jampa-trip/api/v1/auth/logout", middleware.ValidateJSONMiddleware(authHandler.Logout))
+	e.POST("/jampa-trip/api/v1/auth/refresh", middleware.ValidateJSONMiddleware(authHandler.Refresh))
 }
