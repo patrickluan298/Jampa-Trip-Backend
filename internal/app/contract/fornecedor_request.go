@@ -7,15 +7,14 @@ import (
 	"github.com/jampa_trip/internal/pkg/util"
 )
 
-// LoginRequest - objeto de request do enpoint de auth
-type LoginRequest struct {
-	ID    int    `json:"id"`
+// LoginFornecedorRequest - objeto de request do enpoint de login de fornecedor
+type LoginFornecedorRequest struct {
 	Email string `json:"email"`
 	Senha string `json:"senha"`
 }
 
 // Validate valida os campos da requisição
-func (receiver LoginRequest) Validate() error {
+func (receiver LoginFornecedorRequest) Validate() error {
 
 	err := validation.ValidateStruct(&receiver,
 		validation.Field(&receiver.Email, validation.Required, validation.Match(util.COD_03), validation.Length(1, 40)),

@@ -7,11 +7,16 @@ import (
 )
 
 func ConfigureRoutes(e *echo.Echo) {
-	authHandler := handler.AuthHandler{}
 
-	// Auth
-	e.POST("/jampa-trip/api/v1/auth/login", middleware.ValidateJSONMiddleware(authHandler.Login))
-	e.POST("/jampa-trip/api/v1/auth/register", middleware.ValidateJSONMiddleware(authHandler.Register))
-	e.POST("/jampa-trip/api/v1/auth/logout", middleware.ValidateJSONMiddleware(authHandler.Logout))
-	e.POST("/jampa-trip/api/v1/auth/refresh", middleware.ValidateJSONMiddleware(authHandler.Refresh))
+	// Empresas de turismo
+	e.POST("/jampa-trip/api/v1/fornecedores/login", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Login))
+	e.POST("/jampa-trip/api/v1/fornecedores/register", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Register))
+	e.POST("/jampa-trip/api/v1/fornecedores/logout", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Logout))
+	e.POST("/jampa-trip/api/v1/fornecedores/refresh", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Refresh))
+
+	// Cconsumidores de serviços
+	e.POST("/jampa-trip/api/v1/clientes/login", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Login))
+	e.POST("/jampa-trip/api/v1/clientes/register", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Register))
+	e.POST("/jampa-trip/api/v1/clientes/logout", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Logout))
+	e.POST("/jampa-trip/api/v1/clientes/refresh", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Refresh))
 }
