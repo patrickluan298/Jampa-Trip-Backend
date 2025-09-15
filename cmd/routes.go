@@ -8,15 +8,19 @@ import (
 
 func ConfigureRoutes(e *echo.Echo) {
 
+	// Health check
+	e.GET("/health-check", handler.HealthCheckResponse{}.HealthCheck)
+	e.HEAD("/health-check", handler.HealthCheckResponse{}.HealthCheck)
+
 	// Empresas de turismo
 	e.POST("/jampa-trip/api/v1/fornecedores/login", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Login))
-	e.POST("/jampa-trip/api/v1/fornecedores/register", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Register))
+	e.POST("/jampa-trip/api/v1/fornecedores/cadastrar", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Cadastrar))
 	e.POST("/jampa-trip/api/v1/fornecedores/logout", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Logout))
 	e.POST("/jampa-trip/api/v1/fornecedores/refresh", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Refresh))
 
-	// Cconsumidores de serviços
+	// Consumidores de serviços
 	e.POST("/jampa-trip/api/v1/clientes/login", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Login))
-	e.POST("/jampa-trip/api/v1/clientes/register", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Register))
+	e.POST("/jampa-trip/api/v1/clientes/cadastrar", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Cadastrar))
 	e.POST("/jampa-trip/api/v1/clientes/logout", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Logout))
 	e.POST("/jampa-trip/api/v1/clientes/refresh", middleware.ValidateJSONMiddleware(handler.FornecedorHandler{}.Refresh))
 }

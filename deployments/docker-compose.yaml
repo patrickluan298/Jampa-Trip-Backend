@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: jampa-trip-postgres
+    container_name: jampa-trip-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: jampa_trip_db
@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: jampa_trip_password
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
-      - "5432:5432"
+      - "6432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./deployments/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -22,10 +22,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "none"
 
   app:
     build:
-      context: .
+      context: ..
       dockerfile: build/Dockerfile
     container_name: jampa-trip-app
     restart: unless-stopped
@@ -34,7 +36,7 @@ services:
       HTTP_SERVER_READ_TIMEOUT: "20"
       HTTP_SERVER_WRITE_TIMEOUT: "60"
       HTTP_SERVER_IDLE_TIMEOUT: "120"
-      HTTP_SERVER_PORT: "1450"
+      HTTP_SERVER_PORT: ":1450"
       
       DATABASE_POSTGRES_HOST: "postgres"
       DATABASE_POSTGRES_PORT: "5432"
@@ -42,22 +44,27 @@ services:
       DATABASE_POSTGRES_USER: "jampa_trip_user"
       DATABASE_POSTGRES_PASSWORD: "jampa_trip_password"
       DATABASE_POSTGRES_POOL_MAX_LIFETIME_CONNECTION: "300"
-      DATABASE_POSTGRES_LOG: "/workspace/logs/database.log"
+      DATABASE_POSTGRES_LOG: ""
     ports:
       - "1450:1450"
     volumes:
-      - ./logs:/workspace/logs
-      - ./temp:/workspace/temp
+      # - ../logs:/workspace/logs
+      - ../temp:/workspace/temp
     networks:
       - jampa-trip-network
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1450/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1450/health-check"]
       interval: 30s
       timeout: 10s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
 
 volumes:
   postgres_data:

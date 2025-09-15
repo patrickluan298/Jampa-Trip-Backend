@@ -8,6 +8,13 @@ type LoginFornecedorResponse struct {
 	Dados      Fornecedor `json:"dados"`
 }
 
+// CadastrarFornecedorResponse - resposta de cadastro para fornecedores
+type CadastrarFornecedorResponse struct {
+	StatusCode int        `json:"statusCode"`
+	Message    string     `json:"message"`
+	Dados      Fornecedor `json:"dados"`
+}
+
 // Fornecedor - dados do fornecedor logado
 type Fornecedor struct {
 	ID              int    `json:"id"`

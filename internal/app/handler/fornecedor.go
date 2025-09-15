@@ -38,11 +38,29 @@ func (h FornecedorHandler) Login(ctx echo.Context) error {
 	return ctx.JSON(response.StatusCode, response)
 }
 
-// Register handler para registro de usuário
-func (h FornecedorHandler) Register(ctx echo.Context) error {
-	return ctx.JSON(http.StatusCreated, map[string]string{
-		"message": "Usuário registrado com sucesso",
-	})
+// Cadastrar - realiza o cadastro de um novo fornecedor
+func (h FornecedorHandler) Cadastrar(ctx echo.Context) error {
+
+	request := &contract.CadastrarFornecedorRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	serviceFornecedor := service.FornecedorServiceNew(app.DB)
+	response, err := serviceFornecedor.Cadastrar(request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(response.StatusCode, response)
 }
 
 // Logout handler para logout de usuário

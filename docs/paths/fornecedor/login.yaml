@@ -1,0 +1,33 @@
+post:
+  summary: Login de fornecedor
+  tags:
+    - Fornecedor
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+          required:
+            - email
+            - password
+  responses:
+    '200':
+      description: Login realizado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+              refresh_token:
+                type: string
+    '401':
+      description: Credenciais inválidas

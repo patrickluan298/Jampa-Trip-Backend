@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -49,10 +50,14 @@ func (receiver GormPostgresDatabase) Init(config GormPostgresDatabaseConfig) (da
 		return
 	}
 
-	logOutput, err := os.OpenFile(config.Logger, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-
-	if err != nil {
-		return
+	var logOutput io.Writer
+	if config.Logger == "" {
+		logOutput = os.Stdout
+	} else {
+		logOutput, err = os.OpenFile(config.Logger, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			return
+		}
 	}
 
 	database, err = gorm.Open(postgres.New(postgres.Config{Conn: sql}), &gorm.Config{

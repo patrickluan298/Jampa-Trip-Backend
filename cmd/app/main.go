@@ -15,14 +15,13 @@ import (
 	"github.com/jampa_trip/internal/pkg/database"
 	"github.com/jampa_trip/internal/pkg/util"
 	"github.com/jampa_trip/internal/pkg/webserver"
-	"github.com/labstack/echo/v4"
 	"github.com/swaggo/swag"
 )
 
 var err error
 
 const (
-	VersionAplication = "v1.0.0"
+	VersionApplication = "v1.0.0"
 )
 
 type swagger struct{}
@@ -48,7 +47,7 @@ func init() {
 		return
 	}
 
-	log.Println("Versão da Aplicação: ", VersionAplication)
+	log.Println("Versão da Aplicação: ", VersionApplication)
 
 	app.DB, err = database.GormPostgresDatabaseNew().Init(database.GormPostgresDatabaseConfig{
 		Host:     app.Config.DatabaseHost,
@@ -56,17 +55,15 @@ func init() {
 		User:     app.Config.DatabaseUser,
 		Password: app.Config.DatabasePassword,
 		DB:       app.Config.DatabaseName,
+		Logger:   "",
 	})
 	if err != nil {
-		log.Printf("erro ao inicializar conexão com o banco de dados escrita: %s", err.Error())
-		panic("erro ao inicializar conexão com o banco de dados escrita")
+		log.Fatalf("erro ao inicializar conexão com o banco de dados: %s", err.Error())
 	}
 	log.Println("Database OK")
 }
 
 func main() {
-	e := echo.New()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -77,9 +74,9 @@ func main() {
 		IDleTimeout:  app.Config.HTTPServerIdleTimeout,
 	})
 
-	middleware.SetupMiddlewares(e)
+	middleware.SetupMiddlewares(server)
 
-	cmd.ConfigureRoutes(e)
+	cmd.ConfigureRoutes(server)
 
 	go func() {
 		if err := server.Start(app.Config.HTTPServerPort); err != nil {
