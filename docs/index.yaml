@@ -11,17 +11,11 @@ servers:
     description: Servidor da Aplicação
 
 paths:
-  /auth/login:
-    $ref: './paths/auth/login.yaml'
+  /fornecedor/cadastrar:
+    $ref: './paths/fornecedor/cadastrar.yaml'
 
-  /auth/register:
-    $ref: './paths/auth/register.yaml'
-
-  /auth/logout:
-    $ref: './paths/auth/logout.yaml'
-    
-  /auth/refresh:
-    $ref: './paths/auth/refresh.yaml'
+  /fornecedor/login:
+    $ref: './paths/fornecedor/login.yaml'
 
 components:
   schemas:

@@ -1,49 +1,53 @@
-FROM golang:1.22.5-alpine3.19 AS build
+FROM golang:1.23.5-alpine AS builder
 
 ENV GOOS=linux
 ENV GOARCH=amd64
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
-ENV WORKSPACE=${GOPATH}/src/app
+ENV GOPROXY=direct
 
-WORKDIR ${WORKSPACE}
+RUN apk add --no-cache git ca-certificates tzdata
 
-RUN apk add --no-cache build-base gcc git pkgconf musl-dev openssh --virtual .build-deps
+WORKDIR /app
 
-RUN mkdir /root/.ssh/ && \
-    chmod 0700 /root/.ssh && \
-    ssh-keyscan -p 2222 gitlab.servicenet.com.br > /root/.ssh/known_hosts
+COPY go.mod go.sum ./
 
-COPY id_rsa /root/.ssh/
-RUN chmod 600 /root/.ssh/id_rsa
-
-RUN git config --global url."ssh://git@gitlab.servicenet.com.br:2222".insteadOf "http://gitlab.servicenet.com.br"
-
-COPY go.mod .
-COPY go.sum .
-
-RUN go mod download
+RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build -ldflags '-extldflags "-static"' -o bin/app cmd/app/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags='-w -s -extldflags "-static"' \
+    -a -installsuffix cgo \
+    -o main cmd/app/main.go
 
-RUN rm -R /root/.ssh/
+FROM alpine:3.19
 
-FROM alpine:3.12.1
+RUN apk --no-cache add ca-certificates tzdata bash wget
 
 ENV TZ=America/Recife
-ENV WORKSPACE=/workspace
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apk add --no-cache --virtual .build-deps ca-certificates tzdata bash \
-    && cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
 
-WORKDIR ${WORKSPACE}
+WORKDIR /workspace
 
-RUN mkdir -p ${WORKSPACE}/temp/arquivos/cbf801 \
-    && chmod 777 ${WORKSPACE}/temp/arquivos/cbf801
+RUN mkdir -p /workspace/logs /workspace/temp/arquivos/cbf801 && \
+    chmod 777 /workspace/temp/arquivos/cbf801 && \
+    chmod 777 /workspace/logs
 
-COPY --from=build /go/src/app/api/ ${WORKSPACE}/api/
-COPY --from=build /go/src/app/bin ${WORKSPACE}
+COPY --from=builder /app/main /workspace/
 
-CMD ["./app"]
+COPY --from=builder /app/docs /workspace/docs/
+
+RUN chown -R appuser:appgroup /workspace
+
+USER appuser
+
+EXPOSE 1450
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:1450/health || exit 1
+
+CMD ["./main"]

@@ -1,0 +1,75 @@
+# Arquivos de controle de versão
+.git
+.gitignore
+
+# Documentação
+README.md
+*.md
+
+# Arquivos de desenvolvimento e configuração local
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs (referenciado no docker-compose)
+logs/
+*.log
+
+# Arquivos temporários (usado no Dockerfile)
+temp/
+tmp/
+*.tmp
+
+# Arquivos de IDE e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Arquivos de teste (diretório existe mas vazio)
+tests/
+
+# Arquivos de build local
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Scripts de desenvolvimento (existem no projeto)
+Makefile
+run.sh
+*.sh
+
+# Arquivos de configuração de deployment (existe no projeto)
+deployments/
+
+# Arquivos de sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Arquivos de cache
+.cache/
+*.cache
+
+# Arquivos de backup
+*.bak
+*.backup
+*.old

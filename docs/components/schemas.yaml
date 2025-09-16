@@ -1,0 +1,15 @@
+Error:
+  type: object
+  properties:
+    detail:
+      type: string
+      example: Acesso negado.
+    errorName:
+      type: string
+      example: AccessDenied
+    moment:
+      type: string
+      example: 2024-05-17 14:01:41
+    statusCode:
+      type: integer
+      example: 401
