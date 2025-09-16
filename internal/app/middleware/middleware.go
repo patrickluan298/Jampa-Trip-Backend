@@ -7,7 +7,8 @@ import (
 
 // SetupMiddlewares - configura os middlewares
 func SetupMiddlewares(e *echo.Echo) {
-	e.Use(middleware.Recover())
+	e.Use(RecoveryMiddleware())
+	e.Use(Logging())
 	e.Use(middleware.CORS())
 	e.Use(middleware.Gzip())
 }

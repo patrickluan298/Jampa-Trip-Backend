@@ -1,6 +1,8 @@
 package util
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
@@ -129,4 +131,13 @@ func ValidaCNPJ(cnpj string) error {
 	}
 
 	return nil
+}
+
+// GenerateToken - gera um token aleatório para autenticação
+func GenerateToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }

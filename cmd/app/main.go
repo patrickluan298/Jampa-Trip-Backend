@@ -56,7 +56,7 @@ func init() {
 		User:     app.Config.DatabaseUser,
 		Password: app.Config.DatabasePassword,
 		DB:       app.Config.DatabaseName,
-		Logger:   "",
+		Logger:   app.Config.DatabaseLog,
 	})
 	if err != nil {
 		log.Fatalf("erro ao inicializar conexão com o banco de dados: %s", err.Error())

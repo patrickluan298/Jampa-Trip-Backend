@@ -39,7 +39,6 @@ func EchoWebServerNew() *EchoWebServer {
 func (receiver EchoWebServer) Init(config EchoWebServerConfig) (serverEcho *echo.Echo) {
 
 	server := echo.New()
-	server.Use(middleware.Recover())
 	server.Use(middleware.Secure())
 
 	debug, _ := strconv.ParseBool(config.Debug)

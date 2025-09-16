@@ -33,10 +33,6 @@ RUN addgroup -g 1001 -S appgroup && \
 
 WORKDIR /workspace
 
-RUN mkdir -p /workspace/logs /workspace/temp/arquivos/cbf801 && \
-    chmod 777 /workspace/temp/arquivos/cbf801 && \
-    chmod 777 /workspace/logs
-
 COPY --from=builder /app/main /workspace/
 
 COPY --from=builder /app/docs /workspace/docs/

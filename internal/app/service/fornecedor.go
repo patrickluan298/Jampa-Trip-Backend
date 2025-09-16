@@ -1,8 +1,6 @@
 package service
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"net/http"
 	"time"
 
@@ -41,7 +39,7 @@ func (receiver *FornecedorService) Login(request *contract.LoginFornecedorReques
 		return nil, util.WrapError("Email e/ou senha incorretos", nil, http.StatusUnauthorized)
 	}
 
-	token, err := receiver.generateToken()
+	token, err := util.GenerateToken()
 	if err != nil {
 		return nil, util.WrapError("Erro ao gerar token", err, http.StatusInternalServerError)
 	}
@@ -73,18 +71,13 @@ func (receiver *FornecedorService) Cadastrar(request *contract.CadastrarForneced
 	}
 
 	if emailExiste {
-		return nil, util.WrapError("Email já está cadastrado", nil, http.StatusConflict)
-	}
-
-	senhaHash, err := receiver.HashPassword(request.Senha)
-	if err != nil {
-		return nil, util.WrapError("Erro ao processar senha", err, http.StatusInternalServerError)
+		return nil, util.WrapError("O email informado já está cadastrado", nil, http.StatusConflict)
 	}
 
 	novoFornecedor := &model.Fornecedor{
 		Nome:            request.Nome,
 		Email:           request.Email,
-		Senha:           senhaHash,
+		Senha:           request.Senha,
 		CNPJ:            request.CNPJ,
 		Telefone:        request.Telefone,
 		Endereco:        request.Endereco,
@@ -102,6 +95,7 @@ func (receiver *FornecedorService) Cadastrar(request *contract.CadastrarForneced
 			ID:              novoFornecedor.ID,
 			Nome:            novoFornecedor.Nome,
 			Email:           novoFornecedor.Email,
+			Senha:           novoFornecedor.Senha,
 			CNPJ:            novoFornecedor.CNPJ,
 			Telefone:        novoFornecedor.Telefone,
 			Endereco:        novoFornecedor.Endereco,
@@ -116,19 +110,4 @@ func (receiver *FornecedorService) Cadastrar(request *contract.CadastrarForneced
 func (receiver *FornecedorService) verificaSenha(password, hashedPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
-}
-
-// generateToken - gera um token aleatório para autenticação
-func (receiver *FornecedorService) generateToken() (string, error) {
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
-}
-
-// HashPassword - gera um hash da senha usando bcrypt
-func (receiver *FornecedorService) HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
 }

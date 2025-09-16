@@ -1,9 +1,10 @@
 -- Script de inicialização do banco de dados Jampa Trip
 -- Este arquivo é executado automaticamente quando o container PostgreSQL é iniciado pela primeira vez
 
--- Conectar ao banco de dados correto
+-- Conectar ao banco de dados
 \c jampa_trip_db;
 
+-- FORNECEDORES
 CREATE TABLE IF NOT EXISTS fornecedores (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -19,7 +20,6 @@ CREATE INDEX IF NOT EXISTS idx_fornecedores_email ON fornecedores(email);
 CREATE INDEX IF NOT EXISTS idx_fornecedores_cnpj ON fornecedores(cnpj);
 CREATE INDEX IF NOT EXISTS idx_fornecedores_momento_cadastro ON fornecedores(momento_cadastro);
 
--- Comentário final
 COMMENT ON TABLE fornecedores IS 'Tabela para armazenar informações dos fornecedores do sistema Jampa Trip';
 COMMENT ON COLUMN fornecedores.id IS 'Identificador único do fornecedor';
 COMMENT ON COLUMN fornecedores.nome IS 'Nome da empresa fornecedora';
