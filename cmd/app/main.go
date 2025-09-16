@@ -41,13 +41,14 @@ func init() {
 	util.ParseSwagger(fmt.Sprintf("%s/docs/%s", currentDir, "index.yaml"))
 	swag.Register(swag.Name, &swagger{})
 
+	os.Setenv("VERSION_APPLICATION", VersionApplication)
+	log.Println("Versão da Aplicação: ", VersionApplication)
+
 	app.Config, err = config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-
-	log.Println("Versão da Aplicação: ", VersionApplication)
 
 	app.DB, err = database.GormPostgresDatabaseNew().Init(database.GormPostgresDatabaseConfig{
 		Host:     app.Config.DatabaseHost,

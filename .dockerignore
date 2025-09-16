@@ -33,8 +33,6 @@ Thumbs.db
 
 # Arquivos de teste (diretório existe mas vazio)
 tests/
-*_test.go
-coverage.out
 
 # Arquivos de build local
 bin/

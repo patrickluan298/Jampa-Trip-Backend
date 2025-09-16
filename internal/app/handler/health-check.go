@@ -9,17 +9,15 @@ import (
 
 // HealthCheckResponse referente ao response da função
 type HealthCheckResponse struct {
-	Status             int    `json:"status"`
-	Message            string `json:"message"`
-	NameApplication    string `json:"nameApplication"`
-	VersionApplication string `json:"versionApplication"`
+	Nome     string `json:"nome"`
+	Versao   string `json:"versao"`
+	Mensagem string `json:"mensagem"`
 }
 
 func (h HealthCheckResponse) HealthCheck(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, &HealthCheckResponse{
-		Status:             http.StatusOK,
-		Message:            "Aplicação up e em pleno funcionamento",
-		NameApplication:    "Jampa-Trip",
-		VersionApplication: os.Getenv("VERSION_APPLICATION"),
+		Nome:     "Jampa-Trip",
+		Versao:   os.Getenv("VERSION_APPLICATION"),
+		Mensagem: "Aplicação up e em pleno funcionamento",
 	})
 }

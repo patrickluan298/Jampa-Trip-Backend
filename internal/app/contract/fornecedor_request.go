@@ -44,13 +44,17 @@ func (receiver CadastrarFornecedorRequest) Validate() error {
 		validation.Field(&receiver.Nome, validation.Required, validation.Length(2, 100)),
 		validation.Field(&receiver.Email, validation.Required, validation.Match(util.COD_03), validation.Length(1, 40)),
 		validation.Field(&receiver.Senha, validation.Required, validation.Match(util.COD_07), validation.Length(8, 50)),
-		validation.Field(&receiver.CNPJ, validation.Required, validation.Length(14, 18)),
-		validation.Field(&receiver.Telefone, validation.Required, validation.Length(10, 15)),
-		validation.Field(&receiver.Endereco, validation.Required, validation.Length(5, 200)),
+		validation.Field(&receiver.CNPJ, validation.Required, validation.Match(util.COD_12)),
+		validation.Field(&receiver.Telefone, validation.Required, validation.Match(util.COD_11)),
+		validation.Field(&receiver.Endereco, validation.Required, validation.Length(10, 100)),
 	)
 
 	if err != nil {
 		return util.WrapError(util.FormatarErroValidacao(err).Error(), err, http.StatusUnprocessableEntity)
+	}
+
+	if err := util.ValidaCNPJ(receiver.CNPJ); err != nil {
+		return util.WrapError(err.Error(), err, http.StatusUnprocessableEntity)
 	}
 
 	if err := util.ValidaSegurancaSenha(receiver.Senha); err != nil {

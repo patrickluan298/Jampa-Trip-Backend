@@ -13,3 +13,8 @@ type Fornecedor struct {
 	Endereco        string    `gorm:"column:endereco"`
 	MomentoCadastro time.Time `gorm:"column:momento_cadastro"`
 }
+
+// TableName especifica o nome da tabela no banco de dados
+func (Fornecedor) TableName() string {
+	return "fornecedores"
+}
