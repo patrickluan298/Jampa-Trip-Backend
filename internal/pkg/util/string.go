@@ -5,11 +5,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Validações de caracteres para os campos fornecidos
@@ -140,4 +142,19 @@ func GenerateToken() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+// CriptografarSenha - criptografa a senha
+func CriptografarSenha(senha string) (string, error) {
+	senhaHash, err := bcrypt.GenerateFromPassword([]byte(senha), bcrypt.DefaultCost)
+	if err != nil {
+		return "", WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+	}
+	return string(senhaHash), nil
+}
+
+// VerificaSenha - verifica se a senha fornecida corresponde ao hash armazenado
+func VerificaSenha(password, hashedPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
 }

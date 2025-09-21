@@ -15,3 +15,6 @@ docker-dev-stop: # Para os containers em execução
 
 docker-dev-down: # Para e remove os containers
 	docker-compose -f deployments/docker-compose.yaml down
+
+docker-dev-volume-remove: # Remove o volume do banco de dados
+	docker volume rm deployments_postgres_data

@@ -2,12 +2,24 @@ package query
 
 var (
 	ObterPorEmail = `
-		SELECT * FROM fornecedores WHERE email = ?;
+		SELECT id, nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
+		FROM fornecedores WHERE email = ?;
 	`
 
 	Cadastrar = `
-		INSERT INTO fornecedores (nome, email, senha, cnpj, telefone, endereco, momento_cadastro)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO fornecedores (nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 		RETURNING id;
+	`
+
+	Atualizar = `
+		UPDATE fornecedores 
+		SET nome = ?, email = ?, senha = ?, cnpj = ?, telefone = ?, endereco = ?, momento_atualizacao = ?
+		WHERE id = ?;
+	`
+
+	ObterPorID = `
+		SELECT id, nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
+		FROM fornecedores WHERE id = ?;
 	`
 )

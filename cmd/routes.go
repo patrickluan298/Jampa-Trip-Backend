@@ -14,12 +14,10 @@ func ConfigureRoutes(e *echo.Echo) {
 	// Empresas de turismo
 	e.POST("/jampa-trip/api/v1/fornecedores/login", handler.FornecedorHandler{}.Login)
 	e.POST("/jampa-trip/api/v1/fornecedores/cadastrar", handler.FornecedorHandler{}.Cadastrar)
-	e.POST("/jampa-trip/api/v1/fornecedores/logout", handler.FornecedorHandler{}.Logout)
-	e.POST("/jampa-trip/api/v1/fornecedores/refresh", handler.FornecedorHandler{}.Refresh)
+	e.POST("/jampa-trip/api/v1/fornecedores/atualizar", handler.FornecedorHandler{}.Atualizar)
 
 	// Consumidores de serviços
 	e.POST("/jampa-trip/api/v1/clientes/login", handler.FornecedorHandler{}.Login)
 	e.POST("/jampa-trip/api/v1/clientes/cadastrar", handler.FornecedorHandler{}.Cadastrar)
-	e.POST("/jampa-trip/api/v1/clientes/logout", handler.FornecedorHandler{}.Logout)
-	e.POST("/jampa-trip/api/v1/clientes/refresh", handler.FornecedorHandler{}.Refresh)
+	e.POST("/jampa-trip/api/v1/clientes/atualizar", handler.FornecedorHandler{}.Atualizar)
 }

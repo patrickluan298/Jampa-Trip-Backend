@@ -8,7 +8,6 @@ import (
 	"github.com/jampa_trip/internal/app/model"
 	"github.com/jampa_trip/internal/app/repository"
 	"github.com/jampa_trip/internal/pkg/util"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +26,7 @@ func FornecedorServiceNew(DB *gorm.DB) *FornecedorService {
 // Login - realiza a autenticação de um usuário
 func (receiver *FornecedorService) Login(request *contract.LoginFornecedorRequest) (*contract.LoginFornecedorResponse, error) {
 
-	fornecedor, err := receiver.FornecedorRepository.Get(request.Email)
+	fornecedor, err := receiver.FornecedorRepository.GetByEmail(request.Email)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, util.WrapError("Email e/ou senha incorretos", nil, http.StatusUnauthorized)
@@ -35,7 +34,7 @@ func (receiver *FornecedorService) Login(request *contract.LoginFornecedorReques
 		return nil, util.WrapError("Erro ao buscar usuário", err, http.StatusInternalServerError)
 	}
 
-	if !receiver.verificaSenha(request.Senha, fornecedor.Senha) {
+	if !util.VerificaSenha(request.Senha, fornecedor.Senha) {
 		return nil, util.WrapError("Email e/ou senha incorretos", nil, http.StatusUnauthorized)
 	}
 
@@ -45,9 +44,8 @@ func (receiver *FornecedorService) Login(request *contract.LoginFornecedorReques
 	}
 
 	response := &contract.LoginFornecedorResponse{
-		StatusCode: http.StatusOK,
-		Message:    "Login realizado com sucesso",
-		Token:      token,
+		Mensagem: "Login realizado com sucesso",
+		Token:    token,
 		Dados: contract.Fornecedor{
 			ID:              fornecedor.ID,
 			Nome:            fornecedor.Nome,
@@ -74,40 +72,97 @@ func (receiver *FornecedorService) Cadastrar(request *contract.CadastrarForneced
 		return nil, util.WrapError("O email informado já está cadastrado", nil, http.StatusConflict)
 	}
 
-	novoFornecedor := &model.Fornecedor{
-		Nome:            request.Nome,
-		Email:           request.Email,
-		Senha:           request.Senha,
-		CNPJ:            request.CNPJ,
-		Telefone:        request.Telefone,
-		Endereco:        request.Endereco,
-		MomentoCadastro: time.Now(),
+	senhaHash, err := util.CriptografarSenha(request.Senha)
+	if err != nil {
+		return nil, util.WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
 	}
 
-	if err := receiver.FornecedorRepository.Cadastrar(novoFornecedor); err != nil {
+	fornecedor := &model.Fornecedor{
+		Nome:               request.Nome,
+		Email:              request.Email,
+		Senha:              senhaHash,
+		CNPJ:               request.CNPJ,
+		Telefone:           request.Telefone,
+		Endereco:           request.Endereco,
+		MomentoCadastro:    time.Now(),
+		MomentoAtualizacao: time.Now(),
+	}
+
+	if err := receiver.FornecedorRepository.Cadastrar(fornecedor); err != nil {
 		return nil, util.WrapError("Erro ao cadastrar fornecedor", err, http.StatusInternalServerError)
 	}
 
 	response := &contract.CadastrarFornecedorResponse{
-		StatusCode: http.StatusCreated,
-		Message:    "Fornecedor cadastrado com sucesso",
+		Mensagem: "Fornecedor cadastrado com sucesso",
 		Dados: contract.Fornecedor{
-			ID:              novoFornecedor.ID,
-			Nome:            novoFornecedor.Nome,
-			Email:           novoFornecedor.Email,
-			Senha:           novoFornecedor.Senha,
-			CNPJ:            novoFornecedor.CNPJ,
-			Telefone:        novoFornecedor.Telefone,
-			Endereco:        novoFornecedor.Endereco,
-			MomentoCadastro: novoFornecedor.MomentoCadastro.Format("2006-01-02 15:04:05"),
+			ID:                 fornecedor.ID,
+			Nome:               fornecedor.Nome,
+			Email:              fornecedor.Email,
+			CNPJ:               fornecedor.CNPJ,
+			Telefone:           fornecedor.Telefone,
+			Endereco:           fornecedor.Endereco,
+			MomentoCadastro:    fornecedor.MomentoCadastro.Format("2006-01-02 15:04:05"),
+			MomentoAtualizacao: fornecedor.MomentoAtualizacao.Format("2006-01-02 15:04:05"),
 		},
 	}
 
 	return response, nil
 }
 
-// verificaSenha - verifica se a senha fornecida corresponde ao hash armazenado
-func (receiver *FornecedorService) verificaSenha(password, hashedPassword string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	return err == nil
+// Atualizar - realiza a atualização de um fornecedor existente
+func (receiver *FornecedorService) Atualizar(request *contract.AtualizarFornecedorRequest) (*contract.AtualizarFornecedorResponse, error) {
+
+	fornecedorExistente, err := receiver.FornecedorRepository.GetByID(request.ID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, util.WrapError("Fornecedor não encontrado", nil, http.StatusNotFound)
+		}
+		return nil, util.WrapError("Erro ao buscar fornecedor", err, http.StatusInternalServerError)
+	}
+
+	emailExiste, err := receiver.FornecedorRepository.EmailExisteParaOutroFornecedor(request.Email, request.ID)
+	if err != nil {
+		return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
+	}
+
+	if emailExiste {
+		return nil, util.WrapError("O email informado já está cadastrado para outro fornecedor", nil, http.StatusConflict)
+	}
+
+	senhaHash, err := util.CriptografarSenha(request.Senha)
+	if err != nil {
+		return nil, util.WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+	}
+
+	fornecedor := &model.Fornecedor{
+		ID:                 request.ID,
+		Nome:               request.Nome,
+		Email:              request.Email,
+		Senha:              senhaHash,
+		CNPJ:               request.CNPJ,
+		Telefone:           request.Telefone,
+		Endereco:           request.Endereco,
+		MomentoCadastro:    fornecedorExistente.MomentoCadastro,
+		MomentoAtualizacao: time.Now(),
+	}
+
+	if err := receiver.FornecedorRepository.Atualizar(fornecedor); err != nil {
+		return nil, util.WrapError("Erro ao atualizar fornecedor", err, http.StatusInternalServerError)
+	}
+
+	response := &contract.AtualizarFornecedorResponse{
+		Mensagem: "Fornecedor atualizado com sucesso",
+		Dados: contract.Fornecedor{
+			ID:                 fornecedor.ID,
+			Nome:               fornecedor.Nome,
+			Email:              fornecedor.Email,
+			CNPJ:               fornecedor.CNPJ,
+			Telefone:           fornecedor.Telefone,
+			Endereco:           fornecedor.Endereco,
+			MomentoCadastro:    fornecedor.MomentoCadastro.Format("2006-01-02 15:04:05"),
+			MomentoAtualizacao: fornecedor.MomentoAtualizacao.Format("2006-01-02 15:04:05"),
+		},
+	}
+
+	return response, nil
 }
