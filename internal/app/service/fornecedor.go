@@ -46,14 +46,10 @@ func (receiver *FornecedorService) Login(request *contract.LoginFornecedorReques
 	response := &contract.LoginFornecedorResponse{
 		Mensagem: "Login realizado com sucesso",
 		Token:    token,
-		Dados: contract.Fornecedor{
-			ID:              fornecedor.ID,
-			Nome:            fornecedor.Nome,
-			Email:           fornecedor.Email,
-			CNPJ:            fornecedor.CNPJ,
-			Telefone:        fornecedor.Telefone,
-			Endereco:        fornecedor.Endereco,
-			MomentoCadastro: fornecedor.MomentoCadastro.Format(time.RFC3339),
+		Dados: contract.FornecedorLogin{
+			ID:    fornecedor.ID,
+			Nome:  fornecedor.Nome,
+			Email: fornecedor.Email,
 		},
 	}
 
@@ -162,6 +158,36 @@ func (receiver *FornecedorService) Atualizar(request *contract.AtualizarForneced
 			MomentoCadastro:    fornecedor.MomentoCadastro.Format("2006-01-02 15:04:05"),
 			MomentoAtualizacao: fornecedor.MomentoAtualizacao.Format("2006-01-02 15:04:05"),
 		},
+	}
+
+	return response, nil
+}
+
+// Listar - realiza a listagem de todos os fornecedores
+func (receiver *FornecedorService) Listar() (*contract.ListarFornecedorResponse, error) {
+
+	fornecedores, err := receiver.FornecedorRepository.ListarTodos()
+	if err != nil {
+		return nil, util.WrapError("Erro ao buscar fornecedores", err, http.StatusInternalServerError)
+	}
+
+	var fornecedoresResponse []contract.Fornecedor
+	for _, fornecedor := range fornecedores {
+		fornecedoresResponse = append(fornecedoresResponse, contract.Fornecedor{
+			ID:                 fornecedor.ID,
+			Nome:               fornecedor.Nome,
+			Email:              fornecedor.Email,
+			CNPJ:               fornecedor.CNPJ,
+			Telefone:           fornecedor.Telefone,
+			Endereco:           fornecedor.Endereco,
+			MomentoCadastro:    fornecedor.MomentoCadastro.Format("2006-01-02 15:04:05"),
+			MomentoAtualizacao: fornecedor.MomentoAtualizacao.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	response := &contract.ListarFornecedorResponse{
+		Mensagem: "Fornecedores listados com sucesso",
+		Dados:    fornecedoresResponse,
 	}
 
 	return response, nil

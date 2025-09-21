@@ -76,6 +76,56 @@ func ValidaSegurancaSenha(senha string) error {
 	return nil
 }
 
+// ValidaCPF - valida se o CPF é válido (formato e dígitos verificadores)
+func ValidaCPF(cpf string) error {
+	cpf = strings.ReplaceAll(cpf, ".", "")
+	cpf = strings.ReplaceAll(cpf, "-", "")
+
+	if len(cpf) != 11 {
+		return errors.New("CPF deve ter 11 dígitos")
+	}
+
+	if strings.Count(cpf, string(cpf[0])) == 11 {
+		return errors.New("CPF inválido: todos os dígitos são iguais")
+	}
+
+	// Validação do primeiro dígito verificador
+	soma := 0
+	for i := 0; i < 9; i++ {
+		digito, _ := strconv.Atoi(string(cpf[i]))
+		soma += digito * (10 - i)
+	}
+	resto := soma % 11
+	primeiroDigito := 0
+	if resto >= 2 {
+		primeiroDigito = 11 - resto
+	}
+
+	digito1, _ := strconv.Atoi(string(cpf[9]))
+	if digito1 != primeiroDigito {
+		return errors.New("CPF inválido: primeiro dígito verificador incorreto")
+	}
+
+	// Validação do segundo dígito verificador
+	soma = 0
+	for i := 0; i < 10; i++ {
+		digito, _ := strconv.Atoi(string(cpf[i]))
+		soma += digito * (11 - i)
+	}
+	resto = soma % 11
+	segundoDigito := 0
+	if resto >= 2 {
+		segundoDigito = 11 - resto
+	}
+
+	digito2, _ := strconv.Atoi(string(cpf[10]))
+	if digito2 != segundoDigito {
+		return errors.New("CPF inválido: segundo dígito verificador incorreto")
+	}
+
+	return nil
+}
+
 // ValidaCNPJ - valida se o CNPJ é válido (formato e dígitos verificadores)
 func ValidaCNPJ(cnpj string) error {
 	cnpj = strings.ReplaceAll(cnpj, ".", "")

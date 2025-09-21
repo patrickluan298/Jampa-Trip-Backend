@@ -22,7 +22,7 @@ func FornecedorRepositoryNew(DB *gorm.DB) *FornecedorRepository {
 func (receiver *FornecedorRepository) GetByID(id int) (*model.Fornecedor, error) {
 	row := &model.Fornecedor{}
 
-	err := receiver.DB.Raw(query.ObterPorID, id).Row().Scan(
+	err := receiver.DB.Raw(query.ObterFornecedorPorID, id).Row().Scan(
 		&row.ID,
 		&row.Nome,
 		&row.Email,
@@ -45,7 +45,7 @@ func (receiver *FornecedorRepository) GetByID(id int) (*model.Fornecedor, error)
 func (receiver *FornecedorRepository) GetByEmail(email string) (*model.Fornecedor, error) {
 	row := &model.Fornecedor{}
 
-	err := receiver.DB.Raw(query.ObterPorEmail, email).Row().Scan(
+	err := receiver.DB.Raw(query.ObterFornecedorPorEmail, email).Row().Scan(
 		&row.ID,
 		&row.Nome,
 		&row.Email,
@@ -66,7 +66,7 @@ func (receiver *FornecedorRepository) GetByEmail(email string) (*model.Fornecedo
 
 // Cadastrar - cria um novo fornecedor
 func (receiver *FornecedorRepository) Cadastrar(fornecedor *model.Fornecedor) error {
-	err := receiver.DB.Raw(query.Cadastrar,
+	err := receiver.DB.Raw(query.CadastrarFornecedor,
 		fornecedor.Nome,
 		fornecedor.Email,
 		fornecedor.Senha,
@@ -82,7 +82,7 @@ func (receiver *FornecedorRepository) Cadastrar(fornecedor *model.Fornecedor) er
 
 // Atualizar - atualiza um fornecedor existente
 func (receiver *FornecedorRepository) Atualizar(fornecedor *model.Fornecedor) error {
-	err := receiver.DB.Raw(query.Atualizar,
+	err := receiver.DB.Raw(query.AtualizarFornecedor,
 		fornecedor.Nome,
 		fornecedor.Email,
 		fornecedor.Senha,
@@ -94,6 +94,36 @@ func (receiver *FornecedorRepository) Atualizar(fornecedor *model.Fornecedor) er
 	).Row().Scan()
 
 	return err
+}
+
+// ListarTodos - busca todos os fornecedores
+func (receiver *FornecedorRepository) ListarTodos() ([]*model.Fornecedor, error) {
+	rows, err := receiver.DB.Raw(query.ListarTodosFornecedores).Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var fornecedores []*model.Fornecedor
+	for rows.Next() {
+		fornecedor := &model.Fornecedor{}
+		err := rows.Scan(
+			&fornecedor.ID,
+			&fornecedor.Nome,
+			&fornecedor.Email,
+			&fornecedor.CNPJ,
+			&fornecedor.Telefone,
+			&fornecedor.Endereco,
+			&fornecedor.MomentoCadastro,
+			&fornecedor.MomentoAtualizacao,
+		)
+		if err != nil {
+			return nil, err
+		}
+		fornecedores = append(fornecedores, fornecedor)
+	}
+
+	return fornecedores, nil
 }
 
 // EmailExiste - verifica se o email já está cadastrado
