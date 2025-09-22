@@ -11,37 +11,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type FornecedorHandler struct{}
+type ClienteHandler struct{}
 
-// Login - realiza o login de um fornecedor
-func (h FornecedorHandler) Login(ctx echo.Context) error {
+// Login - realiza o login de um cliente
+func (h ClienteHandler) Login(ctx echo.Context) error {
 
-	request := &contract.LoginFornecedorRequest{}
-
-	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
-			return webserver.ErrorResponse(ctx, erro)
-		}
-		return webserver.BadJSONResponse(ctx, err)
-	}
-
-	if err := request.Validate(); err != nil {
-		return webserver.ErrorResponse(ctx, err)
-	}
-
-	serviceFornecedor := service.FornecedorServiceNew(app.DB)
-	response, err := serviceFornecedor.Login(request)
-	if err != nil {
-		return webserver.ErrorResponse(ctx, err)
-	}
-
-	return ctx.JSON(http.StatusOK, response)
-}
-
-// Cadastrar - realiza o cadastro de um novo fornecedor
-func (h FornecedorHandler) Cadastrar(ctx echo.Context) error {
-
-	request := &contract.CadastrarFornecedorRequest{}
+	request := &contract.LoginClienteRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidarTipoBody(err); erro != nil {
@@ -54,8 +29,8 @@ func (h FornecedorHandler) Cadastrar(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceFornecedor := service.FornecedorServiceNew(app.DB)
-	response, err := serviceFornecedor.Cadastrar(request)
+	serviceCliente := service.ClienteServiceNew(app.DB)
+	response, err := serviceCliente.Login(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -63,10 +38,10 @@ func (h FornecedorHandler) Cadastrar(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// Atualizar - realiza a atualização de um fornecedor existente
-func (h FornecedorHandler) Atualizar(ctx echo.Context) error {
+// Cadastrar - realiza o cadastro de um novo cliente
+func (h ClienteHandler) Cadastrar(ctx echo.Context) error {
 
-	request := &contract.AtualizarFornecedorRequest{}
+	request := &contract.CadastrarClienteRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidarTipoBody(err); erro != nil {
@@ -79,8 +54,8 @@ func (h FornecedorHandler) Atualizar(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceFornecedor := service.FornecedorServiceNew(app.DB)
-	response, err := serviceFornecedor.Atualizar(request)
+	serviceCliente := service.ClienteServiceNew(app.DB)
+	response, err := serviceCliente.Cadastrar(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -88,11 +63,36 @@ func (h FornecedorHandler) Atualizar(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// Listar - realiza a listagem de todos os fornecedores
-func (h FornecedorHandler) Listar(ctx echo.Context) error {
+// Atualizar - realiza a atualização de um cliente existente
+func (h ClienteHandler) Atualizar(ctx echo.Context) error {
 
-	serviceFornecedor := service.FornecedorServiceNew(app.DB)
-	response, err := serviceFornecedor.Listar()
+	request := &contract.AtualizarClienteRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	serviceCliente := service.ClienteServiceNew(app.DB)
+	response, err := serviceCliente.Atualizar(request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+// Listar - realiza a listagem de todos os clientes
+func (h ClienteHandler) Listar(ctx echo.Context) error {
+
+	serviceCliente := service.ClienteServiceNew(app.DB)
+	response, err := serviceCliente.Listar()
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}

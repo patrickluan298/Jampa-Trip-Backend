@@ -1,13 +1,17 @@
 package util
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Validações de caracteres para os campos fornecidos
@@ -72,6 +76,56 @@ func ValidaSegurancaSenha(senha string) error {
 	return nil
 }
 
+// ValidaCPF - valida se o CPF é válido (formato e dígitos verificadores)
+func ValidaCPF(cpf string) error {
+	cpf = strings.ReplaceAll(cpf, ".", "")
+	cpf = strings.ReplaceAll(cpf, "-", "")
+
+	if len(cpf) != 11 {
+		return errors.New("CPF deve ter 11 dígitos")
+	}
+
+	if strings.Count(cpf, string(cpf[0])) == 11 {
+		return errors.New("CPF inválido: todos os dígitos são iguais")
+	}
+
+	// Validação do primeiro dígito verificador
+	soma := 0
+	for i := 0; i < 9; i++ {
+		digito, _ := strconv.Atoi(string(cpf[i]))
+		soma += digito * (10 - i)
+	}
+	resto := soma % 11
+	primeiroDigito := 0
+	if resto >= 2 {
+		primeiroDigito = 11 - resto
+	}
+
+	digito1, _ := strconv.Atoi(string(cpf[9]))
+	if digito1 != primeiroDigito {
+		return errors.New("CPF inválido: primeiro dígito verificador incorreto")
+	}
+
+	// Validação do segundo dígito verificador
+	soma = 0
+	for i := 0; i < 10; i++ {
+		digito, _ := strconv.Atoi(string(cpf[i]))
+		soma += digito * (11 - i)
+	}
+	resto = soma % 11
+	segundoDigito := 0
+	if resto >= 2 {
+		segundoDigito = 11 - resto
+	}
+
+	digito2, _ := strconv.Atoi(string(cpf[10]))
+	if digito2 != segundoDigito {
+		return errors.New("CPF inválido: segundo dígito verificador incorreto")
+	}
+
+	return nil
+}
+
 // ValidaCNPJ - valida se o CNPJ é válido (formato e dígitos verificadores)
 func ValidaCNPJ(cnpj string) error {
 	cnpj = strings.ReplaceAll(cnpj, ".", "")
@@ -129,4 +183,28 @@ func ValidaCNPJ(cnpj string) error {
 	}
 
 	return nil
+}
+
+// GenerateToken - gera um token aleatório para autenticação
+func GenerateToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
+
+// CriptografarSenha - criptografa a senha
+func CriptografarSenha(senha string) (string, error) {
+	senhaHash, err := bcrypt.GenerateFromPassword([]byte(senha), bcrypt.DefaultCost)
+	if err != nil {
+		return "", WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+	}
+	return string(senhaHash), nil
+}
+
+// VerificaSenha - verifica se a senha fornecida corresponde ao hash armazenado
+func VerificaSenha(password, hashedPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
 }

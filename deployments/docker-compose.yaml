@@ -47,9 +47,6 @@ services:
       DATABASE_POSTGRES_LOG: ""
     ports:
       - "1450:1450"
-    volumes:
-      # - ../logs:/workspace/logs
-      - ../temp:/workspace/temp
     networks:
       - jampa-trip-network
     depends_on:

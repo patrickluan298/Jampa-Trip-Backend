@@ -1,13 +1,31 @@
 package query
 
 var (
-	ObterPorEmail = `
-		SELECT * FROM fornecedores WHERE email = ?;
+	ObterFornecedorPorID = `
+		SELECT id, nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
+		FROM fornecedores WHERE id = ?;
 	`
 
-	Cadastrar = `
-		INSERT INTO fornecedores (nome, email, senha, cnpj, telefone, endereco, momento_cadastro)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+	ObterFornecedorPorEmail = `
+		SELECT id, nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
+		FROM fornecedores WHERE email = ?;
+	`
+
+	CadastrarFornecedor = `
+		INSERT INTO fornecedores (nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 		RETURNING id;
+	`
+
+	AtualizarFornecedor = `
+		UPDATE fornecedores 
+		SET nome = ?, email = ?, senha = ?, cnpj = ?, telefone = ?, endereco = ?, momento_atualizacao = ?
+		WHERE id = ?;
+	`
+
+	ListarTodosFornecedores = `
+		SELECT id, nome, email, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
+		FROM fornecedores 
+		ORDER BY momento_cadastro DESC;
 	`
 )

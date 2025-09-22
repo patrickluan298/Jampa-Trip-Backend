@@ -10,8 +10,11 @@ docker-dev-logs: # Exibe logs em tempo real
 # Faz o build + inicia containers + exibe logs
 docker-dev-build-logs: docker-dev-build docker-dev-logs
 
-docker-dev-stop: # Para containers sem removê-los
+docker-dev-stop: # Para os containers em execução
 	docker-compose -f deployments/docker-compose.yaml stop
 
-docker-dev-down: # Para e remove containers/volumes
+docker-dev-down: # Para e remove os containers
 	docker-compose -f deployments/docker-compose.yaml down
+
+docker-dev-volume-remove: # Remove o volume do banco de dados
+	docker volume rm deployments_postgres_data
