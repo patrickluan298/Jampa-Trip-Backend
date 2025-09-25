@@ -11,11 +11,33 @@ servers:
     description: Servidor da Aplicação
 
 paths:
-  /fornecedor/cadastrar:
-    $ref: './paths/fornecedor/cadastrar.yaml'
+  # HEALTH CHECK
+  /health-check:
+    $ref: './paths/health-check/health-check.yaml'
 
-  /fornecedor/login:
-    $ref: './paths/fornecedor/login.yaml'
+  # EMPRESA
+  /jampa-trip/api/v1/empresas/login:
+    $ref: './paths/empresa/login.yaml'
+  /jampa-trip/api/v1/empresas/cadastrar:
+    $ref: './paths/empresa/cadastrar.yaml'
+  /jampa-trip/api/v1/empresas/atualizar/{id}:
+    $ref: './paths/empresa/atualizar.yaml'
+  /jampa-trip/api/v1/empresas/listar:
+    $ref: './paths/empresa/listar.yaml'
+  /jampa-trip/api/v1/empresas/obter/{id}:
+    $ref: './paths/empresa/obter.yaml'
+
+  # CLIENTE
+  /jampa-trip/api/v1/clientes/login:
+    $ref: './paths/cliente/login.yaml'
+  /jampa-trip/api/v1/clientes/cadastrar:
+    $ref: './paths/cliente/cadastrar.yaml'
+  /jampa-trip/api/v1/clientes/atualizar/{id}:
+    $ref: './paths/cliente/atualizar.yaml'
+  /jampa-trip/api/v1/clientes/listar:
+    $ref: './paths/cliente/listar.yaml'
+  /jampa-trip/api/v1/clientes/obter/{id}:
+    $ref: './paths/cliente/obter.yaml'
 
 components:
   schemas:

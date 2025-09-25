@@ -2,8 +2,8 @@ package model
 
 import "time"
 
-// Fornecedor representa a entidade de fornecedor
-type Fornecedor struct {
+// Empresa representa a entidade de empresa
+type Empresa struct {
 	ID                 int       `gorm:"column:id;primaryKey"`
 	Nome               string    `gorm:"column:nome"`
 	Email              string    `gorm:"column:email"`
@@ -16,6 +16,6 @@ type Fornecedor struct {
 }
 
 // TableName especifica o nome da tabela no banco de dados
-func (Fornecedor) TableName() string {
-	return "fornecedores"
+func (Empresa) TableName() string {
+	return "empresas"
 }

@@ -12,37 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type ClienteHandler struct{}
+type EmpresaHandler struct{}
 
-// Login - realiza o login de um cliente
-func (h ClienteHandler) Login(ctx echo.Context) error {
+// Login - realiza o login de uma empresa
+func (h EmpresaHandler) Login(ctx echo.Context) error {
 
-	request := &contract.LoginClienteRequest{}
-
-	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
-			return webserver.ErrorResponse(ctx, erro)
-		}
-		return webserver.BadJSONResponse(ctx, err)
-	}
-
-	if err := request.Validate(); err != nil {
-		return webserver.ErrorResponse(ctx, err)
-	}
-
-	serviceCliente := service.ClienteServiceNew(app.DB)
-	response, err := serviceCliente.Login(request)
-	if err != nil {
-		return webserver.ErrorResponse(ctx, err)
-	}
-
-	return ctx.JSON(http.StatusOK, response)
-}
-
-// Create - realiza o cadastro de um novo cliente
-func (h ClienteHandler) Create(ctx echo.Context) error {
-
-	request := &contract.CadastrarClienteRequest{}
+	request := &contract.LoginEmpresaRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidarTipoBody(err); erro != nil {
@@ -55,8 +30,8 @@ func (h ClienteHandler) Create(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCliente := service.ClienteServiceNew(app.DB)
-	response, err := serviceCliente.Create(request)
+	serviceEmpresa := service.EmpresaServiceNew(app.DB)
+	response, err := serviceEmpresa.Login(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -64,10 +39,10 @@ func (h ClienteHandler) Create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// Update - realiza a atualização de um cliente existente
-func (h ClienteHandler) Update(ctx echo.Context) error {
+// Create - realiza o cadastro de uma nova empresa
+func (h EmpresaHandler) Create(ctx echo.Context) error {
 
-	request := &contract.AtualizarClienteRequest{}
+	request := &contract.CadastrarEmpresaRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidarTipoBody(err); erro != nil {
@@ -80,8 +55,8 @@ func (h ClienteHandler) Update(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCliente := service.ClienteServiceNew(app.DB)
-	response, err := serviceCliente.Update(request)
+	serviceEmpresa := service.EmpresaServiceNew(app.DB)
+	response, err := serviceEmpresa.Create(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -89,11 +64,24 @@ func (h ClienteHandler) Update(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// List - realiza a listagem de todos os clientes
-func (h ClienteHandler) List(ctx echo.Context) error {
+// Update - realiza a atualização de uma empresa existente
+func (h EmpresaHandler) Update(ctx echo.Context) error {
 
-	serviceCliente := service.ClienteServiceNew(app.DB)
-	response, err := serviceCliente.List()
+	request := &contract.AtualizarEmpresaRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	serviceEmpresa := service.EmpresaServiceNew(app.DB)
+	response, err := serviceEmpresa.Update(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -101,8 +89,20 @@ func (h ClienteHandler) List(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// Get - realiza a busca de um cliente por ID
-func (h ClienteHandler) Get(ctx echo.Context) error {
+// List - realiza a listagem de todas as empresas
+func (h EmpresaHandler) List(ctx echo.Context) error {
+
+	serviceEmpresa := service.EmpresaServiceNew(app.DB)
+	response, err := serviceEmpresa.List()
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+// Get - realiza a busca de uma empresa por ID
+func (h EmpresaHandler) Get(ctx echo.Context) error {
 
 	ID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -116,8 +116,8 @@ func (h ClienteHandler) Get(ctx echo.Context) error {
 		})
 	}
 
-	serviceCliente := service.ClienteServiceNew(app.DB)
-	response, err := serviceCliente.Get(ID)
+	serviceEmpresa := service.EmpresaServiceNew(app.DB)
+	response, err := serviceEmpresa.Get(ID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}

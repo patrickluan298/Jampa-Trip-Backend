@@ -1,31 +1,31 @@
 package query
 
 var (
-	ObterFornecedorPorID = `
+	ObterEmpresaPorID = `
 		SELECT id, nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
-		FROM fornecedores WHERE id = ?;
+		FROM empresas WHERE id = ?;
 	`
 
-	ObterFornecedorPorEmail = `
+	ObterEmpresaPorEmail = `
 		SELECT id, nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
-		FROM fornecedores WHERE email = ?;
+		FROM empresas WHERE email = ?;
 	`
 
-	CadastrarFornecedor = `
-		INSERT INTO fornecedores (nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao)
+	CadastrarEmpresa = `
+		INSERT INTO empresas (nome, email, senha, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 		RETURNING id;
 	`
 
-	AtualizarFornecedor = `
-		UPDATE fornecedores 
+	AtualizarEmpresa = `
+		UPDATE empresas 
 		SET nome = ?, email = ?, senha = ?, cnpj = ?, telefone = ?, endereco = ?, momento_atualizacao = ?
 		WHERE id = ?;
 	`
 
-	ListarTodosFornecedores = `
+	ListarTodasEmpresas = `
 		SELECT id, nome, email, cnpj, telefone, endereco, momento_cadastro, momento_atualizacao 
-		FROM fornecedores 
+		FROM empresas 
 		ORDER BY momento_cadastro DESC;
 	`
 )

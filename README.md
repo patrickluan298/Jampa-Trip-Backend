@@ -1,4 +1,4 @@
-# Jampa Trip Backend
+# Jampa Trip - Backend
 
 [![Go Version](https://img.shields.io/badge/Go-1.23.5-blue.svg)](https://golang.org/)
 [![Echo Framework](https://img.shields.io/badge/Echo-v4.13.4-green.svg)](https://echo.labstack.com/)
@@ -10,7 +10,7 @@
 
 O **Jampa Trip Backend** é uma API REST desenvolvida em Go que serve como backend para uma aplicação mobile de turismo. O projeto foi desenvolvido como parte de um TCC (Trabalho de Conclusão de Curso) do curso de Ciência da Computação, focando na gestão de fornecedores de serviços turísticos e clientes.
 
-A aplicação oferece funcionalidades de autenticação, cadastro de fornecedores e clientes, com uma arquitetura limpa e escalável utilizando o framework Echo, GORM para ORM e PostgreSQL como banco de dados.
+A aplicação oferece, com uma arquitetura limpa e escalável utilizando o framework Echo, GORM para ORM e PostgreSQL como banco de dados.
 
 ## 🚀 Instalação
 
@@ -101,7 +101,6 @@ A documentação Swagger está disponível em:
 ├── docs                  # Documentação da API (OpenAPI/Swagger)
 │   ├── components
 │   └── paths
-│       └── fornecedor
 ├── internal              # Código interno da aplicação
 │   ├── app               # Lógica de negócio
 │   │   ├── contract

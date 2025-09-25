@@ -3,7 +3,6 @@ package contract
 // LoginClienteResponse - resposta de login para clientes
 type LoginClienteResponse struct {
 	Mensagem string       `json:"mensagem"`
-	Token    string       `json:"token"`
 	Dados    ClienteLogin `json:"dados"`
 }
 
@@ -23,6 +22,12 @@ type AtualizarClienteResponse struct {
 type ListarClienteResponse struct {
 	Mensagem string    `json:"mensagem"`
 	Dados    []Cliente `json:"dados"`
+}
+
+// ObterClienteResponse - resposta de obter cliente por ID
+type ObterClienteResponse struct {
+	Mensagem string  `json:"mensagem"`
+	Dados    Cliente `json:"dados"`
 }
 
 // ClienteLogin - dados do cliente logado

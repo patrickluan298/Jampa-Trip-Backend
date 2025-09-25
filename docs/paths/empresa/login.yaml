@@ -1,0 +1,73 @@
+post:
+  summary: Login de empresa
+  tags:
+    - Empresa
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              description: Email da empresa
+              example: "empresa@exemplo.com"
+            senha:
+              type: string
+              format: password
+              description: Senha da empresa
+              example: "minhasenha123"
+          required:
+            - email
+            - senha
+  responses:
+    '200':
+      description: Login realizado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mensagem:
+                type: string
+                example: "Login realizado com sucesso"
+              dados:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nome:
+                    type: string
+                    example: "Empresa Exemplo"
+                  email:
+                    type: string
+                    example: "empresa@exemplo.com"
+    '401':
+      description: Credenciais inválidas
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status_code:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: "Credenciais inválidas"
+    '422':
+      description: Dados de entrada inválidos
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status_code:
+                type: integer
+                example: 422
+              message:
+                type: string
+                example: "Dados de entrada inválidos"

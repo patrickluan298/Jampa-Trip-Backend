@@ -7,14 +7,14 @@ import (
 	"github.com/jampa_trip/internal/pkg/util"
 )
 
-// LoginFornecedorRequest - objeto de request do enpoint de login de fornecedor
-type LoginFornecedorRequest struct {
+// LoginEmpresaRequest - objeto de request do enpoint de login de empresa
+type LoginEmpresaRequest struct {
 	Email string `json:"email"`
 	Senha string `json:"senha"`
 }
 
 // Validate - valida os campos da requisição
-func (receiver LoginFornecedorRequest) Validate() error {
+func (receiver LoginEmpresaRequest) Validate() error {
 
 	err := validation.ValidateStruct(&receiver,
 		validation.Field(&receiver.Email, validation.Required, validation.Match(util.COD_03), validation.Length(1, 40)),
@@ -28,8 +28,8 @@ func (receiver LoginFornecedorRequest) Validate() error {
 	return nil
 }
 
-// CadastrarFornecedorRequest - objeto de request do endpoint de cadastro de fornecedor
-type CadastrarFornecedorRequest struct {
+// CadastrarEmpresaRequest - objeto de request do endpoint de cadastro de empresa
+type CadastrarEmpresaRequest struct {
 	Nome     string `json:"nome"`
 	Email    string `json:"email"`
 	Senha    string `json:"senha"`
@@ -39,7 +39,7 @@ type CadastrarFornecedorRequest struct {
 }
 
 // Validate - valida os campos da requisição de cadastro
-func (receiver CadastrarFornecedorRequest) Validate() error {
+func (receiver CadastrarEmpresaRequest) Validate() error {
 	err := validation.ValidateStruct(&receiver,
 		validation.Field(&receiver.Nome, validation.Required, validation.Length(2, 100)),
 		validation.Field(&receiver.Email, validation.Required, validation.Match(util.COD_03), validation.Length(1, 40)),
@@ -64,8 +64,8 @@ func (receiver CadastrarFornecedorRequest) Validate() error {
 	return nil
 }
 
-// AtualizarFornecedorRequest - objeto de request do endpoint de atualização de fornecedor
-type AtualizarFornecedorRequest struct {
+// AtualizarEmpresaRequest - objeto de request do endpoint de atualização de empresa
+type AtualizarEmpresaRequest struct {
 	ID       int    `json:"id"`
 	Nome     string `json:"nome"`
 	Email    string `json:"email"`
@@ -76,7 +76,7 @@ type AtualizarFornecedorRequest struct {
 }
 
 // Validate - valida os campos da requisição de atualização
-func (receiver AtualizarFornecedorRequest) Validate() error {
+func (receiver AtualizarEmpresaRequest) Validate() error {
 	err := validation.ValidateStruct(&receiver,
 		validation.Field(&receiver.ID, validation.Required, validation.Min(1)),
 		validation.Field(&receiver.Nome, validation.Required, validation.Length(2, 100)),

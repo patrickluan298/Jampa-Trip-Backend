@@ -9,10 +9,10 @@
 \c jampa_trip_db;
 
 -- =============================================================================
--- TABELA FORNECEDORES
+-- TABELA EMPRESAS
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS fornecedores (
+CREATE TABLE IF NOT EXISTS empresas (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -25,12 +25,12 @@ CREATE TABLE IF NOT EXISTS fornecedores (
 );
 
 -- =============================================================================
--- ÍNDICES PARA FORNECEDORES
+-- ÍNDICES PARA EMPRESAS
 -- =============================================================================
 
-CREATE INDEX IF NOT EXISTS idx_fornecedores_email ON fornecedores(email);
-CREATE INDEX IF NOT EXISTS idx_fornecedores_cnpj ON fornecedores(cnpj);
-CREATE INDEX IF NOT EXISTS idx_fornecedores_momento_cadastro ON fornecedores(momento_cadastro);
+CREATE INDEX IF NOT EXISTS idx_empresas_email ON empresas(email);
+CREATE INDEX IF NOT EXISTS idx_empresas_cnpj ON empresas(cnpj);
+CREATE INDEX IF NOT EXISTS idx_empresas_momento_cadastro ON empresas(momento_cadastro);
 
 -- =============================================================================
 -- TABELA CLIENTES

@@ -64,8 +64,8 @@ func (receiver *ClienteRepository) GetByEmail(email string) (*model.Cliente, err
 	return row, nil
 }
 
-// Cadastrar - cria um novo cliente
-func (receiver *ClienteRepository) Cadastrar(cliente *model.Cliente) error {
+// Create - cria um novo cliente
+func (receiver *ClienteRepository) Create(cliente *model.Cliente) error {
 	err := receiver.DB.Raw(query.CadastrarCliente,
 		cliente.Nome,
 		cliente.Email,
@@ -80,8 +80,8 @@ func (receiver *ClienteRepository) Cadastrar(cliente *model.Cliente) error {
 	return err
 }
 
-// Atualizar - atualiza um cliente existente
-func (receiver *ClienteRepository) Atualizar(cliente *model.Cliente) error {
+// Update - atualiza um cliente existente
+func (receiver *ClienteRepository) Update(cliente *model.Cliente) error {
 	err := receiver.DB.Raw(query.AtualizarCliente,
 		cliente.Nome,
 		cliente.Email,
@@ -96,8 +96,8 @@ func (receiver *ClienteRepository) Atualizar(cliente *model.Cliente) error {
 	return err
 }
 
-// ListarTodos - busca todos os clientes
-func (receiver *ClienteRepository) ListarTodos() ([]*model.Cliente, error) {
+// List - busca todos os clientes
+func (receiver *ClienteRepository) List() ([]*model.Cliente, error) {
 	rows, err := receiver.DB.Raw(query.ListarTodosClientes).Rows()
 	if err != nil {
 		return nil, err

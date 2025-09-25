@@ -38,14 +38,8 @@ func (receiver *ClienteService) Login(request *contract.LoginClienteRequest) (*c
 		return nil, util.WrapError("Email e/ou senha incorretos", nil, http.StatusUnauthorized)
 	}
 
-	token, err := util.GenerateToken()
-	if err != nil {
-		return nil, util.WrapError("Erro ao gerar token", err, http.StatusInternalServerError)
-	}
-
 	response := &contract.LoginClienteResponse{
 		Mensagem: "Login realizado com sucesso",
-		Token:    token,
 		Dados: contract.ClienteLogin{
 			ID:    cliente.ID,
 			Nome:  cliente.Nome,
@@ -56,8 +50,8 @@ func (receiver *ClienteService) Login(request *contract.LoginClienteRequest) (*c
 	return response, nil
 }
 
-// Cadastrar - realiza o cadastro de um novo cliente
-func (receiver *ClienteService) Cadastrar(request *contract.CadastrarClienteRequest) (*contract.CadastrarClienteResponse, error) {
+// Create - realiza o cadastro de um novo cliente
+func (receiver *ClienteService) Create(request *contract.CadastrarClienteRequest) (*contract.CadastrarClienteResponse, error) {
 
 	emailExiste, err := receiver.ClienteRepository.EmailExiste(request.Email)
 	if err != nil {
@@ -89,7 +83,7 @@ func (receiver *ClienteService) Cadastrar(request *contract.CadastrarClienteRequ
 		MomentoAtualizacao: time.Now(),
 	}
 
-	if err := receiver.ClienteRepository.Cadastrar(cliente); err != nil {
+	if err := receiver.ClienteRepository.Create(cliente); err != nil {
 		return nil, util.WrapError("Erro ao cadastrar cliente", err, http.StatusInternalServerError)
 	}
 
@@ -110,8 +104,8 @@ func (receiver *ClienteService) Cadastrar(request *contract.CadastrarClienteRequ
 	return response, nil
 }
 
-// Atualizar - realiza a atualização de um cliente existente
-func (receiver *ClienteService) Atualizar(request *contract.AtualizarClienteRequest) (*contract.AtualizarClienteResponse, error) {
+// Update - realiza a atualização de um cliente existente
+func (receiver *ClienteService) Update(request *contract.AtualizarClienteRequest) (*contract.AtualizarClienteResponse, error) {
 
 	clienteExistente, err := receiver.ClienteRepository.GetByID(request.ID)
 	if err != nil {
@@ -152,7 +146,7 @@ func (receiver *ClienteService) Atualizar(request *contract.AtualizarClienteRequ
 		MomentoAtualizacao: time.Now(),
 	}
 
-	if err := receiver.ClienteRepository.Atualizar(cliente); err != nil {
+	if err := receiver.ClienteRepository.Update(cliente); err != nil {
 		return nil, util.WrapError("Erro ao atualizar cliente", err, http.StatusInternalServerError)
 	}
 
@@ -173,10 +167,10 @@ func (receiver *ClienteService) Atualizar(request *contract.AtualizarClienteRequ
 	return response, nil
 }
 
-// Listar - realiza a listagem de todos os clientes
-func (receiver *ClienteService) Listar() (*contract.ListarClienteResponse, error) {
+// List - realiza a listagem de todos os clientes
+func (receiver *ClienteService) List() (*contract.ListarClienteResponse, error) {
 
-	clientes, err := receiver.ClienteRepository.ListarTodos()
+	clientes, err := receiver.ClienteRepository.List()
 	if err != nil {
 		return nil, util.WrapError("Erro ao buscar clientes", err, http.StatusInternalServerError)
 	}
@@ -198,6 +192,34 @@ func (receiver *ClienteService) Listar() (*contract.ListarClienteResponse, error
 	response := &contract.ListarClienteResponse{
 		Mensagem: "Clientes listados com sucesso",
 		Dados:    clientesResponse,
+	}
+
+	return response, nil
+}
+
+// Get - realiza a busca de um cliente por ID
+func (receiver *ClienteService) Get(ID int) (*contract.ObterClienteResponse, error) {
+
+	cliente, err := receiver.ClienteRepository.GetByID(ID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, util.WrapError("Cliente não encontrado", nil, http.StatusNotFound)
+		}
+		return nil, util.WrapError("Erro ao buscar cliente", err, http.StatusInternalServerError)
+	}
+
+	response := &contract.ObterClienteResponse{
+		Mensagem: "Cliente obtido com sucesso",
+		Dados: contract.Cliente{
+			ID:                 cliente.ID,
+			Nome:               cliente.Nome,
+			Email:              cliente.Email,
+			CPF:                cliente.CPF,
+			Telefone:           cliente.Telefone,
+			DataNascimento:     cliente.DataNascimento.Format("2006-01-02"),
+			MomentoCadastro:    cliente.MomentoCadastro.Format("2006-01-02 15:04:05"),
+			MomentoAtualizacao: cliente.MomentoAtualizacao.Format("2006-01-02 15:04:05"),
+		},
 	}
 
 	return response, nil
