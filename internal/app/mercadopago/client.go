@@ -232,6 +232,158 @@ func (c *Client) CreateOrder(orderReq *OrderRequest) (*OrderResponse, error) {
 	return &orderResp, nil
 }
 
+// GetOrder - obtém informações de uma order específica
+func (c *Client) GetOrder(orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s", c.BaseURL, orderID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// CancelOrder - cancela uma order
+func (c *Client) CancelOrder(orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/cancel", c.BaseURL, orderID)
+
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// CaptureOrder - captura uma order totalmente
+func (c *Client) CaptureOrder(orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/capture", c.BaseURL, orderID)
+
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// RefundOrder - reembolsa uma order
+func (c *Client) RefundOrder(orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/refund", c.BaseURL, orderID)
+
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
 // CreatePayment - cria um novo pagamento no Mercado Pago
 func (c *Client) CreatePayment(paymentReq *PaymentRequest) (*PaymentResponse, error) {
 	url := fmt.Sprintf("%s/v1/payments", c.BaseURL)

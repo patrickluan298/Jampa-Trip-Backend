@@ -69,7 +69,6 @@ MERCADO_PAGO_BASE_URL=https://api.mercadopago.com
 - `debit_card` - Cartão de Débito
 - `pix` - PIX
 - `bolbradesco` - Boleto
-- `pec` - PEC
 
 ## Próximos Passos
 

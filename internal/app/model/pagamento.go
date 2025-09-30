@@ -33,3 +33,146 @@ type Pagamento struct {
 func (Pagamento) TableName() string {
 	return "pagamentos"
 }
+
+// StatusPagamento - define os possíveis status de um pagamento
+type StatusPagamento string
+
+const (
+	StatusPending     StatusPagamento = "pending"
+	StatusApproved    StatusPagamento = "approved"
+	StatusAuthorized  StatusPagamento = "authorized"
+	StatusInProcess   StatusPagamento = "in_process"
+	StatusInMediation StatusPagamento = "in_mediation"
+	StatusRejected    StatusPagamento = "rejected"
+	StatusCancelled   StatusPagamento = "cancelled"
+	StatusRefunded    StatusPagamento = "refunded"
+	StatusChargedBack StatusPagamento = "charged_back"
+)
+
+// MetodoPagamento - define os métodos de pagamento suportados
+type MetodoPagamento string
+
+const (
+	MetodoCartaoCredito MetodoPagamento = "credit_card"
+	MetodoCartaoDebito  MetodoPagamento = "debit_card"
+	MetodoPIX           MetodoPagamento = "pix"
+	MetodoBoleto        MetodoPagamento = "bolbradesco"
+)
+
+// Moeda - define as moedas suportadas
+type Moeda string
+
+const (
+	MoedaBRL Moeda = "BRL"
+	MoedaUSD Moeda = "USD"
+	MoedaEUR Moeda = "EUR"
+	MoedaARS Moeda = "ARS"
+	MoedaCLP Moeda = "CLP"
+	MoedaCOP Moeda = "COP"
+	MoedaMXN Moeda = "MXN"
+	MoedaPEN Moeda = "PEN"
+	MoedaUYU Moeda = "UYU"
+)
+
+// Métodos de validação para Pagamento
+func (p *Pagamento) IsValid() bool {
+	return p.Valor > 0 && p.Status != "" && p.MetodoPagamento != ""
+}
+
+func (p *Pagamento) IsApproved() bool {
+	return p.Status == string(StatusApproved)
+}
+
+func (p *Pagamento) IsPending() bool {
+	return p.Status == string(StatusPending)
+}
+
+func (p *Pagamento) IsCancelled() bool {
+	return p.Status == string(StatusCancelled)
+}
+
+func (p *Pagamento) IsRejected() bool {
+	return p.Status == string(StatusRejected)
+}
+
+func (p *Pagamento) CanBeCancelled() bool {
+	return p.Status == string(StatusPending) || p.Status == string(StatusAuthorized)
+}
+
+func (p *Pagamento) CanBeRefunded() bool {
+	return p.Status == string(StatusApproved)
+}
+
+func (p *Pagamento) UpdateStatus(status StatusPagamento) {
+	p.Status = string(status)
+	p.MomentoAtualizacao = time.Now()
+}
+
+func (p *Pagamento) GetStatusDisplay() string {
+	switch p.Status {
+	case string(StatusPending):
+		return "Pendente"
+	case string(StatusApproved):
+		return "Aprovado"
+	case string(StatusAuthorized):
+		return "Autorizado"
+	case string(StatusInProcess):
+		return "Em Processamento"
+	case string(StatusInMediation):
+		return "Em Mediação"
+	case string(StatusRejected):
+		return "Rejeitado"
+	case string(StatusCancelled):
+		return "Cancelado"
+	case string(StatusRefunded):
+		return "Reembolsado"
+	case string(StatusChargedBack):
+		return "Estornado"
+	default:
+		return "Desconhecido"
+	}
+}
+
+func (p *Pagamento) GetMetodoPagamentoDisplay() string {
+	switch p.MetodoPagamento {
+	case string(MetodoCartaoCredito):
+		return "Cartão de Crédito"
+	case string(MetodoCartaoDebito):
+		return "Cartão de Débito"
+	case string(MetodoPIX):
+		return "PIX"
+	case string(MetodoBoleto):
+		return "Boleto"
+	default:
+		return "Desconhecido"
+	}
+}
+
+// Funções de validação
+func IsValidStatus(status StatusPagamento) bool {
+	switch status {
+	case StatusPending, StatusApproved, StatusAuthorized, StatusInProcess,
+		StatusInMediation, StatusRejected, StatusCancelled, StatusRefunded, StatusChargedBack:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsValidPaymentMethod(method MetodoPagamento) bool {
+	switch method {
+	case MetodoCartaoCredito, MetodoCartaoDebito, MetodoPIX, MetodoBoleto:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsValidCurrency(currency Moeda) bool {
+	switch currency {
+	case MoedaBRL, MoedaUSD, MoedaEUR, MoedaARS, MoedaCLP, MoedaCOP, MoedaMXN, MoedaPEN, MoedaUYU:
+		return true
+	default:
+		return false
+	}
+}

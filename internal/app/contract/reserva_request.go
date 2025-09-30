@@ -1,0 +1,96 @@
+package contract
+
+import (
+	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+)
+
+// CreateReservaRequest - representa a requisição para criar uma reserva
+type CreateReservaRequest struct {
+	ClienteID         int       `json:"cliente_id" validate:"required,min=1"`
+	EmpresaID         int       `json:"empresa_id" validate:"required,min=1"`
+	PagamentoID       int       `json:"pagamento_id" validate:"omitempty,min=1"`
+	DataReserva       time.Time `json:"data_reserva" validate:"required"`
+	DataPasseio       time.Time `json:"data_passeio" validate:"required"`
+	QuantidadePessoas int       `json:"quantidade_pessoas" validate:"required,min=1,max=50"`
+	ValorTotal        float64   `json:"valor_total" validate:"required,min=0.01"`
+	Observacoes       string    `json:"observacoes" validate:"max=1000"`
+}
+
+// Validate - valida os campos da requisição
+func (r *CreateReservaRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ClienteID, validation.Required, validation.Min(1)),
+		validation.Field(&r.EmpresaID, validation.Required, validation.Min(1)),
+		validation.Field(&r.PagamentoID, validation.Min(1)),
+		validation.Field(&r.DataReserva, validation.Required),
+		validation.Field(&r.DataPasseio, validation.Required),
+		validation.Field(&r.QuantidadePessoas, validation.Required, validation.Min(1), validation.Max(50)),
+		validation.Field(&r.ValorTotal, validation.Required, validation.Min(0.01)),
+		validation.Field(&r.Observacoes, validation.Length(0, 1000)),
+	)
+}
+
+// UpdateReservaRequest - representa a requisição para atualizar uma reserva
+type UpdateReservaRequest struct {
+	Status            string    `json:"status" validate:"omitempty,oneof=pendente confirmada cancelada concluida"`
+	DataPasseio       time.Time `json:"data_passeio" validate:"omitempty"`
+	QuantidadePessoas int       `json:"quantidade_pessoas" validate:"omitempty,min=1,max=50"`
+	ValorTotal        float64   `json:"valor_total" validate:"omitempty,min=0.01"`
+	Observacoes       string    `json:"observacoes" validate:"max=1000"`
+}
+
+// Validate - valida os campos da requisição
+func (r *UpdateReservaRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.Status, validation.In("pendente", "confirmada", "cancelada", "concluida")),
+		validation.Field(&r.QuantidadePessoas, validation.Min(1), validation.Max(50)),
+		validation.Field(&r.ValorTotal, validation.Min(0.01)),
+		validation.Field(&r.Observacoes, validation.Length(0, 1000)),
+	)
+}
+
+// GetReservaRequest - representa a requisição para buscar uma reserva
+type GetReservaRequest struct {
+	ID int `json:"id" validate:"required,min=1"`
+}
+
+// Validate - valida os campos da requisição
+func (r *GetReservaRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ID, validation.Required, validation.Min(1)),
+	)
+}
+
+// ListReservaRequest - representa a requisição para listar reservas
+type ListReservaRequest struct {
+	ClienteID int    `json:"cliente_id" validate:"omitempty,min=1"`
+	EmpresaID int    `json:"empresa_id" validate:"omitempty,min=1"`
+	Status    string `json:"status" validate:"omitempty,oneof=pendente confirmada cancelada concluida"`
+	Page      int    `json:"page" validate:"min=1"`
+	Limit     int    `json:"limit" validate:"min=1,max=100"`
+}
+
+// Validate - valida os campos da requisição
+func (r *ListReservaRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ClienteID, validation.Min(1)),
+		validation.Field(&r.EmpresaID, validation.Min(1)),
+		validation.Field(&r.Status, validation.In("pendente", "confirmada", "cancelada", "concluida")),
+		validation.Field(&r.Page, validation.Min(1)),
+		validation.Field(&r.Limit, validation.Min(1), validation.Max(100)),
+	)
+}
+
+// CancelarReservaRequest - representa a requisição para cancelar uma reserva
+type CancelarReservaRequest struct {
+	ID int `json:"id" validate:"required,min=1"`
+}
+
+// Validate - valida os campos da requisição
+func (r *CancelarReservaRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ID, validation.Required, validation.Min(1)),
+	)
+}
