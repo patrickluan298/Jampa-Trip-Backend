@@ -1,15 +1,250 @@
-Error:
+PagamentoResponse:
   type: object
   properties:
-    detail:
-      type: string
-      example: Acesso negado.
-    errorName:
-      type: string
-      example: AccessDenied
-    moment:
-      type: string
-      example: 2024-05-17 14:01:41
-    statusCode:
+    id:
       type: integer
-      example: 401
+      example: 1
+    cliente_id:
+      type: integer
+      example: 1
+    empresa_id:
+      type: integer
+      example: 1
+    mercado_pago_order_id:
+      type: string
+      example: "ORDER-12345"
+    mercado_pago_payment_id:
+      type: string
+      example: "123456789"
+    status:
+      type: string
+      enum: [pending, approved, authorized, in_process, in_mediation, rejected, cancelled, refunded, charged_back]
+      example: "authorized"
+    status_detail:
+      type: string
+      example: "accredited"
+    valor:
+      type: number
+      format: float
+      example: 150.50
+    moeda:
+      type: string
+      example: "BRL"
+    metodo_pagamento:
+      type: string
+      example: "credit_card"
+    descricao:
+      type: string
+      example: "Reserva de passeio turístico"
+    numero_parcelas:
+      type: integer
+      example: 3
+    last_four_digits:
+      type: string
+      example: "4321"
+      description: Últimos 4 dígitos do cartão
+    first_six_digits:
+      type: string
+      example: "123456"
+      description: Primeiros 6 dígitos do cartão (BIN)
+    payment_method_id:
+      type: string
+      example: "visa"
+      description: Bandeira do cartão
+    issuer_id:
+      type: string
+      example: "24"
+      description: ID do banco emissor
+    cardholder_name:
+      type: string
+      example: "JOAO SILVA"
+      description: Nome do titular do cartão
+    captured:
+      type: boolean
+      example: false
+      description: Indica se o pagamento foi capturado
+    transaction_amount_refunded:
+      type: number
+      format: float
+      example: 0.00
+      description: Valor reembolsado
+    momento_criacao:
+      type: string
+      format: date-time
+      example: "2025-10-02T10:00:00Z"
+    momento_atualizacao:
+      type: string
+      format: date-time
+      example: "2025-10-02T10:05:00Z"
+    momento_aprovacao:
+      type: string
+      format: date-time
+      nullable: true
+      example: "2025-10-02T10:05:00Z"
+    momento_cancelamento:
+      type: string
+      format: date-time
+      nullable: true
+      example: null
+    momento_autorizacao:
+      type: string
+      format: date-time
+      nullable: true
+      example: "2025-10-02T10:00:00Z"
+    momento_captura:
+      type: string
+      format: date-time
+      nullable: true
+      example: null
+    status_display:
+      type: string
+      example: "Autorizado"
+    metodo_pagamento_display:
+      type: string
+      example: "Cartão de Crédito"
+
+PaymentMethodsResponse:
+  type: object
+  properties:
+    payment_methods:
+      type: array
+      items:
+        $ref: '#/components/schemas/PaymentMethodInfo'
+    example:
+      payment_methods:
+        - id: "visa"
+          name: "Visa"
+          payment_type_id: "credit_card"
+          status: "active"
+          secure_thumbnail: "https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c2001f7b0d8a.svg"
+          thumbnail: "https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c2001f7b0d8a.svg"
+          deferred_capture: "supported"
+
+PaymentMethodInfo:
+  type: object
+  properties:
+    id:
+      type: string
+      example: "visa"
+      description: ID do método de pagamento
+    name:
+      type: string
+      example: "Visa"
+      description: Nome do método de pagamento
+    payment_type_id:
+      type: string
+      example: "credit_card"
+      description: Tipo do método de pagamento
+    status:
+      type: string
+      example: "active"
+      description: Status do método de pagamento
+    secure_thumbnail:
+      type: string
+      example: "https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c2001f7b0d8a.svg"
+      description: URL da imagem segura
+    thumbnail:
+      type: string
+      example: "https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c2001f7b0d8a.svg"
+      description: URL da imagem
+    deferred_capture:
+      type: string
+      example: "supported"
+      description: Suporte a captura diferida
+    settings:
+      type: array
+      items:
+        $ref: '#/components/schemas/PaymentMethodSetting'
+    additional_info_needed:
+      type: array
+      items:
+        type: string
+      example: ["cardholder_identification_number", "cardholder_identification_type", "cardholder_name"]
+    min_allowed_amount:
+      type: number
+      example: 0
+    max_allowed_amount:
+      type: number
+      example: 250000
+    accreditation_time:
+      type: integer
+      example: 1440
+    financial_institutions:
+      type: array
+      items:
+        $ref: '#/components/schemas/FinancialInstitution'
+    processing_modes:
+      type: array
+      items:
+        type: string
+      example: ["aggregator"]
+
+PaymentMethodSetting:
+  type: object
+  properties:
+    card_number:
+      $ref: '#/components/schemas/CardNumberSetting'
+    bin:
+      $ref: '#/components/schemas/BinSetting'
+    security_code:
+      $ref: '#/components/schemas/SecurityCodeSetting'
+
+CardNumberSetting:
+  type: object
+  properties:
+    length:
+      type: integer
+      example: 16
+    validation:
+      type: string
+      example: "standard"
+
+BinSetting:
+  type: object
+  properties:
+    pattern:
+      type: string
+      example: "^4"
+    installments_pattern:
+      type: string
+      example: "^4"
+    exclusion_pattern:
+      type: string
+      nullable: true
+      example: null
+
+SecurityCodeSetting:
+  type: object
+  properties:
+    mode:
+      type: string
+      example: "mandatory"
+    length:
+      type: integer
+      example: 3
+    card_location:
+      type: string
+      example: "back"
+
+FinancialInstitution:
+  type: object
+  properties:
+    id:
+      type: string
+      example: "24"
+    description:
+      type: string
+      example: "Banco do Brasil"
+
+ErrorResponse:
+  type: object
+  properties:
+    status_code:
+      type: integer
+      example: 400
+    message:
+      type: string
+      example: "Erro de validação"
+    error:
+      type: string
+      example: "campo obrigatório não informado"

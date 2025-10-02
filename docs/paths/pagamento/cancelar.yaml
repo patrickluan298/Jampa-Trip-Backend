@@ -1,0 +1,49 @@
+post:
+  tags:
+    - Pagamentos
+  summary: Cancelar pagamento autorizado
+  description: |
+    Cancela (void) um pagamento que foi autorizado mas ainda não foi capturado.
+    
+    **Importante:** 
+    - Apenas pagamentos com status `authorized` ou `pending` podem ser cancelados
+    - Após capturado, use o endpoint de reembolso
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - payment_id
+          properties:
+            payment_id:
+              type: integer
+              format: int64
+              example: 123456789
+              description: ID do pagamento no Mercado Pago
+  responses:
+    '200':
+      description: Pagamento cancelado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pagamento:
+                $ref: '#/components/schemas/PagamentoResponse'
+              message:
+                type: string
+                example: "Pagamento cancelado com sucesso"
+    '400':
+      description: Pagamento não pode ser cancelado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '404':
+      description: Pagamento não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

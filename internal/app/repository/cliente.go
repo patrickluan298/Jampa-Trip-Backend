@@ -97,8 +97,9 @@ func (receiver *ClienteRepository) Update(cliente *model.Cliente) error {
 }
 
 // List - busca todos os clientes
-func (receiver *ClienteRepository) List() ([]*model.Cliente, error) {
-	rows, err := receiver.DB.Raw(query.ListarTodosClientes).Rows()
+func (receiver *ClienteRepository) List(filtros *model.Cliente) ([]*model.Cliente, error) {
+	rows, err := receiver.DB.Raw(query.ListarTodosClientes, filtros.Nome, filtros.Nome, filtros.Email, filtros.Email,
+		filtros.CPF, filtros.CPF, filtros.Telefone, filtros.Telefone, filtros.DataNascimento, filtros.DataNascimento).Rows()
 	if err != nil {
 		return nil, err
 	}

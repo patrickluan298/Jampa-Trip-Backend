@@ -33,6 +33,7 @@ type CadastrarClienteRequest struct {
 	Nome           string `json:"nome"`
 	Email          string `json:"email"`
 	Senha          string `json:"senha"`
+	ConfirmarSenha string `json:"confirmar_senha"`
 	CPF            string `json:"cpf"`
 	Telefone       string `json:"telefone"`
 	DataNascimento string `json:"data_nascimento"`
@@ -44,6 +45,7 @@ func (receiver CadastrarClienteRequest) Validate() error {
 		validation.Field(&receiver.Nome, validation.Required, validation.Length(2, 100)),
 		validation.Field(&receiver.Email, validation.Required, validation.Match(util.COD_03), validation.Length(1, 40)),
 		validation.Field(&receiver.Senha, validation.Required, validation.Match(util.COD_07), validation.Length(8, 50)),
+		validation.Field(&receiver.ConfirmarSenha, validation.Required, validation.Match(util.COD_07), validation.Length(8, 50)),
 		validation.Field(&receiver.CPF, validation.Required, validation.Match(util.COD_04)),
 		validation.Field(&receiver.Telefone, validation.Required, validation.Match(util.COD_11)),
 		validation.Field(&receiver.DataNascimento, validation.Required, validation.Match(util.COD_06)),

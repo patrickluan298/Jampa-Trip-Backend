@@ -2,6 +2,8 @@ package mercadopago
 
 import (
 	"bytes"
+	"context"
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -556,4 +558,425 @@ func (c *Client) CancelPayment(paymentID string) (*PaymentResponse, error) {
 	}
 
 	return &paymentResp, nil
+}
+
+// CreditCardPaymentRequest - representa a estrutura para criar um pagamento com cartão de crédito
+type CreditCardPaymentRequest struct {
+	TransactionAmount float64           `json:"transaction_amount"`
+	Token             string            `json:"token"`
+	Description       string            `json:"description"`
+	Installments      int               `json:"installments"`
+	PaymentMethodID   string            `json:"payment_method_id"`
+	IssuerID          string            `json:"issuer_id,omitempty"`
+	Payer             CreditCardPayer   `json:"payer"`
+	Capture           bool              `json:"capture"`
+	Metadata          map[string]string `json:"metadata,omitempty"`
+	ExternalReference string            `json:"external_reference,omitempty"`
+}
+
+// CreditCardPayer - representa o pagador para pagamentos com cartão
+type CreditCardPayer struct {
+	Email          string                   `json:"email"`
+	Identification CreditCardIdentification `json:"identification,omitempty"`
+	FirstName      string                   `json:"first_name,omitempty"`
+	LastName       string                   `json:"last_name,omitempty"`
+}
+
+// CreditCardIdentification - representa a identificação do pagador
+type CreditCardIdentification struct {
+	Type   string `json:"type"`
+	Number string `json:"number"`
+}
+
+// CreditCardPaymentResponse - representa a resposta da criação de um pagamento com cartão
+type CreditCardPaymentResponse struct {
+	ID                        int64             `json:"id"`
+	Status                    string            `json:"status"`
+	StatusDetail              string            `json:"status_detail"`
+	TransactionAmount         float64           `json:"transaction_amount"`
+	TransactionAmountRefunded float64           `json:"transaction_amount_refunded,omitempty"`
+	CurrencyID                string            `json:"currency_id"`
+	Description               string            `json:"description"`
+	PaymentMethodID           string            `json:"payment_method_id"`
+	PaymentTypeID             string            `json:"payment_type_id"`
+	IssuerID                  string            `json:"issuer_id,omitempty"`
+	Installments              int               `json:"installments"`
+	Captured                  bool              `json:"captured"`
+	DateCreated               string            `json:"date_created"`
+	DateApproved              string            `json:"date_approved,omitempty"`
+	DateLastUpdated           string            `json:"date_last_updated"`
+	Card                      CardInfo          `json:"card,omitempty"`
+	Payer                     CreditCardPayer   `json:"payer"`
+	ExternalReference         string            `json:"external_reference,omitempty"`
+	Metadata                  map[string]string `json:"metadata,omitempty"`
+}
+
+// CardInfo - representa informações do cartão (somente dados não sensíveis)
+type CardInfo struct {
+	FirstSixDigits  string `json:"first_six_digits,omitempty"`
+	LastFourDigits  string `json:"last_four_digits,omitempty"`
+	ExpirationMonth int    `json:"expiration_month,omitempty"`
+	ExpirationYear  int    `json:"expiration_year,omitempty"`
+	DateCreated     string `json:"date_created,omitempty"`
+	DateLastUpdated string `json:"date_last_updated,omitempty"`
+	Cardholder      struct {
+		Name string `json:"name,omitempty"`
+	} `json:"cardholder,omitempty"`
+}
+
+// CapturePaymentRequest - representa a requisição de captura de pagamento
+type CapturePaymentRequest struct {
+	TransactionAmount *float64          `json:"transaction_amount,omitempty"`
+	Metadata          map[string]string `json:"metadata,omitempty"`
+}
+
+// RefundPaymentRequest - representa a requisição de reembolso
+type RefundPaymentRequest struct {
+	Amount   *float64          `json:"amount,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
+}
+
+// RefundResponse - representa a resposta de um reembolso
+type RefundResponse struct {
+	ID               int64   `json:"id"`
+	PaymentID        int64   `json:"payment_id"`
+	Amount           float64 `json:"amount"`
+	Source           string  `json:"source"`
+	Status           string  `json:"status"`
+	DateCreated      string  `json:"date_created"`
+	PartitionDetails string  `json:"partition_details,omitempty"`
+}
+
+// PaymentMethodsResponse - representa a lista de meios de pagamento
+type PaymentMethodsResponse []PaymentMethodInfo
+
+// PaymentMethodInfo - representa informações de um meio de pagamento
+type PaymentMethodInfo struct {
+	ID                    string                 `json:"id"`
+	Name                  string                 `json:"name"`
+	PaymentTypeID         string                 `json:"payment_type_id"`
+	Status                string                 `json:"status"`
+	SecureThumbnail       string                 `json:"secure_thumbnail,omitempty"`
+	Thumbnail             string                 `json:"thumbnail,omitempty"`
+	DeferredCapture       string                 `json:"deferred_capture,omitempty"`
+	Settings              []Setting              `json:"settings,omitempty"`
+	AdditionalInfoNeeded  []string               `json:"additional_info_needed,omitempty"`
+	MinAllowedAmount      float64                `json:"min_allowed_amount,omitempty"`
+	MaxAllowedAmount      float64                `json:"max_allowed_amount,omitempty"`
+	AccreditationTime     int                    `json:"accreditation_time,omitempty"`
+	FinancialInstitutions []FinancialInstitution `json:"financial_institutions,omitempty"`
+}
+
+// Setting - representa configurações do meio de pagamento
+type Setting struct {
+	CardNumber   CardNumberSetting   `json:"card_number,omitempty"`
+	Bin          BinSetting          `json:"bin,omitempty"`
+	SecurityCode SecurityCodeSetting `json:"security_code,omitempty"`
+}
+
+// CardNumberSetting - configurações do número do cartão
+type CardNumberSetting struct {
+	Validation string `json:"validation,omitempty"`
+	Length     int    `json:"length,omitempty"`
+}
+
+// BinSetting - configurações do BIN
+type BinSetting struct {
+	Pattern             string `json:"pattern,omitempty"`
+	InstallmentsPattern string `json:"installments_pattern,omitempty"`
+	ExclusionPattern    string `json:"exclusion_pattern,omitempty"`
+}
+
+// SecurityCodeSetting - configurações do código de segurança
+type SecurityCodeSetting struct {
+	Length       int    `json:"length,omitempty"`
+	CardLocation string `json:"card_location,omitempty"`
+	Mode         string `json:"mode,omitempty"`
+}
+
+// FinancialInstitution - representa uma instituição financeira (emissor)
+type FinancialInstitution struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+}
+
+// CreateCreditCardPayment - cria um pagamento com cartão de crédito
+func (c *Client) CreateCreditCardPayment(ctx context.Context, req *CreditCardPaymentRequest) (*CreditCardPaymentResponse, error) {
+	url := fmt.Sprintf("%s/v1/payments", c.BaseURL)
+
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar pagamento com cartão", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+	httpReq.Header.Set("X-Idempotency-Key", generateIdempotencyKey(req))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s - %s", errorResp.Message, errorResp.Status), nil, resp.StatusCode)
+	}
+
+	var paymentResp CreditCardPaymentResponse
+	if err := json.Unmarshal(body, &paymentResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &paymentResp, nil
+}
+
+// CapturePayment - captura um pagamento autorizado (total ou parcial)
+func (c *Client) CapturePayment(ctx context.Context, paymentID int64, req *CapturePaymentRequest) (*CreditCardPaymentResponse, error) {
+	url := fmt.Sprintf("%s/v1/payments/%d", c.BaseURL, paymentID)
+
+	captureData := map[string]interface{}{
+		"capture": true,
+	}
+
+	if req != nil && req.TransactionAmount != nil {
+		captureData["transaction_amount"] = *req.TransactionAmount
+	}
+
+	if req != nil && req.Metadata != nil {
+		captureData["metadata"] = req.Metadata
+	}
+
+	jsonData, err := json.Marshal(captureData)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar dados de captura", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var paymentResp CreditCardPaymentResponse
+	if err := json.Unmarshal(body, &paymentResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &paymentResp, nil
+}
+
+// CancelCreditCardPayment - cancela um pagamento autorizado (void)
+func (c *Client) CancelCreditCardPayment(ctx context.Context, paymentID int64) (*CreditCardPaymentResponse, error) {
+	url := fmt.Sprintf("%s/v1/payments/%d", c.BaseURL, paymentID)
+
+	cancelData := map[string]string{
+		"status": "cancelled",
+	}
+
+	jsonData, err := json.Marshal(cancelData)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar dados de cancelamento", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var paymentResp CreditCardPaymentResponse
+	if err := json.Unmarshal(body, &paymentResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &paymentResp, nil
+}
+
+// RefundCreditCardPayment - reembolsa um pagamento capturado (total ou parcial)
+func (c *Client) RefundCreditCardPayment(ctx context.Context, paymentID int64, req *RefundPaymentRequest) (*RefundResponse, error) {
+	url := fmt.Sprintf("%s/v1/payments/%d/refunds", c.BaseURL, paymentID)
+
+	var jsonData []byte
+	var err error
+
+	if req != nil {
+		jsonData, err = json.Marshal(req)
+		if err != nil {
+			return nil, util.WrapError("erro ao serializar dados de reembolso", err, http.StatusInternalServerError)
+		}
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var refundResp RefundResponse
+	if err := json.Unmarshal(body, &refundResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &refundResp, nil
+}
+
+// GetCreditCardPayment - obtém informações de um pagamento específico
+func (c *Client) GetCreditCardPayment(ctx context.Context, paymentID int64) (*CreditCardPaymentResponse, error) {
+	url := fmt.Sprintf("%s/v1/payments/%d", c.BaseURL, paymentID)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var paymentResp CreditCardPaymentResponse
+	if err := json.Unmarshal(body, &paymentResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &paymentResp, nil
+}
+
+// GetPaymentMethods - obtém a lista de meios de pagamento disponíveis
+func (c *Client) GetPaymentMethods(ctx context.Context) (*PaymentMethodsResponse, error) {
+	url := fmt.Sprintf("%s/v1/payment_methods", c.BaseURL)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var methodsResp PaymentMethodsResponse
+	if err := json.Unmarshal(body, &methodsResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &methodsResp, nil
+}
+
+// generateIdempotencyKey - gera uma chave de idempotência baseada nos dados da requisição
+func generateIdempotencyKey(req *CreditCardPaymentRequest) string {
+	data := fmt.Sprintf("%s-%f-%d-%s", req.ExternalReference, req.TransactionAmount, req.Installments, req.Token[:8])
+	hash := md5.Sum([]byte(data))
+	return fmt.Sprintf("%x", hash)
 }

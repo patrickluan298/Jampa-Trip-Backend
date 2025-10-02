@@ -21,7 +21,7 @@ A aplicação oferece uma arquitetura limpa e escalável utilizando o framework 
 
 ### 💳 Sistema de Pagamentos
 - **Integração com Mercado Pago**: Processamento completo de pagamentos
-- **Múltiplos métodos**: Cartão de crédito, débito, PIX e boleto
+- **Múltiplos métodos**: Cartão de crédito, débito, e PIX
 - **Gestão de status**: Controle completo do ciclo de vida dos pagamentos
 - **Webhooks**: Notificações automáticas de mudanças de status
 
@@ -291,7 +291,6 @@ O projeto inclui integração completa com o Mercado Pago para processamento de 
 - `credit_card` - Cartão de Crédito
 - `debit_card` - Cartão de Débito
 - `pix` - PIX
-- `bolbradesco` - Boleto
 
 ## 🛠️ Tecnologias Utilizadas
 

@@ -1,0 +1,29 @@
+get:
+  tags:
+    - Pagamentos
+  summary: Obter informações de um pagamento
+  description: |
+    Obtém informações detalhadas de um pagamento pelo ID do Mercado Pago.
+    Atualiza automaticamente o status consultando a API do Mercado Pago.
+  parameters:
+    - in: path
+      name: payment_id
+      required: true
+      schema:
+        type: integer
+        format: int64
+      description: ID do pagamento no Mercado Pago
+      example: 123456789
+  responses:
+    '200':
+      description: Informações do pagamento
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagamentoResponse'
+    '404':
+      description: Pagamento não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

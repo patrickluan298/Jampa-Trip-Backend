@@ -1,0 +1,55 @@
+post:
+  tags:
+    - Pagamentos
+  summary: Capturar pagamento autorizado
+  description: |
+    Captura um pagamento que foi previamente autorizado. Pode ser captura total ou parcial.
+    
+    **Importante:** 
+    - Apenas pagamentos com status `authorized` podem ser capturados
+    - Se não informar `transaction_amount`, captura o valor total
+    - Para captura parcial, informe um valor menor que o autorizado
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - payment_id
+          properties:
+            payment_id:
+              type: integer
+              format: int64
+              example: 123456789
+              description: ID do pagamento no Mercado Pago
+            transaction_amount:
+              type: number
+              format: float
+              example: 100.00
+              description: Valor a capturar (opcional - se não informado, captura total)
+  responses:
+    '200':
+      description: Pagamento capturado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pagamento:
+                $ref: '#/components/schemas/PagamentoResponse'
+              message:
+                type: string
+                example: "Pagamento capturado com sucesso"
+    '400':
+      description: Pagamento não pode ser capturado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '404':
+      description: Pagamento não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

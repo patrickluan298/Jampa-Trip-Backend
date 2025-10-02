@@ -1,0 +1,129 @@
+post:
+  tags:
+    - Pagamentos
+  summary: Autorizar pagamento com cartão de crédito
+  description: |
+    Autoriza um pagamento com cartão de crédito (pré-autorização) sem capturar o valor imediatamente.
+    O token do cartão deve ser gerado no frontend usando Mercado Pago JS/Bricks.
+    
+    **Fluxo:**
+    1. Frontend tokeniza o cartão usando SDK do Mercado Pago
+    2. Backend recebe o token e cria autorização
+    3. Posteriormente, o pagamento pode ser capturado ou cancelado
+    
+    **Status possíveis:**
+    - `authorized`: Pagamento autorizado com sucesso
+    - `rejected`: Pagamento recusado
+    - `pending`: Aguardando processamento
+    
+    **Status Detail comuns:**
+    - `cc_rejected_insufficient_amount`: Saldo insuficiente
+    - `cc_rejected_high_risk`: Recusado por risco
+    - `cc_rejected_call_for_authorize`: Necessário contatar banco
+    - `cc_rejected_bad_filled_security_code`: CVV inválido
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - cliente_id
+            - empresa_id
+            - token
+            - transaction_amount
+            - installments
+            - payment_method_id
+            - payer
+          properties:
+            cliente_id:
+              type: integer
+              example: 1
+              description: ID do cliente
+            empresa_id:
+              type: integer
+              example: 1
+              description: ID da empresa
+            token:
+              type: string
+              example: "a1b2c3d4e5f6g7h8i9j0"
+              description: Token do cartão gerado no frontend
+            transaction_amount:
+              type: number
+              format: float
+              example: 150.50
+              description: Valor da transação
+            installments:
+              type: integer
+              minimum: 1
+              maximum: 12
+              example: 3
+              description: Número de parcelas
+            payment_method_id:
+              type: string
+              enum: [visa, master, amex, elo, hipercard]
+              example: "visa"
+              description: ID do método de pagamento (bandeira)
+            issuer_id:
+              type: string
+              example: "24"
+              description: ID do emissor (banco) - opcional
+            description:
+              type: string
+              maxLength: 500
+              example: "Reserva de passeio turístico"
+              description: Descrição do pagamento
+            payer:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "cliente@example.com"
+                first_name:
+                  type: string
+                  example: "João"
+                last_name:
+                  type: string
+                  example: "Silva"
+                identification:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [CPF, CNPJ]
+                      example: "CPF"
+                    number:
+                      type: string
+                      example: "12345678900"
+            external_reference:
+              type: string
+              example: "ORDER-12345"
+              description: Referência externa para controle
+  responses:
+    '200':
+      description: Pagamento autorizado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pagamento:
+                $ref: '#/components/schemas/PagamentoResponse'
+              message:
+                type: string
+                example: "Pagamento aprovado"
+    '400':
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

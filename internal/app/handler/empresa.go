@@ -6,6 +6,7 @@ import (
 
 	"github.com/jampa_trip/internal/app"
 	"github.com/jampa_trip/internal/app/contract"
+	"github.com/jampa_trip/internal/app/model"
 	"github.com/jampa_trip/internal/app/service"
 	"github.com/jampa_trip/internal/pkg/util"
 	"github.com/jampa_trip/internal/pkg/webserver"
@@ -15,7 +16,7 @@ import (
 type EmpresaHandler struct{}
 
 // Login - realiza o login de uma empresa
-func (h EmpresaHandler) Login(ctx echo.Context) error {
+func (receiver EmpresaHandler) Login(ctx echo.Context) error {
 
 	request := &contract.LoginEmpresaRequest{}
 
@@ -40,7 +41,7 @@ func (h EmpresaHandler) Login(ctx echo.Context) error {
 }
 
 // Create - realiza o cadastro de uma nova empresa
-func (h EmpresaHandler) Create(ctx echo.Context) error {
+func (receiver EmpresaHandler) Create(ctx echo.Context) error {
 
 	request := &contract.CadastrarEmpresaRequest{}
 
@@ -65,7 +66,7 @@ func (h EmpresaHandler) Create(ctx echo.Context) error {
 }
 
 // Update - realiza a atualização de uma empresa existente
-func (h EmpresaHandler) Update(ctx echo.Context) error {
+func (receiver EmpresaHandler) Update(ctx echo.Context) error {
 
 	request := &contract.AtualizarEmpresaRequest{}
 
@@ -90,10 +91,24 @@ func (h EmpresaHandler) Update(ctx echo.Context) error {
 }
 
 // List - realiza a listagem de todas as empresas
-func (h EmpresaHandler) List(ctx echo.Context) error {
+func (receiver EmpresaHandler) List(ctx echo.Context) error {
+
+	Nome := ctx.QueryParam("nome")
+	Email := ctx.QueryParam("email")
+	CNPJ := ctx.QueryParam("cnpj")
+	Telefone := ctx.QueryParam("telefone")
+	Endereco := ctx.QueryParam("endereco")
+
+	filtros := &model.Empresa{
+		Nome:     Nome,
+		Email:    Email,
+		CNPJ:     CNPJ,
+		Telefone: Telefone,
+		Endereco: Endereco,
+	}
 
 	serviceEmpresa := service.EmpresaServiceNew(app.DB)
-	response, err := serviceEmpresa.List()
+	response, err := serviceEmpresa.List(filtros)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -102,7 +117,7 @@ func (h EmpresaHandler) List(ctx echo.Context) error {
 }
 
 // Get - realiza a busca de uma empresa por ID
-func (h EmpresaHandler) Get(ctx echo.Context) error {
+func (receiver EmpresaHandler) Get(ctx echo.Context) error {
 
 	ID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

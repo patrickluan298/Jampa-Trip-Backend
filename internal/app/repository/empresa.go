@@ -97,8 +97,9 @@ func (receiver *EmpresaRepository) Update(empresa *model.Empresa) error {
 }
 
 // List - busca todas as empresas
-func (receiver *EmpresaRepository) List() ([]*model.Empresa, error) {
-	rows, err := receiver.DB.Raw(query.ListarTodasEmpresas).Rows()
+func (receiver *EmpresaRepository) List(filtros *model.Empresa) ([]*model.Empresa, error) {
+	rows, err := receiver.DB.Raw(query.ListarTodasEmpresas, filtros.Nome, filtros.Nome, filtros.Email, filtros.Email,
+		filtros.CNPJ, filtros.CNPJ, filtros.Telefone, filtros.Telefone, filtros.Endereco, filtros.Endereco).Rows()
 	if err != nil {
 		return nil, err
 	}

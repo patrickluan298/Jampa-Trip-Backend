@@ -53,6 +53,10 @@ func (receiver *EmpresaService) Login(request *contract.LoginEmpresaRequest) (*c
 // Create - realiza o cadastro de uma nova empresa
 func (receiver *EmpresaService) Create(request *contract.CadastrarEmpresaRequest) (*contract.CadastrarEmpresaResponse, error) {
 
+	if request.Senha != request.ConfirmarSenha {
+		return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
+	}
+
 	emailExiste, err := receiver.EmpresaRepository.EmailExiste(request.Email)
 	if err != nil {
 		return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
@@ -158,9 +162,9 @@ func (receiver *EmpresaService) Update(request *contract.AtualizarEmpresaRequest
 }
 
 // List - realiza a listagem de todas as empresas
-func (receiver *EmpresaService) List() (*contract.ListarEmpresasResponse, error) {
+func (receiver *EmpresaService) List(filtros *model.Empresa) (*contract.ListarEmpresasResponse, error) {
 
-	empresas, err := receiver.EmpresaRepository.List()
+	empresas, err := receiver.EmpresaRepository.List(filtros)
 	if err != nil {
 		return nil, util.WrapError("Erro ao buscar empresas", err, http.StatusInternalServerError)
 	}

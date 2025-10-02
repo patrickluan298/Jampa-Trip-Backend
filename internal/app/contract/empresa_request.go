@@ -30,12 +30,13 @@ func (receiver LoginEmpresaRequest) Validate() error {
 
 // CadastrarEmpresaRequest - objeto de request do endpoint de cadastro de empresa
 type CadastrarEmpresaRequest struct {
-	Nome     string `json:"nome"`
-	Email    string `json:"email"`
-	Senha    string `json:"senha"`
-	CNPJ     string `json:"cnpj"`
-	Telefone string `json:"telefone"`
-	Endereco string `json:"endereco"`
+	Nome           string `json:"nome"`
+	Email          string `json:"email"`
+	Senha          string `json:"senha"`
+	ConfirmarSenha string `json:"confirmar_senha"`
+	CNPJ           string `json:"cnpj"`
+	Telefone       string `json:"telefone"`
+	Endereco       string `json:"endereco"`
 }
 
 // Validate - valida os campos da requisição de cadastro
@@ -44,6 +45,7 @@ func (receiver CadastrarEmpresaRequest) Validate() error {
 		validation.Field(&receiver.Nome, validation.Required, validation.Length(2, 100)),
 		validation.Field(&receiver.Email, validation.Required, validation.Match(util.COD_03), validation.Length(1, 40)),
 		validation.Field(&receiver.Senha, validation.Required, validation.Match(util.COD_07), validation.Length(8, 50)),
+		validation.Field(&receiver.ConfirmarSenha, validation.Required, validation.Match(util.COD_07), validation.Length(8, 50)),
 		validation.Field(&receiver.CNPJ, validation.Required, validation.Match(util.COD_12)),
 		validation.Field(&receiver.Telefone, validation.Required, validation.Match(util.COD_11)),
 		validation.Field(&receiver.Endereco, validation.Required, validation.Length(10, 100)),

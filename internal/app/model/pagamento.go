@@ -4,25 +4,37 @@ import "time"
 
 // Pagamento - representa a entidade de pagamento
 type Pagamento struct {
-	ID                   int        `gorm:"column:id;primaryKey;autoIncrement"`
-	ClienteID            int        `gorm:"column:cliente_id;not null"`
-	EmpresaID            int        `gorm:"column:empresa_id;not null"`
-	MercadoPagoOrderID   string     `gorm:"column:mercado_pago_order_id;uniqueIndex"`
-	MercadoPagoPaymentID string     `gorm:"column:mercado_pago_payment_id;index"`
-	Status               string     `gorm:"column:status;not null;default:'pending'"`
-	StatusDetail         string     `gorm:"column:status_detail"`
-	Valor                float64    `gorm:"column:valor;not null;type:decimal(10,2)"`
-	Moeda                string     `gorm:"column:moeda;not null;default:'BRL'"`
-	MetodoPagamento      string     `gorm:"column:metodo_pagamento;not null"`
-	Descricao            string     `gorm:"column:descricao"`
-	NumeroParcelas       int        `gorm:"column:numero_parcelas;default:1"`
-	TokenCartao          string     `gorm:"column:token_cartao"`
-	ChavePIX             string     `gorm:"column:chave_pix"`
-	QRCode               string     `gorm:"column:qr_code;type:text"`
-	MomentoCriacao       time.Time  `gorm:"column:momento_criacao;not null;default:CURRENT_TIMESTAMP"`
-	MomentoAtualizacao   time.Time  `gorm:"column:momento_atualizacao;not null;default:CURRENT_TIMESTAMP"`
-	MomentoAprovacao     *time.Time `gorm:"column:momento_aprovacao"`
-	MomentoCancelamento  *time.Time `gorm:"column:momento_cancelamento"`
+	ID                   int     `gorm:"column:id;primaryKey;autoIncrement"`
+	ClienteID            int     `gorm:"column:cliente_id;not null"`
+	EmpresaID            int     `gorm:"column:empresa_id;not null"`
+	MercadoPagoOrderID   string  `gorm:"column:mercado_pago_order_id;uniqueIndex"`
+	MercadoPagoPaymentID string  `gorm:"column:mercado_pago_payment_id;index"`
+	Status               string  `gorm:"column:status;not null;default:'pending'"`
+	StatusDetail         string  `gorm:"column:status_detail"`
+	Valor                float64 `gorm:"column:valor;not null;type:decimal(10,2)"`
+	Moeda                string  `gorm:"column:moeda;not null;default:'BRL'"`
+	MetodoPagamento      string  `gorm:"column:metodo_pagamento;not null"`
+	Descricao            string  `gorm:"column:descricao"`
+	NumeroParcelas       int     `gorm:"column:numero_parcelas;default:1"`
+	TokenCartao          string  `gorm:"column:token_cartao"`
+	ChavePIX             string  `gorm:"column:chave_pix"`
+	QRCode               string  `gorm:"column:qr_code;type:text"`
+
+	// Campos específicos para cartão de crédito (dados não sensíveis)
+	LastFourDigits            string  `gorm:"column:last_four_digits"`
+	FirstSixDigits            string  `gorm:"column:first_six_digits"`
+	PaymentMethodID           string  `gorm:"column:payment_method_id"`
+	IssuerID                  string  `gorm:"column:issuer_id"`
+	CardholderName            string  `gorm:"column:cardholder_name"`
+	Captured                  bool    `gorm:"column:captured;default:false"`
+	TransactionAmountRefunded float64 `gorm:"column:transaction_amount_refunded;type:decimal(10,2);default:0"`
+
+	MomentoCriacao      time.Time  `gorm:"column:momento_criacao;not null;default:CURRENT_TIMESTAMP"`
+	MomentoAtualizacao  time.Time  `gorm:"column:momento_atualizacao;not null;default:CURRENT_TIMESTAMP"`
+	MomentoAprovacao    *time.Time `gorm:"column:momento_aprovacao"`
+	MomentoCancelamento *time.Time `gorm:"column:momento_cancelamento"`
+	MomentoAutorizacao  *time.Time `gorm:"column:momento_autorizacao"`
+	MomentoCaptura      *time.Time `gorm:"column:momento_captura"`
 
 	// Relacionamentos
 	Cliente Cliente `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
@@ -56,7 +68,6 @@ const (
 	MetodoCartaoCredito MetodoPagamento = "credit_card"
 	MetodoCartaoDebito  MetodoPagamento = "debit_card"
 	MetodoPIX           MetodoPagamento = "pix"
-	MetodoBoleto        MetodoPagamento = "bolbradesco"
 )
 
 // Moeda - define as moedas suportadas
@@ -95,12 +106,20 @@ func (p *Pagamento) IsRejected() bool {
 	return p.Status == string(StatusRejected)
 }
 
-func (p *Pagamento) CanBeCancelled() bool {
-	return p.Status == string(StatusPending) || p.Status == string(StatusAuthorized)
+func (p *Pagamento) IsAuthorized() bool {
+	return p.Status == string(StatusAuthorized)
+}
+
+func (p *Pagamento) IsCaptured() bool {
+	return p.Captured && p.Status == string(StatusApproved)
+}
+
+func (p *Pagamento) CanBeCaptured() bool {
+	return p.Status == string(StatusAuthorized) && !p.Captured
 }
 
 func (p *Pagamento) CanBeRefunded() bool {
-	return p.Status == string(StatusApproved)
+	return p.Status == string(StatusApproved) && p.Captured
 }
 
 func (p *Pagamento) UpdateStatus(status StatusPagamento) {
@@ -141,8 +160,6 @@ func (p *Pagamento) GetMetodoPagamentoDisplay() string {
 		return "Cartão de Débito"
 	case string(MetodoPIX):
 		return "PIX"
-	case string(MetodoBoleto):
-		return "Boleto"
 	default:
 		return "Desconhecido"
 	}
@@ -161,7 +178,7 @@ func IsValidStatus(status StatusPagamento) bool {
 
 func IsValidPaymentMethod(method MetodoPagamento) bool {
 	switch method {
-	case MetodoCartaoCredito, MetodoCartaoDebito, MetodoPIX, MetodoBoleto:
+	case MetodoCartaoCredito, MetodoCartaoDebito, MetodoPIX:
 		return true
 	default:
 		return false

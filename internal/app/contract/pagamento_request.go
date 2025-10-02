@@ -78,3 +78,84 @@ func (r *ListPagamentoRequest) Validate() error {
 		validation.Field(&r.Limit, validation.Min(1), validation.Max(100)),
 	)
 }
+
+// AutorizarCartaoRequest - representa a requisição para autorizar um pagamento com cartão
+type AutorizarCartaoRequest struct {
+	ClienteID         int          `json:"cliente_id" validate:"required,min=1"`
+	EmpresaID         int          `json:"empresa_id" validate:"required,min=1"`
+	Token             string       `json:"token" validate:"required,min=1"`
+	TransactionAmount float64      `json:"transaction_amount" validate:"required,min=0.01"`
+	Installments      int          `json:"installments" validate:"required,min=1,max=12"`
+	PaymentMethodID   string       `json:"payment_method_id" validate:"required"`
+	IssuerID          string       `json:"issuer_id"`
+	Description       string       `json:"description" validate:"max=500"`
+	Payer             PayerRequest `json:"payer" validate:"required"`
+	ExternalReference string       `json:"external_reference"`
+}
+
+// PayerRequest - representa os dados do pagador
+type PayerRequest struct {
+	Email          string                `json:"email" validate:"required,email"`
+	Identification IdentificationRequest `json:"identification"`
+	FirstName      string                `json:"first_name"`
+	LastName       string                `json:"last_name"`
+}
+
+// IdentificationRequest - representa a identificação do pagador
+type IdentificationRequest struct {
+	Type   string `json:"type" validate:"required,oneof=CPF CNPJ"`
+	Number string `json:"number" validate:"required"`
+}
+
+// Validate - valida os campos da requisição
+func (r *AutorizarCartaoRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ClienteID, validation.Required, validation.Min(1)),
+		validation.Field(&r.EmpresaID, validation.Required, validation.Min(1)),
+		validation.Field(&r.Token, validation.Required, validation.Length(1, 500)),
+		validation.Field(&r.TransactionAmount, validation.Required, validation.Min(0.01)),
+		validation.Field(&r.Installments, validation.Required, validation.Min(1), validation.Max(12)),
+		validation.Field(&r.PaymentMethodID, validation.Required, validation.In("visa", "master", "amex", "elo", "hipercard", "cabal", "naranja", "tarshop")),
+		validation.Field(&r.Description, validation.Length(0, 500)),
+		validation.Field(&r.Payer.Email, validation.Required),
+		validation.Field(&r.Payer.Identification.Type, validation.In("CPF", "CNPJ")),
+	)
+}
+
+// CapturarPagamentoRequest - representa a requisição para capturar um pagamento autorizado
+type CapturarPagamentoRequest struct {
+	PaymentID         int64    `json:"payment_id" validate:"required,min=1"`
+	TransactionAmount *float64 `json:"transaction_amount,omitempty"`
+}
+
+// Validate - valida os campos da requisição
+func (r *CapturarPagamentoRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.PaymentID, validation.Required, validation.Min(1)),
+	)
+}
+
+// CancelarPagamentoRequest - representa a requisição para cancelar um pagamento
+type CancelarPagamentoRequest struct {
+	PaymentID int64 `json:"payment_id" validate:"required,min=1"`
+}
+
+// Validate - valida os campos da requisição
+func (r *CancelarPagamentoRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.PaymentID, validation.Required, validation.Min(1)),
+	)
+}
+
+// ReembolsarPagamentoRequest - representa a requisição para reembolsar um pagamento
+type ReembolsarPagamentoRequest struct {
+	PaymentID int64    `json:"payment_id" validate:"required,min=1"`
+	Amount    *float64 `json:"amount,omitempty"`
+}
+
+// Validate - valida os campos da requisição
+func (r *ReembolsarPagamentoRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.PaymentID, validation.Required, validation.Min(1)),
+	)
+}

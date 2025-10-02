@@ -2,9 +2,10 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
+	"github.com/jampa_trip/internal/app"
 	"github.com/jampa_trip/internal/app/contract"
+	"github.com/jampa_trip/internal/app/service"
 	"github.com/jampa_trip/internal/pkg/util"
 	"github.com/jampa_trip/internal/pkg/webserver"
 	"github.com/labstack/echo/v4"
@@ -12,9 +13,9 @@ import (
 
 type PagamentoHandler struct{}
 
-// Create - cria um novo pagamento
-func (h PagamentoHandler) Create(ctx echo.Context) error {
-	request := &contract.CreatePagamentoRequest{}
+// AutorizarCartao - autoriza um pagamento com cartão de crédito
+func (h PagamentoHandler) AutorizarCartao(ctx echo.Context) error {
+	request := &contract.AutorizarCartaoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidarTipoBody(err); erro != nil {
@@ -27,136 +28,111 @@ func (h PagamentoHandler) Create(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	// TODO: Implementar PagamentoService quando estiver disponível
-	// pagamentoService := service.PagamentoServiceNew(app.DB)
-	// response, err := pagamentoService.Create(request)
-	// if err != nil {
-	// 	return webserver.ErrorResponse(ctx, err)
-	// }
-
-	// Por enquanto, retornar erro de não implementado
-	return webserver.ErrorResponse(ctx, util.WrapError("funcionalidade de pagamento não implementada", nil, http.StatusNotImplemented))
-}
-
-// Get - busca um pagamento pelo ID
-func (h PagamentoHandler) Get(ctx echo.Context) error {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
+	servicePagamento := service.PagamentoServiceNew(app.DB)
+	response, err := servicePagamento.AutorizarCartao(ctx.Request().Context(), request)
 	if err != nil {
-		return webserver.ErrorResponse(ctx, util.WrapError("ID inválido", err, http.StatusBadRequest))
-	}
-
-	request := &contract.GetPagamentoRequest{ID: id}
-
-	if err := request.Validate(); err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	// TODO: Implementar PagamentoService quando estiver disponível
-	// pagamentoService := service.PagamentoServiceNew(app.DB)
-	// response, err := pagamentoService.GetByID(request)
-	// if err != nil {
-	// 	return webserver.ErrorResponse(ctx, err)
-	// }
-
-	// Por enquanto, retornar erro de não implementado
-	return webserver.ErrorResponse(ctx, util.WrapError("funcionalidade de pagamento não implementada", nil, http.StatusNotImplemented))
+	return ctx.JSON(http.StatusOK, response)
 }
 
-// List - lista pagamentos
-func (h PagamentoHandler) List(ctx echo.Context) error {
-	request := &contract.ListPagamentoRequest{}
+// CapturarPagamento - captura um pagamento autorizado
+// func (h PagamentoHandler) CapturarPagamento(ctx echo.Context) error {
+// 	request := &contract.CapturarPagamentoRequest{}
 
-	// Parse query parameters
-	if clienteIDStr := ctx.QueryParam("cliente_id"); clienteIDStr != "" {
-		if clienteID, err := strconv.Atoi(clienteIDStr); err == nil {
-			request.ClienteID = clienteID
-		}
-	}
+// 	if err := ctx.Bind(request); err != nil {
+// 		if erro := util.ValidarTipoBody(err); erro != nil {
+// 			return webserver.ErrorResponse(ctx, erro)
+// 		}
+// 		return webserver.BadJSONResponse(ctx, err)
+// 	}
 
-	if empresaIDStr := ctx.QueryParam("empresa_id"); empresaIDStr != "" {
-		if empresaID, err := strconv.Atoi(empresaIDStr); err == nil {
-			request.EmpresaID = empresaID
-		}
-	}
+// 	if err := request.Validate(); err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-	request.Status = ctx.QueryParam("status")
-	request.MetodoPagamento = ctx.QueryParam("metodo_pagamento")
+// 	servicePagamento := service.PagamentoServiceNew(app.DB)
+// 	response, err := servicePagamento.CapturarPagamento(ctx.Request().Context(), request)
+// 	if err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-	if pageStr := ctx.QueryParam("page"); pageStr != "" {
-		if page, err := strconv.Atoi(pageStr); err == nil {
-			request.Page = page
-		}
-	}
+// 	return ctx.JSON(http.StatusOK, response)
+// }
 
-	if limitStr := ctx.QueryParam("limit"); limitStr != "" {
-		if limit, err := strconv.Atoi(limitStr); err == nil {
-			request.Limit = limit
-		}
-	}
+// CancelarPagamento - cancela um pagamento autorizado
+// func (h PagamentoHandler) CancelarPagamento(ctx echo.Context) error {
+// 	request := &contract.CancelarPagamentoRequest{}
 
-	if err := request.Validate(); err != nil {
-		return webserver.ErrorResponse(ctx, err)
-	}
+// 	if err := ctx.Bind(request); err != nil {
+// 		if erro := util.ValidarTipoBody(err); erro != nil {
+// 			return webserver.ErrorResponse(ctx, erro)
+// 		}
+// 		return webserver.BadJSONResponse(ctx, err)
+// 	}
 
-	// TODO: Implementar PagamentoService quando estiver disponível
-	// pagamentoService := service.PagamentoServiceNew(app.DB)
-	// response, err := pagamentoService.List(request)
-	// if err != nil {
-	// 	return webserver.ErrorResponse(ctx, err)
-	// }
+// 	if err := request.Validate(); err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-	// Por enquanto, retornar erro de não implementado
-	return webserver.ErrorResponse(ctx, util.WrapError("funcionalidade de pagamento não implementada", nil, http.StatusNotImplemented))
-}
+// 	servicePagamento := service.PagamentoServiceNew(app.DB)
+// 	response, err := servicePagamento.CancelarPagamento(ctx.Request().Context(), request)
+// 	if err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-// Update - atualiza um pagamento
-func (h PagamentoHandler) Update(ctx echo.Context) error {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return webserver.ErrorResponse(ctx, util.WrapError("ID inválido", err, http.StatusBadRequest))
-	}
+// 	return ctx.JSON(http.StatusOK, response)
+// }
 
-	request := &contract.UpdatePagamentoRequest{}
+// ReembolsarPagamento - reembolsa um pagamento capturado
+// func (h PagamentoHandler) ReembolsarPagamento(ctx echo.Context) error {
+// 	request := &contract.ReembolsarPagamentoRequest{}
 
-	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
-			return webserver.ErrorResponse(ctx, erro)
-		}
-		return webserver.BadJSONResponse(ctx, err)
-	}
+// 	if err := ctx.Bind(request); err != nil {
+// 		if erro := util.ValidarTipoBody(err); erro != nil {
+// 			return webserver.ErrorResponse(ctx, erro)
+// 		}
+// 		return webserver.BadJSONResponse(ctx, err)
+// 	}
 
-	if err := request.Validate(); err != nil {
-		return webserver.ErrorResponse(ctx, err)
-	}
+// 	if err := request.Validate(); err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-	// TODO: Implementar PagamentoService quando estiver disponível
-	// pagamentoService := service.PagamentoServiceNew(app.DB)
-	// response, err := pagamentoService.Update(id, request)
-	// if err != nil {
-	// 	return webserver.ErrorResponse(ctx, err)
-	// }
+// 	servicePagamento := service.PagamentoServiceNew(app.DB)
+// 	response, err := servicePagamento.ReembolsarPagamento(ctx.Request().Context(), request)
+// 	if err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-	// Por enquanto, retornar erro de não implementado
-	return webserver.ErrorResponse(ctx, util.WrapError("funcionalidade de pagamento não implementada", nil, http.StatusNotImplemented))
-}
+// 	return ctx.JSON(http.StatusOK, response)
+// }
 
-// Delete - remove um pagamento
-func (h PagamentoHandler) Delete(ctx echo.Context) error {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return webserver.ErrorResponse(ctx, util.WrapError("ID inválido", err, http.StatusBadRequest))
-	}
+// ObterPagamento - obtém informações de um pagamento pelo ID do Mercado Pago
+// func (h PagamentoHandler) ObterPagamento(ctx echo.Context) error {
+// 	paymentIDStr := ctx.Param("payment_id")
+// 	paymentID, err := strconv.ParseInt(paymentIDStr, 10, 64)
+// 	if err != nil {
+// 		return webserver.ErrorResponse(ctx, util.WrapError("ID do pagamento inválido", err, http.StatusBadRequest))
+// 	}
 
-	// TODO: Implementar PagamentoService quando estiver disponível
-	// pagamentoService := service.PagamentoServiceNew(app.DB)
-	// response, err := pagamentoService.Delete(id)
-	// if err != nil {
-	// 	return webserver.ErrorResponse(ctx, err)
-	// }
+// 	servicePagamento := service.PagamentoServiceNew(app.DB)
+// 	response, err := servicePagamento.ObterPagamento(ctx.Request().Context(), paymentID)
+// 	if err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
 
-	// Por enquanto, retornar erro de não implementado
-	return webserver.ErrorResponse(ctx, util.WrapError("funcionalidade de pagamento não implementada", nil, http.StatusNotImplemented))
-}
+// 	return ctx.JSON(http.StatusOK, response)
+// }
+
+// ListarMeiosPagamento - lista os meios de pagamento disponíveis
+// func (h PagamentoHandler) ListarMeiosPagamento(ctx echo.Context) error {
+// 	servicePagamento := service.PagamentoServiceNew(app.DB)
+// 	response, err := servicePagamento.ListarMeiosPagamento(ctx.Request().Context())
+// 	if err != nil {
+// 		return webserver.ErrorResponse(ctx, err)
+// 	}
+
+// 	return ctx.JSON(http.StatusOK, response)
+// }

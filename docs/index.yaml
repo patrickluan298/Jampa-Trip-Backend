@@ -39,6 +39,20 @@ paths:
   /jampa-trip/api/v1/clientes/obter/{id}:
     $ref: './paths/cliente/obter.yaml'
 
+  # PAGAMENTOS COM CARTÃO DE CRÉDITO
+  /jampa-trip/api/v1/pagamentos/cartao/autorizar:
+    $ref: './paths/pagamento/autorizar-cartao.yaml'
+  /jampa-trip/api/v1/pagamentos/cartao/capturar:
+    $ref: './paths/pagamento/capturar.yaml'
+  /jampa-trip/api/v1/pagamentos/cartao/cancelar:
+    $ref: './paths/pagamento/cancelar.yaml'
+  /jampa-trip/api/v1/pagamentos/cartao/reembolsar:
+    $ref: './paths/pagamento/reembolsar.yaml'
+  /jampa-trip/api/v1/pagamentos/cartao/{payment_id}:
+    $ref: './paths/pagamento/obter.yaml'
+  /jampa-trip/api/v1/pagamentos/metodos:
+    $ref: './paths/pagamento/metodos.yaml'
+
 components:
   schemas:
     $ref: './components/schemas.yaml'

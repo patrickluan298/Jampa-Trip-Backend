@@ -1,0 +1,55 @@
+get:
+  tags:
+    - Pagamentos
+  summary: Listar métodos de pagamento
+  description: |
+    Lista todos os métodos de pagamento disponíveis no Mercado Pago.
+    Inclui informações sobre cartões de crédito, débito e outros métodos.
+    Os dados são cacheados por 1 hora para melhor performance.
+  responses:
+    '200':
+      description: Lista de métodos de pagamento
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentMethodsResponse'
+          example:
+            payment_methods:
+              - id: "visa"
+                name: "Visa"
+                payment_type_id: "credit_card"
+                status: "active"
+                secure_thumbnail: "https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c2001f7b0d8a.svg"
+                thumbnail: "https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c2001f7b0d8a.svg"
+                deferred_capture: "supported"
+                settings:
+                  - card_number:
+                      length: 16
+                      validation: "standard"
+                    bin:
+                      pattern: "^4"
+                      installments_pattern: "^4"
+                      exclusion_pattern: null
+                    security_code:
+                      mode: "mandatory"
+                      length: 3
+                      card_location: "back"
+                additional_info_needed:
+                  - "cardholder_identification_number"
+                  - "cardholder_identification_type"
+                  - "cardholder_name"
+                min_allowed_amount: 0
+                max_allowed_amount: 250000
+                accreditation_time: 1440
+                financial_institutions: []
+                processing_modes:
+                  - "aggregator"
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Erro ao obter métodos de pagamento"
+            message: "Falha na comunicação com o Mercado Pago"

@@ -53,6 +53,10 @@ func (receiver *ClienteService) Login(request *contract.LoginClienteRequest) (*c
 // Create - realiza o cadastro de um novo cliente
 func (receiver *ClienteService) Create(request *contract.CadastrarClienteRequest) (*contract.CadastrarClienteResponse, error) {
 
+	if request.Senha != request.ConfirmarSenha {
+		return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
+	}
+
 	emailExiste, err := receiver.ClienteRepository.EmailExiste(request.Email)
 	if err != nil {
 		return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
@@ -168,9 +172,9 @@ func (receiver *ClienteService) Update(request *contract.AtualizarClienteRequest
 }
 
 // List - realiza a listagem de todos os clientes
-func (receiver *ClienteService) List() (*contract.ListarClienteResponse, error) {
+func (receiver *ClienteService) List(filtros *model.Cliente) (*contract.ListarClienteResponse, error) {
 
-	clientes, err := receiver.ClienteRepository.List()
+	clientes, err := receiver.ClienteRepository.List(filtros)
 	if err != nil {
 		return nil, util.WrapError("Erro ao buscar clientes", err, http.StatusInternalServerError)
 	}

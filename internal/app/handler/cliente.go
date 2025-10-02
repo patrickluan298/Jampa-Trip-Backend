@@ -6,6 +6,7 @@ import (
 
 	"github.com/jampa_trip/internal/app"
 	"github.com/jampa_trip/internal/app/contract"
+	"github.com/jampa_trip/internal/app/model"
 	"github.com/jampa_trip/internal/app/service"
 	"github.com/jampa_trip/internal/pkg/util"
 	"github.com/jampa_trip/internal/pkg/webserver"
@@ -92,8 +93,20 @@ func (h ClienteHandler) Update(ctx echo.Context) error {
 // List - realiza a listagem de todos os clientes
 func (h ClienteHandler) List(ctx echo.Context) error {
 
+	Nome := ctx.QueryParam("nome")
+	Email := ctx.QueryParam("email")
+	CPF := ctx.QueryParam("cpf")
+	Telefone := ctx.QueryParam("telefone")
+
+	filtros := &model.Cliente{
+		Nome:     Nome,
+		Email:    Email,
+		CPF:      CPF,
+		Telefone: Telefone,
+	}
+
 	serviceCliente := service.ClienteServiceNew(app.DB)
-	response, err := serviceCliente.List()
+	response, err := serviceCliente.List(filtros)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
