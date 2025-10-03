@@ -14,4 +14,4 @@ export DATABASE_POSTGRES_USER=jampa_trip_user
 export DATABASE_POSTGRES_PASSWORD=jampa_trip_password
 export DATABASE_POSTGRES_LOG=/workspace/logs/database.log
 
-go run cmd/app/main.go
+go run cmd/main.go

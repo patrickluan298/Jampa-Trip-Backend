@@ -19,7 +19,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
-    -o main cmd/app/main.go
+    -o main ./cmd
 
 FROM alpine:3.19
 
@@ -44,6 +44,6 @@ USER appuser
 EXPOSE 1450
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:1450/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:1450/health-check || exit 1
 
 CMD ["./main"]

@@ -1,0 +1,122 @@
+put:
+  summary: Atualizar cliente
+  tags:
+    - Cliente
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do cliente a ser atualizado
+      schema:
+        type: integer
+        example: 1
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID do cliente
+              example: 1
+            nome:
+              type: string
+              description: Nome completo do cliente
+              example: "João Silva Atualizado"
+            email:
+              type: string
+              format: email
+              description: Email do cliente
+              example: "cliente@exemplo.com"
+            senha:
+              type: string
+              format: password
+              description: Senha do cliente
+              example: "novasenha123"
+            cpf:
+              type: string
+              description: CPF do cliente
+              example: "123.456.789-00"
+            telefone:
+              type: string
+              description: Telefone do cliente
+              example: "(83) 99999-9999"
+            data_nascimento:
+              type: string
+              format: date
+              description: Data de nascimento do cliente
+              example: "1990-01-01"
+          required:
+            - id
+            - nome
+            - email
+            - senha
+            - cpf
+            - telefone
+            - data_nascimento
+  responses:
+    '200':
+      description: Cliente atualizado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mensagem:
+                type: string
+                example: "Cliente atualizado com sucesso"
+              dados:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nome:
+                    type: string
+                    example: "João Silva Atualizado"
+                  email:
+                    type: string
+                    example: "cliente@exemplo.com"
+                  cpf:
+                    type: string
+                    example: "123.456.789-00"
+                  telefone:
+                    type: string
+                    example: "(83) 99999-9999"
+                  data_nascimento:
+                    type: string
+                    example: "1990-01-01"
+                  momento_cadastro:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+                  momento_atualizacao:
+                    type: string
+                    example: "2024-01-01T12:00:00Z"
+    '400':
+      description: ID inválido
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status_code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: "ID não pode ser zero ou negativo"
+    '422':
+      description: Dados de entrada inválidos
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status_code:
+                type: integer
+                example: 422
+              message:
+                type: string
+                example: "Dados de entrada inválidos"

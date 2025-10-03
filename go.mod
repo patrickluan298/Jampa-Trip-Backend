@@ -6,7 +6,6 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
-	github.com/pkg/errors v0.9.1
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/crypto v0.40.0
 	gopkg.in/yaml.v3 v3.0.1

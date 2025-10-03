@@ -1,0 +1,53 @@
+get:
+  summary: Health Check da aplicação
+  description: Verifica se a aplicação está funcionando corretamente
+  tags:
+    - Health Check
+  responses:
+    '200':
+      description: Aplicação funcionando corretamente
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+                description: Nome da aplicação
+                example: "Jampa-Trip"
+              versao:
+                type: string
+                description: Versão da aplicação
+                example: "1.0.0"
+              mensagem:
+                type: string
+                description: Mensagem de status da aplicação
+                example: "Aplicação up e em pleno funcionamento"
+            required:
+              - nome
+              - versao
+              - mensagem
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status_code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: "Erro interno do servidor"
+
+head:
+  summary: Health Check da aplicação (HEAD)
+  description: Verifica se a aplicação está funcionando corretamente usando método HEAD
+  tags:
+    - Health Check
+  responses:
+    '200':
+      description: Aplicação funcionando corretamente
+    '500':
+      description: Erro interno do servidor
