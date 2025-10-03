@@ -19,7 +19,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
-    -o main cmd/main.go
+    -o main ./cmd
 
 FROM alpine:3.19
 
