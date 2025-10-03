@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jampa_trip/internal"
 	"github.com/jampa_trip/internal/contract"
 	"github.com/jampa_trip/internal/model"
 	"github.com/jampa_trip/internal/service"
+	"github.com/jampa_trip/pkg/database"
 	"github.com/jampa_trip/pkg/util"
 	"github.com/jampa_trip/pkg/webserver"
 	"github.com/labstack/echo/v4"
@@ -31,7 +31,7 @@ func (h ClienteHandler) Login(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCliente := service.ClienteServiceNew(internal.DB)
+	serviceCliente := service.ClienteServiceNew(database.DB)
 	response, err := serviceCliente.Login(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -56,7 +56,7 @@ func (h ClienteHandler) Create(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCliente := service.ClienteServiceNew(internal.DB)
+	serviceCliente := service.ClienteServiceNew(database.DB)
 	response, err := serviceCliente.Create(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -81,7 +81,7 @@ func (h ClienteHandler) Update(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCliente := service.ClienteServiceNew(internal.DB)
+	serviceCliente := service.ClienteServiceNew(database.DB)
 	response, err := serviceCliente.Update(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -105,7 +105,7 @@ func (h ClienteHandler) List(ctx echo.Context) error {
 		Telefone: Telefone,
 	}
 
-	serviceCliente := service.ClienteServiceNew(internal.DB)
+	serviceCliente := service.ClienteServiceNew(database.DB)
 	response, err := serviceCliente.List(filtros)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -129,7 +129,7 @@ func (h ClienteHandler) Get(ctx echo.Context) error {
 		})
 	}
 
-	serviceCliente := service.ClienteServiceNew(internal.DB)
+	serviceCliente := service.ClienteServiceNew(database.DB)
 	response, err := serviceCliente.Get(ID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)

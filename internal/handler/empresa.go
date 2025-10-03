@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jampa_trip/internal"
 	"github.com/jampa_trip/internal/contract"
 	"github.com/jampa_trip/internal/model"
 	"github.com/jampa_trip/internal/service"
+	"github.com/jampa_trip/pkg/database"
 	"github.com/jampa_trip/pkg/util"
 	"github.com/jampa_trip/pkg/webserver"
 	"github.com/labstack/echo/v4"
@@ -31,7 +31,7 @@ func (receiver EmpresaHandler) Login(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceEmpresa := service.EmpresaServiceNew(internal.DB)
+	serviceEmpresa := service.EmpresaServiceNew(database.DB)
 	response, err := serviceEmpresa.Login(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -56,7 +56,7 @@ func (receiver EmpresaHandler) Create(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceEmpresa := service.EmpresaServiceNew(internal.DB)
+	serviceEmpresa := service.EmpresaServiceNew(database.DB)
 	response, err := serviceEmpresa.Create(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -81,7 +81,7 @@ func (receiver EmpresaHandler) Update(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceEmpresa := service.EmpresaServiceNew(internal.DB)
+	serviceEmpresa := service.EmpresaServiceNew(database.DB)
 	response, err := serviceEmpresa.Update(request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -107,7 +107,7 @@ func (receiver EmpresaHandler) List(ctx echo.Context) error {
 		Endereco: Endereco,
 	}
 
-	serviceEmpresa := service.EmpresaServiceNew(internal.DB)
+	serviceEmpresa := service.EmpresaServiceNew(database.DB)
 	response, err := serviceEmpresa.List(filtros)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -131,7 +131,7 @@ func (receiver EmpresaHandler) Get(ctx echo.Context) error {
 		})
 	}
 
-	serviceEmpresa := service.EmpresaServiceNew(internal.DB)
+	serviceEmpresa := service.EmpresaServiceNew(database.DB)
 	response, err := serviceEmpresa.Get(ID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
