@@ -40,7 +40,7 @@ MERCADO_PAGO_BASE_URL=https://api.mercadopago.com
 
 1. **`internal/pkg/config/config.go`** - Adicionadas configurações do Mercado Pago
 2. **`internal/pkg/mercadopago/client.go`** - Cliente HTTP para comunicação com a API
-3. **`internal/app/model/pagamento.go`** - Modelo de dados para pagamentos
+3. **`internal/model/pagamento.go`** - Modelo de dados para pagamentos
 
 ### Funcionalidades do Cliente
 

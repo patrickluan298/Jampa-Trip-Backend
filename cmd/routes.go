@@ -1,7 +1,7 @@
-package cmd
+package main
 
 import (
-	"github.com/jampa_trip/internal/app/handler"
+	"github.com/jampa_trip/internal/handler"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,6 +24,13 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.PUT("/jampa-trip/api/v1/clientes/atualizar/:id", handler.ClienteHandler{}.Update)
 	e.GET("/jampa-trip/api/v1/clientes/listar", handler.ClienteHandler{}.List)
 	e.GET("/jampa-trip/api/v1/clientes/obter/:id", handler.ClienteHandler{}.Get)
+
+	// CARTÕES
+	e.POST("/jampa-trip/api/v1/clientes/:customer_id/cartoes", handler.CartaoHandler{}.Create)
+	e.GET("/jampa-trip/api/v1/clientes/:customer_id/cartoes", handler.CartaoHandler{}.List)
+	e.GET("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Get)
+	e.PUT("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Update)
+	e.DELETE("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Delete)
 
 	// PAGAMENTOS COM CARTÃO DE CRÉDITO
 	e.POST("/jampa-trip/api/v1/pagamentos/cartao/autorizar", handler.PagamentoHandler{}.AutorizarCartao)
