@@ -23,13 +23,15 @@ A aplicação oferece uma arquitetura limpa e escalável utilizando o framework 
 - **Integração com Mercado Pago**: Processamento completo de pagamentos
 - **Múltiplos métodos**: Cartão de crédito, débito, e PIX
 - **Gestão de status**: Controle completo do ciclo de vida dos pagamentos
-- **Webhooks**: Notificações automáticas de mudanças de status
+- **Autorização de cartões**: Sistema de pré-autorização para cartões de crédito
+- **Gestão de cartões**: Cadastro e gerenciamento de cartões dos clientes
 
 ### 🏗️ Arquitetura
 - **Clean Architecture**: Separação clara de responsabilidades
 - **API RESTful**: Endpoints bem estruturados e documentados
 - **Documentação Swagger**: Interface interativa para testes da API
 - **Health Checks**: Monitoramento de saúde da aplicação
+- **Middleware de Logging**: Sistema completo de logs estruturados
 
 ## 🚀 Instalação
 
@@ -95,21 +97,13 @@ make docker-dev-up
 O projeto inclui um `Makefile` com comandos pré-configurados para facilitar o desenvolvimento:
 
 ```bash
-make docker-dev-up          # Inicia os containers em background
-make docker-dev-build       # Faz o build e inicia os containers
-make docker-dev-logs        # Exibe logs em tempo real
-make docker-dev-build-logs  # Build + inicia containers + exibe logs
-make docker-dev-stop        # Para containers sem removê-los
-make docker-dev-down        # Para e remove containers/volumes
-make docker-dev-volume-remove # Remove o volume do banco de dados
-```
-
-### Comandos Docker Manuais
-
-```bash
-docker-compose -f deployments/docker-compose.yaml up --build -d  # Build da aplicação
-docker-compose -f deployments/docker-compose.yaml logs -f        # Ver logs
-docker-compose -f deployments/docker-compose.yaml down           # Parar serviços
+make docker-dev-up             # Inicia os containers em background
+make docker-dev-build          # Faz o build e inicia os containers
+make docker-dev-logs           # Exibe logs em tempo real
+make docker-dev-build-logs     # Build + inicia containers + exibe logs
+make docker-dev-stop           # Para containers sem removê-los
+make docker-dev-down           # Para e remove containers/volumes
+make docker-dev-volume-remove  # Remove o volume do banco de dados
 ```
 
 ## 📖 Documentação da API
@@ -124,39 +118,27 @@ A documentação Swagger está disponível em:
 .
 ├── build/                    # Arquivos de build e Dockerfile
 ├── cmd/                      # Ponto de entrada da aplicação
-│   ├── app/
-│   │   └── main.go
-│   └── routes.go
 ├── deployments/              # Configurações de deploy
-│   ├── docker-compose.yaml
-│   └── init.sql
 ├── docs/                     # Documentação da API (OpenAPI/Swagger)
 │   ├── components/
 │   ├── paths/
 │   └── index.yaml
 ├── internal/                 # Código interno da aplicação
-│   ├── app/                  # Lógica de negócio
-│   │   ├── contract/         # Contratos de request/response
-│   │   ├── dto/              # Data Transfer Objects
-│   │   ├── handler/          # Handlers HTTP
-│   │   ├── middleware/       # Middlewares
-│   │   ├── model/            # Modelos de dados
-│   │   ├── query/            # Queries customizadas
-│   │   ├── repository/       # Camada de acesso a dados
-│   │   ├── service/          # Lógica de negócio
-│   │   ├── types/            # Tipos customizados
-│   │   └── validation/       # Validações
-│   └── pkg/                  # Pacotes utilitários
-│       ├── config/           # Configurações
-│       ├── database/         # Conexão com banco
-│       ├── mercadopago/      # Cliente Mercado Pago
-│       ├── util/             # Utilitários
-│       └── webserver/        # Servidor web
+│   ├── contract/
+│   ├── handler/
+│   ├── middleware/
+│   ├── model/
+│   ├── query/
+│   ├── repository/
+│   ├── service/
+├── pkg/                      # Pacotes utilitários
+│   ├── config/
+│   ├── database/
+│   ├── mercadopago/
+│   ├── util/
+│   └── webserver/
 ├── tests/                    # Testes automatizados
-├── go.mod
-├── go.sum
-├── Makefile                  # Comandos de automação
-├── run.sh                    # Script de execução
+├── README.md
 └── MERCADO_PAGO_SETUP.md     # Documentação do Mercado Pago
 ```
 
@@ -272,8 +254,10 @@ O projeto inclui integração completa com o Mercado Pago para processamento de 
 - ✅ Criação de Orders
 - ✅ Criação de Pagamentos (Cartão de Crédito/Débito)
 - ✅ Criação de Pagamentos PIX
+- ✅ Autorização de Cartões (Pré-autorização)
+- ✅ Gestão de Cartões dos Clientes
 - ✅ Consulta de Pagamentos
-- ✅ Cancelamento de Pagamentos
+- ✅ Atualização de Pagamentos
 - ✅ Tratamento de Erros da API
 
 ### Status de Pagamento Suportados

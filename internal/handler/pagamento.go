@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/jampa_trip/internal"
 	"github.com/jampa_trip/internal/contract"
@@ -13,9 +14,10 @@ import (
 
 type PagamentoHandler struct{}
 
-// AutorizarCartao - autoriza um pagamento com cartão de crédito
-func (h PagamentoHandler) AutorizarCartao(ctx echo.Context) error {
-	request := &contract.AutorizarCartaoRequest{}
+// CriarPagamentoCartaoCredito - cria um pagamento com cartão de crédito
+func (h PagamentoHandler) CriarPagamentoCartaoCredito(ctx echo.Context) error {
+
+	request := &contract.CriarPagamentoCartaoCreditoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidarTipoBody(err); erro != nil {
@@ -29,7 +31,82 @@ func (h PagamentoHandler) AutorizarCartao(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(internal.DB)
-	response, err := servicePagamento.AutorizarCartao(ctx.Request().Context(), request)
+	response, err := servicePagamento.CriarPagamentoCartaoCredito(ctx.Request().Context(), request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusCreated, response)
+}
+
+// CriarPagamentoCartaoDebito - cria um pagamento com cartão de débito
+func (h PagamentoHandler) CriarPagamentoCartaoDebito(ctx echo.Context) error {
+
+	request := &contract.CriarPagamentoCartaoDebitoRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	servicePagamento := service.PagamentoServiceNew(internal.DB)
+	response, err := servicePagamento.CriarPagamentoCartaoDebito(ctx.Request().Context(), request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusCreated, response)
+}
+
+// CriarPagamentoPIX - cria um pagamento com PIX
+func (h PagamentoHandler) CriarPagamentoPIX(ctx echo.Context) error {
+
+	request := &contract.CriarPagamentoPIXRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	servicePagamento := service.PagamentoServiceNew(internal.DB)
+	response, err := servicePagamento.CriarPagamentoPIX(ctx.Request().Context(), request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusCreated, response)
+}
+
+// BuscarPagamentos - busca pagamentos com filtros
+func (h PagamentoHandler) BuscarPagamentos(ctx echo.Context) error {
+
+	request := &contract.BuscarPagamentosRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	servicePagamento := service.PagamentoServiceNew(internal.DB)
+	response, err := servicePagamento.BuscarPagamentos(ctx.Request().Context(), request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -37,102 +114,45 @@ func (h PagamentoHandler) AutorizarCartao(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// CapturarPagamento - captura um pagamento autorizado
-// func (h PagamentoHandler) CapturarPagamento(ctx echo.Context) error {
-// 	request := &contract.CapturarPagamentoRequest{}
+// ObterPagamento - obtém um pagamento por ID
+func (h PagamentoHandler) ObterPagamento(ctx echo.Context) error {
 
-// 	if err := ctx.Bind(request); err != nil {
-// 		if erro := util.ValidarTipoBody(err); erro != nil {
-// 			return webserver.ErrorResponse(ctx, erro)
-// 		}
-// 		return webserver.BadJSONResponse(ctx, err)
-// 	}
+	paymentIDStr := ctx.Param("id")
+	paymentID, err := strconv.ParseInt(paymentIDStr, 10, 64)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, util.WrapError("ID do pagamento inválido", err, http.StatusBadRequest))
+	}
 
-// 	if err := request.Validate(); err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
+	servicePagamento := service.PagamentoServiceNew(internal.DB)
+	response, err := servicePagamento.ObterPagamentoPorID(ctx.Request().Context(), paymentID)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
 
-// 	servicePagamento := service.PagamentoServiceNew(internal.DB)
-// 	response, err := servicePagamento.CapturarPagamento(ctx.Request().Context(), request)
-// 	if err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
+	return ctx.JSON(http.StatusOK, response)
+}
 
-// 	return ctx.JSON(http.StatusOK, response)
-// }
+// AtualizarPagamento - atualiza um pagamento
+func (h PagamentoHandler) AtualizarPagamento(ctx echo.Context) error {
 
-// CancelarPagamento - cancela um pagamento autorizado
-// func (h PagamentoHandler) CancelarPagamento(ctx echo.Context) error {
-// 	request := &contract.CancelarPagamentoRequest{}
+	request := &contract.AtualizarPagamentoRequest{}
 
-// 	if err := ctx.Bind(request); err != nil {
-// 		if erro := util.ValidarTipoBody(err); erro != nil {
-// 			return webserver.ErrorResponse(ctx, erro)
-// 		}
-// 		return webserver.BadJSONResponse(ctx, err)
-// 	}
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidarTipoBody(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
 
-// 	if err := request.Validate(); err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
 
-// 	servicePagamento := service.PagamentoServiceNew(internal.DB)
-// 	response, err := servicePagamento.CancelarPagamento(ctx.Request().Context(), request)
-// 	if err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
+	servicePagamento := service.PagamentoServiceNew(internal.DB)
+	response, err := servicePagamento.AtualizarPagamento(ctx.Request().Context(), request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
 
-// 	return ctx.JSON(http.StatusOK, response)
-// }
-
-// ReembolsarPagamento - reembolsa um pagamento capturado
-// func (h PagamentoHandler) ReembolsarPagamento(ctx echo.Context) error {
-// 	request := &contract.ReembolsarPagamentoRequest{}
-
-// 	if err := ctx.Bind(request); err != nil {
-// 		if erro := util.ValidarTipoBody(err); erro != nil {
-// 			return webserver.ErrorResponse(ctx, erro)
-// 		}
-// 		return webserver.BadJSONResponse(ctx, err)
-// 	}
-
-// 	if err := request.Validate(); err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
-
-// 	servicePagamento := service.PagamentoServiceNew(internal.DB)
-// 	response, err := servicePagamento.ReembolsarPagamento(ctx.Request().Context(), request)
-// 	if err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
-
-// 	return ctx.JSON(http.StatusOK, response)
-// }
-
-// ObterPagamento - obtém informações de um pagamento pelo ID do Mercado Pago
-// func (h PagamentoHandler) ObterPagamento(ctx echo.Context) error {
-// 	paymentIDStr := ctx.Param("payment_id")
-// 	paymentID, err := strconv.ParseInt(paymentIDStr, 10, 64)
-// 	if err != nil {
-// 		return webserver.ErrorResponse(ctx, util.WrapError("ID do pagamento inválido", err, http.StatusBadRequest))
-// 	}
-
-// 	servicePagamento := service.PagamentoServiceNew(internal.DB)
-// 	response, err := servicePagamento.ObterPagamento(ctx.Request().Context(), paymentID)
-// 	if err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
-
-// 	return ctx.JSON(http.StatusOK, response)
-// }
-
-// ListarMeiosPagamento - lista os meios de pagamento disponíveis
-// func (h PagamentoHandler) ListarMeiosPagamento(ctx echo.Context) error {
-// 	servicePagamento := service.PagamentoServiceNew(internal.DB)
-// 	response, err := servicePagamento.ListarMeiosPagamento(ctx.Request().Context())
-// 	if err != nil {
-// 		return webserver.ErrorResponse(ctx, err)
-// 	}
-
-// 	return ctx.JSON(http.StatusOK, response)
-// }
+	return ctx.JSON(http.StatusOK, response)
+}

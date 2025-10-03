@@ -41,44 +41,43 @@ type PagamentoResponse struct {
 	MetodoPagamentoDisplay string `json:"metodo_pagamento_display"`
 }
 
-// AutorizarCartaoResponse - representa a resposta da autorização de pagamento com cartão
-type AutorizarCartaoResponse struct {
+// CriarPagamentoCartaoCreditoResponse - representa a resposta da criação de pagamento com cartão de crédito
+type CriarPagamentoCartaoCreditoResponse struct {
 	Pagamento PagamentoResponse `json:"pagamento"`
 	Message   string            `json:"message"`
 }
 
-// CapturarPagamentoResponse - representa a resposta da captura de pagamento
-type CapturarPagamentoResponse struct {
+// CriarPagamentoCartaoDebitoResponse - representa a resposta da criação de pagamento com cartão de débito
+type CriarPagamentoCartaoDebitoResponse struct {
 	Pagamento PagamentoResponse `json:"pagamento"`
 	Message   string            `json:"message"`
 }
 
-// CancelarPagamentoResponse - representa a resposta do cancelamento de pagamento
-type CancelarPagamentoResponse struct {
+// CriarPagamentoPIXResponse - representa a resposta da criação de pagamento com PIX
+type CriarPagamentoPIXResponse struct {
+	Pagamento    PagamentoResponse `json:"pagamento"`
+	Message      string            `json:"message"`
+	QRCode       string            `json:"qr_code,omitempty"`
+	QRCodeBase64 string            `json:"qr_code_base64,omitempty"`
+	TicketURL    string            `json:"ticket_url,omitempty"`
+}
+
+// BuscarPagamentosResponse - representa a resposta da busca de pagamentos
+type BuscarPagamentosResponse struct {
+	Pagamentos []PagamentoResponse `json:"pagamentos"`
+	Total      int                 `json:"total"`
+	Offset     int                 `json:"offset"`
+	Limit      int                 `json:"limit"`
+	HasMore    bool                `json:"has_more"`
+}
+
+// ObterPagamentoResponse - representa a resposta de obter pagamento por ID
+type ObterPagamentoResponse struct {
+	Pagamento PagamentoResponse `json:"pagamento"`
+}
+
+// AtualizarPagamentoResponse - representa a resposta de atualizar pagamento
+type AtualizarPagamentoResponse struct {
 	Pagamento PagamentoResponse `json:"pagamento"`
 	Message   string            `json:"message"`
-}
-
-// ReembolsarPagamentoResponse - representa a resposta do reembolso de pagamento
-type ReembolsarPagamentoResponse struct {
-	Pagamento      PagamentoResponse `json:"pagamento"`
-	RefundID       int64             `json:"refund_id"`
-	RefundedAmount float64           `json:"refunded_amount"`
-	Message        string            `json:"message"`
-}
-
-// PaymentMethodsResponse - resposta com lista de meios de pagamento
-type PaymentMethodsResponse struct {
-	Methods []PaymentMethodInfo `json:"methods"`
-}
-
-// PaymentMethodInfo - informações de um meio de pagamento
-type PaymentMethodInfo struct {
-	ID                string  `json:"id"`
-	Name              string  `json:"name"`
-	PaymentTypeID     string  `json:"payment_type_id"`
-	Status            string  `json:"status"`
-	MinAllowedAmount  float64 `json:"min_allowed_amount,omitempty"`
-	MaxAllowedAmount  float64 `json:"max_allowed_amount,omitempty"`
-	AccreditationTime int     `json:"accreditation_time,omitempty"`
 }

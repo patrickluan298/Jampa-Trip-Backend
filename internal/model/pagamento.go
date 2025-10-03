@@ -114,14 +114,6 @@ func (p *Pagamento) IsCaptured() bool {
 	return p.Captured && p.Status == string(StatusApproved)
 }
 
-func (p *Pagamento) CanBeCaptured() bool {
-	return p.Status == string(StatusAuthorized) && !p.Captured
-}
-
-func (p *Pagamento) CanBeRefunded() bool {
-	return p.Status == string(StatusApproved) && p.Captured
-}
-
 func (p *Pagamento) UpdateStatus(status StatusPagamento) {
 	p.Status = string(status)
 	p.MomentoAtualizacao = time.Now()

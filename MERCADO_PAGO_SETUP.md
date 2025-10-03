@@ -38,18 +38,34 @@ MERCADO_PAGO_BASE_URL=https://api.mercadopago.com
 
 ### Arquivos Criados/Modificados
 
-1. **`internal/pkg/config/config.go`** - Adicionadas configurações do Mercado Pago
-2. **`internal/pkg/mercadopago/client.go`** - Cliente HTTP para comunicação com a API
+1. **`pkg/config/config.go`** - Adicionadas configurações do Mercado Pago
+2. **`pkg/mercadopago/client.go`** - Cliente HTTP para comunicação com a API
 3. **`internal/model/pagamento.go`** - Modelo de dados para pagamentos
+4. **`internal/service/pagamento.go`** - Lógica de negócio para pagamentos
+5. **`internal/handler/pagamento.go`** - Handlers HTTP para pagamentos
+6. **`internal/repository/pagamento.go`** - Camada de acesso a dados
+7. **`internal/contract/pagamento_request.go`** - Contratos de request
+8. **`internal/contract/pagamento_response.go`** - Contratos de response
 
-### Funcionalidades do Cliente
+### Funcionalidades Implementadas
 
 - ✅ Criação de Orders
 - ✅ Criação de Pagamentos (Cartão de Crédito/Débito)
 - ✅ Criação de Pagamentos PIX
+- ✅ Autorização de Cartões (Pré-autorização)
+- ✅ Gestão de Cartões dos Clientes
 - ✅ Consulta de Pagamentos
-- ✅ Cancelamento de Pagamentos
+- ✅ Atualização de Pagamentos
 - ✅ Tratamento de Erros da API
+
+### Endpoints Implementados
+
+- `POST /jampa-trip/api/v1/pagamentos/cartao-credito` - Pagamento com cartão de crédito
+- `POST /jampa-trip/api/v1/pagamentos/cartao-debito` - Pagamento com cartão de débito
+- `POST /jampa-trip/api/v1/pagamentos/pix` - Pagamento via PIX
+- `GET /jampa-trip/api/v1/pagamentos` - Buscar pagamentos
+- `GET /jampa-trip/api/v1/pagamentos/:id` - Obter pagamento por ID
+- `PUT /jampa-trip/api/v1/pagamentos/:id` - Atualizar pagamento
 
 ### Status de Pagamento Suportados
 
@@ -69,19 +85,21 @@ MERCADO_PAGO_BASE_URL=https://api.mercadopago.com
 - `debit_card` - Cartão de Débito
 - `pix` - PIX
 
-## Próximos Passos
+## Configuração Atual
 
-1. Configure as variáveis de ambiente
-2. Execute a migração do banco de dados (tabela `pagamentos`)
-3. Implemente os contratos de request/response
-4. Crie o repository de pagamentos
-5. Implemente o service de pagamentos
-6. Crie os handlers HTTP
-7. Configure as rotas
+O sistema de pagamentos está **totalmente implementado** e funcional. Não são necessários passos adicionais de configuração além das variáveis de ambiente.
+
+### Funcionalidades Disponíveis
+
+1. **Autorização de Cartões**: Sistema de pré-autorização para cartões de crédito
+2. **Pagamentos Diretos**: Cartão de crédito, débito e PIX
+3. **Gestão de Cartões**: Cadastro e gerenciamento de cartões dos clientes
+4. **Consulta de Pagamentos**: Busca e visualização de pagamentos
+5. **Atualização de Status**: Atualização automática de status dos pagamentos
 
 ## Migração do Banco de Dados
 
-Execute o seguinte SQL para criar a tabela de pagamentos:
+A tabela de pagamentos é criada automaticamente pelo GORM com base no modelo `Pagamento`. O schema inclui:
 
 ```sql
 CREATE TABLE pagamentos (
@@ -100,17 +118,28 @@ CREATE TABLE pagamentos (
     token_cartao VARCHAR(255),
     chave_pix VARCHAR(255),
     qr_code TEXT,
+    -- Campos específicos para cartão
+    last_four_digits VARCHAR(4),
+    first_six_digits VARCHAR(6),
+    payment_method_id VARCHAR(50),
+    issuer_id VARCHAR(50),
+    cardholder_name VARCHAR(255),
+    captured BOOLEAN DEFAULT FALSE,
+    transaction_amount_refunded DECIMAL(10,2) DEFAULT 0,
+    -- Timestamps
     momento_criacao TIMESTAMP NOT NULL DEFAULT NOW(),
     momento_atualizacao TIMESTAMP NOT NULL DEFAULT NOW(),
     momento_aprovacao TIMESTAMP,
-    momento_cancelamento TIMESTAMP
+    momento_cancelamento TIMESTAMP,
+    momento_autorizacao TIMESTAMP,
+    momento_captura TIMESTAMP
 );
-
-CREATE INDEX idx_pagamentos_cliente_id ON pagamentos(cliente_id);
-CREATE INDEX idx_pagamentos_empresa_id ON pagamentos(empresa_id);
-CREATE INDEX idx_pagamentos_mercado_pago_order_id ON pagamentos(mercado_pago_order_id);
-CREATE INDEX idx_pagamentos_mercado_pago_payment_id ON pagamentos(mercado_pago_payment_id);
-CREATE INDEX idx_pagamentos_status ON pagamentos(status);
-CREATE INDEX idx_pagamentos_metodo_pagamento ON pagamentos(metodo_pagamento);
-CREATE INDEX idx_pagamentos_momento_criacao ON pagamentos(momento_criacao);
 ```
+
+## Exemplo de Uso
+
+Consulte o arquivo `EXEMPLO_PAGAMENTO_CARTAO_CREDITO.md` para exemplos práticos de como usar a API de pagamentos.
+
+## Monitoramento
+
+O sistema inclui logs estruturados para monitoramento de pagamentos e integração com o Mercado Pago. Todos os eventos são registrados com detalhes completos para facilitar o debug e auditoria.

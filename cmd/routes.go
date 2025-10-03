@@ -32,13 +32,13 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.PUT("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Update)
 	e.DELETE("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Delete)
 
-	// PAGAMENTOS COM CARTÃO DE CRÉDITO
-	e.POST("/jampa-trip/api/v1/pagamentos/cartao/autorizar", handler.PagamentoHandler{}.AutorizarCartao)
-	// e.POST("/jampa-trip/api/v1/pagamentos/cartao/capturar", handler.PagamentoHandler{}.CapturarPagamento)
-	// e.POST("/jampa-trip/api/v1/pagamentos/cartao/cancelar", handler.PagamentoHandler{}.CancelarPagamento)
-	// e.POST("/jampa-trip/api/v1/pagamentos/cartao/reembolsar", handler.PagamentoHandler{}.ReembolsarPagamento)
-	// e.GET("/jampa-trip/api/v1/pagamentos/cartao/:payment_id", handler.PagamentoHandler{}.ObterPagamento)
-	// e.GET("/jampa-trip/api/v1/pagamentos/metodos", handler.PagamentoHandler{}.ListarMeiosPagamento)
+	// MÉTODOS DE PAGAMENTO
+	e.POST("/jampa-trip/api/v1/pagamentos/cartao-credito", handler.PagamentoHandler{}.CriarPagamentoCartaoCredito)
+	e.POST("/jampa-trip/api/v1/pagamentos/cartao-debito", handler.PagamentoHandler{}.CriarPagamentoCartaoDebito)
+	e.POST("/jampa-trip/api/v1/pagamentos/pix", handler.PagamentoHandler{}.CriarPagamentoPIX)
+	e.GET("/jampa-trip/api/v1/pagamentos", handler.PagamentoHandler{}.BuscarPagamentos)
+	e.GET("/jampa-trip/api/v1/pagamentos/:id", handler.PagamentoHandler{}.ObterPagamento)
+	e.PUT("/jampa-trip/api/v1/pagamentos/:id", handler.PagamentoHandler{}.AtualizarPagamento)
 
 	// RESERVAS
 	// e.POST("/jampa-trip/api/v1/reservas", handler.ReservaHandler{}.Create)
