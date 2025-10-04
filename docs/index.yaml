@@ -14,29 +14,21 @@ paths:
   /health-check:
     $ref: './paths/health-check/health-check.yaml'
 
-  # EMPRESA
-  /jampa-trip/api/v1/empresas/login:
-    $ref: './paths/empresa/login.yaml'
-  /jampa-trip/api/v1/empresas/cadastrar:
-    $ref: './paths/empresa/cadastrar.yaml'
-  /jampa-trip/api/v1/empresas/atualizar/{id}:
-    $ref: './paths/empresa/atualizar.yaml'
-  /jampa-trip/api/v1/empresas/listar:
-    $ref: './paths/empresa/listar.yaml'
-  /jampa-trip/api/v1/empresas/obter/{id}:
-    $ref: './paths/empresa/obter.yaml'
+  # LOGIN
+  /jampa-trip/api/v1/login:
+    $ref: './paths/login/login.yaml'
 
-  # CLIENTE
-  /jampa-trip/api/v1/clientes/login:
-    $ref: './paths/cliente/login.yaml'
-  /jampa-trip/api/v1/clientes/cadastrar:
-    $ref: './paths/cliente/cadastrar.yaml'
-  /jampa-trip/api/v1/clientes/atualizar/{id}:
-    $ref: './paths/cliente/atualizar.yaml'
-  /jampa-trip/api/v1/clientes/listar:
-    $ref: './paths/cliente/listar.yaml'
-  /jampa-trip/api/v1/clientes/obter/{id}:
-    $ref: './paths/cliente/obter.yaml'
+  # COMPANIES
+  /jampa-trip/api/v1/companies:
+    $ref: './paths/companies/create_list.yaml'
+  /jampa-trip/api/v1/companies/{id}:
+    $ref: './paths/companies/get_update.yaml'
+
+  # CLIENTS
+  /jampa-trip/api/v1/clients:
+    $ref: './paths/clients/create_list.yaml'
+  /jampa-trip/api/v1/clients/{id}:
+    $ref: './paths/clients/get_update.yaml'
 
 components:
   schemas:

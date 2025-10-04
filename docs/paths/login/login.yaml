@@ -1,0 +1,68 @@
+post:
+  tags:
+    - Login
+  summary: Login
+  description: Realiza login da empresa ou do cliente
+  operationId: loginUnified
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/LoginUnifiedRequest'
+        example:
+          email: "usuario@exemplo.com"
+          password: "minhasenha123"
+  responses:
+    '200':
+      description: Login realizado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponse'
+          examples:
+            company:
+              summary: Login de empresa
+              value:
+                message: "Login realizado com sucesso"
+                type: "company"
+                data:
+                  id: 1
+                  name: "Empresa Exemplo"
+                  email: "empresa@exemplo.com"
+            client:
+              summary: Login de cliente
+              value:
+                message: "Login realizado com sucesso"
+                type: "client"
+                data:
+                  id: 1
+                  name: "Cliente Exemplo"
+                  email: "cliente@exemplo.com"
+    '401':
+      description: Email e/ou senha incorretos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 401
+            message: "Email e/ou senha incorretos"
+    '422':
+      description: Dados de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 422
+            message: "Email é obrigatório"
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 500
+            message: "Erro interno do servidor"

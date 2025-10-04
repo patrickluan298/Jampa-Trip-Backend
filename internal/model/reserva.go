@@ -19,8 +19,8 @@ type Reserva struct {
 	MomentoCancelamento *time.Time `gorm:"column:momento_cancelamento"`
 
 	// Relacionamentos
-	Cliente   Cliente   `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	Empresa   Empresa   `gorm:"foreignKey:EmpresaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Cliente   Client    `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Empresa   Company   `gorm:"foreignKey:EmpresaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	Pagamento Pagamento `gorm:"foreignKey:PagamentoID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 

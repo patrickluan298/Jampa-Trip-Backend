@@ -1,0 +1,166 @@
+post:
+  summary: Create client
+  tags:
+    - Clients
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Full name of the client
+              example: "João Silva"
+            email:
+              type: string
+              format: email
+              description: Client email
+              example: "client@example.com"
+            password:
+              type: string
+              format: password
+              description: Client password
+              example: "mypassword123"
+            cpf:
+              type: string
+              description: Client CPF
+              example: "123.456.789-00"
+            phone:
+              type: string
+              description: Client phone
+              example: "(83) 99999-9999"
+            birth_date:
+              type: string
+              format: date
+              description: Client birth date
+              example: "1990-01-01"
+          required:
+            - name
+            - email
+            - password
+            - cpf
+            - phone
+            - birth_date
+  responses:
+    '200':
+      description: Client created successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Client created successfully"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "João Silva"
+                  email:
+                    type: string
+                    example: "client@example.com"
+                  cpf:
+                    type: string
+                    example: "123.456.789-00"
+                  phone:
+                    type: string
+                    example: "(83) 99999-9999"
+                  birth_date:
+                    type: string
+                    example: "1990-01-01"
+                  created_at:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+                  updated_at:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+    '422':
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status_code:
+                type: integer
+                example: 422
+              message:
+                type: string
+                example: "Invalid input data"
+
+get:
+  summary: List clients
+  tags:
+    - Clients
+  parameters:
+    - name: name
+      in: query
+      description: Filter by client name
+      required: false
+      schema:
+        type: string
+    - name: email
+      in: query
+      description: Filter by client email
+      required: false
+      schema:
+        type: string
+    - name: cpf
+      in: query
+      description: Filter by client CPF
+      required: false
+      schema:
+        type: string
+    - name: phone
+      in: query
+      description: Filter by client phone
+      required: false
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Clients listed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Clientes listados com sucesso"
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "João Silva"
+                    email:
+                      type: string
+                      example: "cliente@exemplo.com"
+                    cpf:
+                      type: string
+                      example: "123.456.789-00"
+                    phone:
+                      type: string
+                      example: "(83) 99999-9999"
+                    birth_date:
+                      type: string
+                      example: "1990-01-01"
+                    created_at:
+                      type: string
+                      example: "2024-01-01T10:00:00Z"
+                    updated_at:
+                      type: string
+                      example: "2024-01-01T10:00:00Z"
