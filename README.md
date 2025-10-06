@@ -3,7 +3,9 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23.5-blue.svg)](https://golang.org/)
 [![Echo Framework](https://img.shields.io/badge/Echo-v4.13.4-green.svg)](https://echo.labstack.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com/)
+[![JWT](https://img.shields.io/badge/JWT-Authentication-orange.svg)](https://jwt.io/)
 [![Mercado Pago](https://img.shields.io/badge/Mercado%20Pago-Integrated-green.svg)](https://mercadopago.com.br/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -11,13 +13,22 @@
 
 O **Jampa Trip Backend** é uma API REST desenvolvida em Go que serve como backend para uma aplicação mobile de turismo. O projeto foi desenvolvido como parte de um TCC (Trabalho de Conclusão de Curso) do curso de Ciência da Computação, focando na gestão de fornecedores de serviços turísticos e clientes.
 
-A aplicação oferece uma arquitetura limpa e escalável utilizando o framework Echo, GORM para ORM, PostgreSQL como banco de dados e integração completa com o Mercado Pago para processamento de pagamentos.
+A aplicação oferece uma arquitetura limpa e escalável utilizando o framework Echo, GORM para ORM, PostgreSQL como banco de dados, Redis para cache e autenticação, e integração completa com o Mercado Pago para processamento de pagamentos.
 
 ## 🚀 Funcionalidades
 
 ### 👥 Gestão de Usuários
 - **Clientes**: Cadastro, login, atualização e listagem de clientes
 - **Empresas**: Cadastro, login, atualização e listagem de empresas fornecedoras de serviços turísticos
+- **Autenticação JWT**: Sistema completo de autenticação com access e refresh tokens
+- **Segurança**: Middleware de autenticação em todas as rotas protegidas
+
+### 🔐 Sistema de Autenticação
+- **JWT Tokens**: Access tokens (15 min) e refresh tokens (7 dias)
+- **Redis Storage**: Armazenamento seguro de tokens com TTL
+- **Token Rotation**: Renovação automática de tokens
+- **Middleware Global**: Proteção automática de rotas
+- **Validação Dupla**: Tokens validados tanto no JWT quanto no Redis
 
 ### 💳 Sistema de Pagamentos
 - **Integração com Mercado Pago**: Processamento completo de pagamentos
@@ -72,6 +83,17 @@ export DATABASE_POSTGRES_PASSWORD=jampa_trip_password
 export DATABASE_POSTGRES_POOL_MAX_LIFETIME_CONNECTION=300
 export DATABASE_POSTGRES_LOG=""
 
+# Configurações JWT
+export JWT_SECRET=jampa_trip_jwt_secret_key_2024_very_secure
+export JWT_ACCESS_TOKEN_EXPIRATION=15m
+export JWT_REFRESH_TOKEN_EXPIRATION=168h
+
+# Configurações Redis
+export REDIS_HOST=localhost
+export REDIS_PORT=6379
+export REDIS_PASSWORD=""
+export REDIS_DB=0
+
 # Configurações do Mercado Pago
 export MERCADO_PAGO_ACCESS_TOKEN=your_access_token_here
 export MERCADO_PAGO_PUBLIC_KEY=your_public_key_here
@@ -80,7 +102,7 @@ export MERCADO_PAGO_ENVIRONMENT=sandbox
 export MERCADO_PAGO_BASE_URL=https://api.mercadopago.com
 ```
 
-4. **Execute o banco de dados PostgreSQL:**
+4. **Execute os serviços:**
 ```bash
 make docker-dev-up
 ```
@@ -116,30 +138,26 @@ A documentação Swagger está disponível em:
 
 ```
 .
-├── build/                    # Arquivos de build e Dockerfile
 ├── cmd/                      # Ponto de entrada da aplicação
 ├── deployments/              # Configurações de deploy
 ├── docs/                     # Documentação da API (OpenAPI/Swagger)
-│   ├── components/
-│   ├── paths/
-│   └── index.yaml
 ├── internal/                 # Código interno da aplicação
-│   ├── contract/
-│   ├── handler/
-│   ├── middleware/
-│   ├── model/
-│   ├── query/
-│   ├── repository/
-│   ├── service/
+│   ├── contract/             # Contratos de request/response
+│   ├── handler/              # Handlers HTTP
+│   ├── model/                # Modelos de dados
+│   ├── query/                # Queries customizadas
+│   ├── repository/           # Camada de acesso a dados
+│   └── service/              # Lógica de negócio
 ├── pkg/                      # Pacotes utilitários
-│   ├── config/
-│   ├── database/
-│   ├── mercadopago/
-│   ├── util/
-│   └── webserver/
+│   ├── auth/                 # Autenticação JWT
+│   ├── config/               # Configurações
+│   ├── database/             # Conexões com banco e Redis
+│   ├── middleware/           # Middlewares HTTP
+│   ├── mercadopago/          # Integração Mercado Pago
+│   ├── util/                 # Utilitários
+│   └── webserver/            # Servidor web
 ├── tests/                    # Testes automatizados
-├── README.md
-└── MERCADO_PAGO_SETUP.md     # Documentação do Mercado Pago
+└── README.md
 ```
 
 ### Arquitetura
@@ -171,6 +189,13 @@ O projeto segue os princípios da **Clean Architecture** com as seguintes camada
 | `DATABASE_POSTGRES_PASSWORD` | Senha do banco | - | Sim |
 | `DATABASE_POSTGRES_POOL_MAX_LIFETIME_CONNECTION` | Tempo de vida da conexão (segundos) | `300` | Não |
 | `DATABASE_POSTGRES_LOG` | Caminho do log do banco | - | Não |
+| `JWT_SECRET` | Chave secreta para JWT | - | Sim |
+| `JWT_ACCESS_TOKEN_EXPIRATION` | Duração do access token | `15m` | Sim |
+| `JWT_REFRESH_TOKEN_EXPIRATION` | Duração do refresh token | `168h` | Sim |
+| `REDIS_HOST` | Host do Redis | - | Sim |
+| `REDIS_PORT` | Porta do Redis | - | Sim |
+| `REDIS_PASSWORD` | Senha do Redis | - | Não |
+| `REDIS_DB` | Número do banco Redis | `0` | Não |
 | `MERCADO_PAGO_ACCESS_TOKEN` | Token de acesso do Mercado Pago | - | Sim (para pagamentos) |
 | `MERCADO_PAGO_PUBLIC_KEY` | Chave pública do Mercado Pago | - | Sim (para pagamentos) |
 | `MERCADO_PAGO_WEBHOOK_SECRET` | Chave secreta para webhooks | - | Não |
@@ -186,6 +211,15 @@ O banco PostgreSQL é configurado automaticamente via Docker Compose com:
 - **Password:** `jampa_trip_password`
 - **Port:** `6432` (mapeada para `5432` no container)
 
+### Configuração do Redis
+
+O Redis é configurado automaticamente via Docker Compose com:
+
+- **Host:** `redis`
+- **Port:** `6379`
+- **Database:** `0`
+- **Persistência:** Volume Docker para dados
+
 ### Configuração do Mercado Pago
 
 Para configurar o Mercado Pago, consulte o arquivo `MERCADO_PAGO_SETUP.md` que contém instruções detalhadas sobre:
@@ -195,6 +229,293 @@ Para configurar o Mercado Pago, consulte o arquivo `MERCADO_PAGO_SETUP.md` que c
 3. Estrutura da integração implementada
 4. Status de pagamento suportados
 5. Métodos de pagamento disponíveis
+
+## 🔐 Autenticação JWT
+
+### Visão Geral
+
+O sistema implementa autenticação JWT completa com:
+
+- **Access Tokens**: Válidos por 15 minutos
+- **Refresh Tokens**: Válidos por 7 dias
+- **Armazenamento Redis**: Tokens armazenados com TTL
+- **Middleware Global**: Proteção automática de rotas
+- **Token Rotation**: Renovação segura de tokens
+
+### Arquitetura da Autenticação
+
+#### Componentes Principais
+
+1. **JWT Authentication (`pkg/auth/jwt.go`)**
+   - Geração de tokens (access e refresh)
+   - Validação e parsing de tokens
+   - Estrutura de claims personalizada
+
+2. **Redis Token Store (`pkg/auth/redis_token_store.go`)**
+   - Armazenamento de tokens no Redis
+   - Validação de tokens ativos
+   - Gerenciamento de TTL (Time To Live)
+
+3. **JWT Middleware (`pkg/middleware/jwt_middleware.go`)**
+   - Validação automática de tokens em rotas protegidas
+   - Extração de claims do contexto
+   - Tratamento de erros de autenticação
+
+4. **Redis Client (`pkg/database/redis.go`)**
+   - Cliente singleton para conexão com Redis
+   - Configuração e inicialização
+   - Health check
+
+### Fluxo de Autenticação
+
+#### 1. Login e Geração de Tokens
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant LoginHandler
+    participant LoginService
+    participant JWT
+    participant Redis
+    participant TokenStore
+
+    Client->>LoginHandler: POST /login {email, password}
+    LoginHandler->>LoginService: Login(request)
+    LoginService->>LoginService: Validar credenciais
+    LoginService->>JWT: GenerateTokenPair(userID, userType, email)
+    JWT-->>LoginService: {access_token, refresh_token, expires_in}
+    LoginService->>TokenStore: StoreTokenPair(userID, userType, accessToken, refreshToken)
+    TokenStore->>Redis: SET access_token:userID:userType
+    TokenStore->>Redis: SET refresh_token:userID:userType
+    LoginService-->>LoginHandler: LoginResponse com tokens
+    LoginHandler-->>Client: 200 OK {access_token, refresh_token, expires_in}
+```
+
+#### 2. Validação de Tokens (Middleware)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant JWTMiddleware
+    participant JWT
+    participant Redis
+    participant TokenStore
+    participant Handler
+
+    Client->>JWTMiddleware: Request com Authorization: Bearer <token>
+    JWTMiddleware->>JWT: ValidateToken(tokenString)
+    JWT-->>JWTMiddleware: Claims {userID, userType, email}
+    JWTMiddleware->>TokenStore: ValidateAccessToken(userID, userType, token)
+    TokenStore->>Redis: GET access_token:userID:userType
+    Redis-->>TokenStore: Token armazenado
+    TokenStore-->>JWTMiddleware: Token válido
+    JWTMiddleware->>JWTMiddleware: Injetar claims no contexto
+    JWTMiddleware->>Handler: next(c)
+    Handler-->>Client: Response
+```
+
+#### 3. Refresh Token
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant RefreshHandler
+    participant RefreshService
+    participant JWT
+    participant Redis
+    participant TokenStore
+
+    Client->>RefreshHandler: POST /refresh {refresh_token}
+    RefreshHandler->>RefreshService: RefreshToken(request)
+    RefreshService->>JWT: ValidateToken(refreshToken)
+    JWT-->>RefreshService: Claims {userID, userType, email}
+    RefreshService->>TokenStore: ValidateRefreshToken(userID, userType, token)
+    TokenStore->>Redis: GET refresh_token:userID:userType
+    Redis-->>TokenStore: Token válido
+    RefreshService->>JWT: GenerateTokenPair(userID, userType, email)
+    JWT-->>RefreshService: Novos tokens
+    RefreshService->>TokenStore: DeleteTokens(userID, userType)
+    TokenStore->>Redis: DEL access_token:userID:userType
+    TokenStore->>Redis: DEL refresh_token:userID:userType
+    RefreshService->>TokenStore: StoreTokenPair(userID, userType, newTokens)
+    TokenStore->>Redis: SET novos tokens
+    RefreshService-->>RefreshHandler: RefreshTokenResponse
+    RefreshHandler-->>Client: 200 OK {novos tokens}
+```
+
+### Estrutura de Dados no Redis
+
+#### Chaves de Armazenamento
+
+- **Access Token**: `access_token:{userID}:{userType}`
+- **Refresh Token**: `refresh_token:{userID}:{userType}`
+
+#### Exemplo de Dados
+
+```
+access_token:123:client = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+refresh_token:123:client = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+#### TTL (Time To Live)
+
+- **Access Token**: 15 minutos (configurável via `JWT_ACCESS_TOKEN_EXPIRATION`)
+- **Refresh Token**: 7 dias (configurável via `JWT_REFRESH_TOKEN_EXPIRATION`)
+
+### Claims do JWT
+
+#### Estrutura de Claims
+
+```go
+type JWTClaims struct {
+    UserID   int    `json:"user_id"`
+    UserType string `json:"user_type"`
+    Email    string `json:"email"`
+    jwt.RegisteredClaims
+}
+```
+
+#### Campos Padrão (RegisteredClaims)
+
+- `exp` (ExpiresAt): Data de expiração
+- `iat` (IssuedAt): Data de emissão
+- `nbf` (NotBefore): Data de início de validade
+- `iss` (Issuer): Emissor ("jampa-trip")
+- `sub` (Subject): ID do usuário
+
+### Rotas da API
+
+#### Rotas Públicas (sem autenticação)
+
+- `GET /health-check` - Health check
+- `POST /jampa-trip/api/v1/login` - Login
+- `POST /jampa-trip/api/v1/refresh` - Renovar tokens
+
+#### Rotas Protegidas (com autenticação JWT)
+
+Todas as outras rotas estão protegidas pelo middleware JWT.
+
+### Exemplos de Uso
+
+#### 1. Login
+
+```bash
+curl -X POST http://localhost:1450/jampa-trip/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+```
+
+**Resposta:**
+```json
+{
+  "message": "Login realizado com sucesso",
+  "type": "client",
+  "data": {
+    "id": 123,
+    "name": "João Silva",
+    "email": "user@example.com"
+  },
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 1703123456
+}
+```
+
+#### 2. Acesso a Rota Protegida
+
+```bash
+curl -X GET http://localhost:1450/jampa-trip/api/v1/companies \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+#### 3. Renovar Tokens
+
+```bash
+curl -X POST http://localhost:1450/jampa-trip/api/v1/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+```
+
+**Resposta:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 1703123456
+}
+```
+
+### Tratamento de Erros
+
+#### Códigos de Status HTTP
+
+- **401 Unauthorized**: Token inválido, expirado ou não fornecido
+- **403 Forbidden**: Token não encontrado no Redis
+- **422 Unprocessable Entity**: Erro de validação nos dados
+- **500 Internal Server Error**: Erro interno do servidor
+
+#### Exemplos de Erros
+
+```json
+{
+  "statusCode": 401,
+  "message": "token de autorização não fornecido"
+}
+```
+
+```json
+{
+  "statusCode": 401,
+  "message": "token expirado"
+}
+```
+
+```json
+{
+  "statusCode": 401,
+  "message": "token não encontrado ou inválido"
+}
+```
+
+### Segurança
+
+#### Medidas Implementadas
+
+1. **Tokens com TTL**: Access tokens expiram em 15 minutos
+2. **Refresh Token Rotation**: Novos tokens são gerados a cada refresh
+3. **Armazenamento Seguro**: Tokens são armazenados no Redis com TTL
+4. **Validação Dupla**: Tokens são validados tanto no JWT quanto no Redis
+5. **Chave Secreta**: JWT_SECRET é configurado via variável de ambiente
+
+#### Boas Práticas
+
+1. **Use HTTPS** em produção
+2. **Configure JWT_SECRET** com uma chave forte e única
+3. **Monitore** tentativas de acesso com tokens inválidos
+4. **Implemente rate limiting** para prevenir ataques de força bruta
+5. **Logs de segurança** para auditoria
+
+### Monitoramento
+
+#### Logs Importantes
+
+- Conexão com Redis estabelecida
+- Tokens gerados com sucesso
+- Tokens validados
+- Erros de autenticação
+- Tokens expirados
+
+#### Métricas Recomendadas
+
+- Número de logins por minuto
+- Taxa de tokens expirados
+- Tentativas de acesso com tokens inválidos
+- Tempo de resposta do Redis
 
 ## 🧪 Testes
 
@@ -214,7 +535,7 @@ go test ./internal/app/service/...
 
 > **Nota:** O diretório `tests/` está presente mas ainda não contém testes implementados. Esta é uma área para desenvolvimento futuro.
 
-##  Deploy
+## 🚀 Deploy
 
 ### Deploy Local com Docker
 
@@ -244,6 +565,7 @@ A aplicação inclui health checks configurados:
 
 - **Aplicação:** `http://localhost:1450/health-check`
 - **Banco de dados:** Verificação automática via `pg_isready`
+- **Redis:** Verificação automática via `redis-cli ping`
 - **Docker:** Health checks configurados nos containers
 
 ## 💳 Integração com Mercado Pago
@@ -251,30 +573,157 @@ A aplicação inclui health checks configurados:
 O projeto inclui integração completa com o Mercado Pago para processamento de pagamentos:
 
 ### Funcionalidades Implementadas
-- ✅ Criação de Orders
-- ✅ Criação de Pagamentos (Cartão de Crédito/Débito)
-- ✅ Criação de Pagamentos PIX
-- ✅ Autorização de Cartões (Pré-autorização)
-- ✅ Gestão de Cartões dos Clientes
-- ✅ Consulta de Pagamentos
-- ✅ Atualização de Pagamentos
-- ✅ Tratamento de Erros da API
+
+- ✅ **Criação de Orders** - Gerenciamento de pedidos
+- ✅ **Pagamentos com Cartão** - Crédito e débito
+- ✅ **Pagamentos PIX** - Transferência instantânea
+- ✅ **Autorização de Cartões** - Pré-autorização para reservas
+- ✅ **Gestão de Cartões** - Cadastro e gerenciamento
+- ✅ **Consulta de Pagamentos** - Busca e visualização
+- ✅ **Atualização de Status** - Controle automático
+- ✅ **Tratamento de Erros** - Logs e monitoramento
 
 ### Status de Pagamento Suportados
-- `pending` - Pendente
-- `approved` - Aprovado
-- `authorized` - Autorizado
-- `in_process` - Em Processamento
-- `in_mediation` - Em Mediação
-- `rejected` - Rejeitado
-- `cancelled` - Cancelado
-- `refunded` - Reembolsado
-- `charged_back` - Estornado
+
+| Status | Descrição |
+|--------|-----------|
+| `pending` | Pendente |
+| `approved` | Aprovado |
+| `authorized` | Autorizado |
+| `in_process` | Em Processamento |
+| `in_mediation` | Em Mediação |
+| `rejected` | Rejeitado |
+| `cancelled` | Cancelado |
+| `refunded` | Reembolsado |
+| `charged_back` | Estornado |
 
 ### Métodos de Pagamento Suportados
-- `credit_card` - Cartão de Crédito
-- `debit_card` - Cartão de Débito
-- `pix` - PIX
+
+| Método | Descrição |
+|--------|-----------|
+| `credit_card` | Cartão de Crédito |
+| `debit_card` | Cartão de Débito |
+| `pix` | PIX |
+
+### Configuração do Mercado Pago
+
+#### Como Obter as Credenciais
+
+1. **Acesse o [Painel de Desenvolvedores](https://www.mercadopago.com.br/developers/panel/credentials)**
+2. **Faça login** com sua conta Mercado Pago
+3. **Crie uma nova aplicação** ou selecione uma existente
+4. **Copie as credenciais:**
+   - **Access Token**: Token de acesso para autenticação na API
+   - **Public Key**: Chave pública para uso no frontend
+   - **Webhook Secret**: Chave secreta para validar webhooks
+
+#### Ambientes
+
+- **Sandbox**: Ambiente de testes (recomendado para desenvolvimento)
+- **Production**: Ambiente de produção
+
+#### URLs da API
+
+- **Sandbox**: `https://api.mercadopago.com`
+- **Production**: `https://api.mercadopago.com`
+
+### Estrutura do Banco de Dados
+
+A tabela de pagamentos é criada automaticamente pelo GORM:
+
+```sql
+CREATE TABLE pagamentos (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL REFERENCES clientes(id),
+    empresa_id INTEGER NOT NULL REFERENCES empresas(id),
+    mercado_pago_order_id VARCHAR(255) UNIQUE,
+    mercado_pago_payment_id VARCHAR(255),
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    status_detail VARCHAR(100),
+    valor DECIMAL(10,2) NOT NULL,
+    moeda VARCHAR(3) NOT NULL DEFAULT 'BRL',
+    metodo_pagamento VARCHAR(50) NOT NULL,
+    descricao TEXT,
+    numero_parcelas INTEGER DEFAULT 1,
+    token_cartao VARCHAR(255),
+    chave_pix VARCHAR(255),
+    qr_code TEXT,
+    -- Campos específicos para cartão
+    last_four_digits VARCHAR(4),
+    first_six_digits VARCHAR(6),
+    payment_method_id VARCHAR(50),
+    issuer_id VARCHAR(50),
+    cardholder_name VARCHAR(255),
+    captured BOOLEAN DEFAULT FALSE,
+    transaction_amount_refunded DECIMAL(10,2) DEFAULT 0,
+    -- Timestamps
+    momento_criacao TIMESTAMP NOT NULL DEFAULT NOW(),
+    momento_atualizacao TIMESTAMP NOT NULL DEFAULT NOW(),
+    momento_aprovacao TIMESTAMP,
+    momento_cancelamento TIMESTAMP,
+    momento_autorizacao TIMESTAMP,
+    momento_captura TIMESTAMP
+);
+```
+
+### Exemplos de Uso
+
+#### Pagamento com Cartão de Crédito
+
+```bash
+curl -X POST http://localhost:1450/jampa-trip/api/v1/payments/credit-card \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cliente_id": 123,
+    "empresa_id": 456,
+    "valor": 100.00,
+    "descricao": "Pagamento de tour",
+    "numero_parcelas": 3,
+    "token_cartao": "card_token_from_frontend"
+  }'
+```
+
+#### Pagamento via PIX
+
+```bash
+curl -X POST http://localhost:1450/jampa-trip/api/v1/payments/pix \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cliente_id": 123,
+    "empresa_id": 456,
+    "valor": 100.00,
+    "descricao": "Pagamento de tour via PIX"
+  }'
+```
+
+#### Consultar Pagamentos
+
+```bash
+curl -X GET http://localhost:1450/jampa-trip/api/v1/payments \
+  -H "Authorization: Bearer <access_token>"
+```
+
+### Monitoramento
+
+O sistema inclui **logs estruturados** para monitoramento de pagamentos:
+
+- **Eventos de pagamento** registrados com detalhes completos
+- **Integração com Mercado Pago** monitorada
+- **Debug e auditoria** facilitados
+- **Status em tempo real** dos pagamentos
+
+### Arquivos Implementados
+
+1. **`pkg/config/config.go`** - Configurações do Mercado Pago
+2. **`pkg/mercadopago/client.go`** - Cliente HTTP para API
+3. **`internal/model/pagamento.go`** - Modelo de dados
+4. **`internal/service/pagamento.go`** - Lógica de negócio
+5. **`internal/handler/pagamento.go`** - Handlers HTTP
+6. **`internal/repository/pagamento.go`** - Acesso a dados
+7. **`internal/contract/pagamento_request.go`** - Contratos de request
+8. **`internal/contract/pagamento_response.go`** - Contratos de response
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -282,6 +731,8 @@ O projeto inclui integração completa com o Mercado Pago para processamento de 
 - **[Echo v4](https://echo.labstack.com/)** - Framework web
 - **[GORM](https://gorm.io/)** - ORM para Go
 - **[PostgreSQL 15](https://postgresql.org/)** - Banco de dados
+- **[Redis 7](https://redis.io/)** - Cache e armazenamento de tokens
+- **[JWT](https://jwt.io/)** - Autenticação com tokens
 - **[Docker](https://docker.com/)** - Containerização
 - **[Swagger/OpenAPI 3.0.3](https://swagger.io/)** - Documentação da API
 - **[Ozzo Validation](https://github.com/go-ozzo/ozzo-validation)** - Validação de dados
@@ -289,9 +740,40 @@ O projeto inclui integração completa com o Mercado Pago para processamento de 
 
 ## 📚 Documentação Adicional
 
-- [Configuração do Mercado Pago](MERCADO_PAGO_SETUP.md)
 - [Documentação da API](docs/)
 - [Swagger UI](http://localhost:1450/swagger/index.html)
+
+## 🔧 Troubleshooting
+
+### Problemas Comuns
+
+1. **Redis não conecta**
+   ```bash
+   # Verificar se o Redis está rodando
+   docker exec -it jampa-trip-redis redis-cli ping
+   ```
+
+2. **Tokens não são validados**
+   - Verificar se o JWT_SECRET está correto
+   - Verificar se o token está no Redis
+   - Verificar se o token não expirou
+
+3. **Erro de parsing de duração**
+   - Verificar formato das variáveis JWT_*_EXPIRATION
+   - Usar formato Go duration (ex: "15m", "168h")
+
+### Comandos de Debug
+
+```bash
+# Verificar conexão com Redis
+docker exec -it jampa-trip-redis redis-cli ping
+
+# Listar chaves de tokens
+docker exec -it jampa-trip-redis redis-cli keys "*token*"
+
+# Verificar TTL de uma chave
+docker exec -it jampa-trip-redis redis-cli ttl access_token:123:client
+```
 
 ---
 

@@ -61,7 +61,6 @@ func (h TourHandler) Update(ctx echo.Context) error {
 		return webserver.BadJSONResponse(ctx, err)
 	}
 
-	// Definir ID do path no request
 	request.ID = ID
 
 	if err := request.Validate(); err != nil {

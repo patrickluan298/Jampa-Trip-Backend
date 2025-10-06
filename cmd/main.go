@@ -60,6 +60,8 @@ func init() {
 		log.Fatalf("erro ao inicializar conexão com o banco de dados: %s", err.Error())
 	}
 	log.Println("Database OK")
+
+	database.RedisClientNew()
 }
 
 func main() {
