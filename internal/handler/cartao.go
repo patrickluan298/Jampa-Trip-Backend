@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/jampa_trip/internal"
 	"github.com/jampa_trip/internal/contract"
 	"github.com/jampa_trip/internal/service"
+	"github.com/jampa_trip/pkg/database"
 	"github.com/jampa_trip/pkg/util"
 	"github.com/jampa_trip/pkg/webserver"
 	"github.com/labstack/echo/v4"
@@ -24,7 +24,7 @@ func (h CartaoHandler) Create(ctx echo.Context) error {
 	request := &contract.CreateCartaoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -34,7 +34,7 @@ func (h CartaoHandler) Create(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCartao := service.CartaoServiceNew(internal.DB)
+	serviceCartao := service.CartaoServiceNew(database.DB)
 	response, err := serviceCartao.Create(ctx.Request().Context(), customerID, request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -50,7 +50,7 @@ func (h CartaoHandler) List(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, util.WrapError("customer_id é obrigatório", nil, http.StatusBadRequest))
 	}
 
-	serviceCartao := service.CartaoServiceNew(internal.DB)
+	serviceCartao := service.CartaoServiceNew(database.DB)
 	response, err := serviceCartao.List(ctx.Request().Context(), customerID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -71,7 +71,7 @@ func (h CartaoHandler) Get(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, util.WrapError("card_id é obrigatório", nil, http.StatusBadRequest))
 	}
 
-	serviceCartao := service.CartaoServiceNew(internal.DB)
+	serviceCartao := service.CartaoServiceNew(database.DB)
 	response, err := serviceCartao.Get(ctx.Request().Context(), customerID, cardID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -95,7 +95,7 @@ func (h CartaoHandler) Update(ctx echo.Context) error {
 	request := &contract.UpdateCartaoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -105,7 +105,7 @@ func (h CartaoHandler) Update(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	serviceCartao := service.CartaoServiceNew(internal.DB)
+	serviceCartao := service.CartaoServiceNew(database.DB)
 	response, err := serviceCartao.Update(ctx.Request().Context(), customerID, cardID, request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
@@ -126,7 +126,7 @@ func (h CartaoHandler) Delete(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, util.WrapError("card_id é obrigatório", nil, http.StatusBadRequest))
 	}
 
-	serviceCartao := service.CartaoServiceNew(internal.DB)
+	serviceCartao := service.CartaoServiceNew(database.DB)
 	response, err := serviceCartao.Delete(ctx.Request().Context(), customerID, cardID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)

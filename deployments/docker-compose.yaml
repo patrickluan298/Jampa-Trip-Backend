@@ -28,7 +28,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: build/Dockerfile
+      dockerfile: deployments/Dockerfile
     container_name: jampa-trip-app
     restart: unless-stopped
     environment:
@@ -76,3 +76,4 @@ volumes:
 networks:
   jampa-trip-network:
     driver: bridge
+    name: host-jampa-trip-network

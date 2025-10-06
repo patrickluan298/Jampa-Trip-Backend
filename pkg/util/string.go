@@ -3,7 +3,6 @@ package util
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -59,19 +58,19 @@ func FormatarErroValidacao(err error) error {
 	}
 
 	mensagemFinal := strings.TrimSuffix(builder.String(), "; ")
-	return errors.New(mensagemFinal)
+	return WrapError(mensagemFinal, nil, http.StatusUnprocessableEntity)
 }
 
 // ValidaSegurancaSenha - valida se a senha é forte
 func ValidaSegurancaSenha(senha string) error {
 	if !COD_08.MatchString(senha) {
-		return errors.New("senha deve conter pelo menos 1 letra maiúscula")
+		return WrapError("senha deve conter pelo menos 1 letra maiúscula", nil, http.StatusUnprocessableEntity)
 	}
 	if !COD_09.MatchString(senha) {
-		return errors.New("senha deve conter pelo menos 1 número")
+		return WrapError("senha deve conter pelo menos 1 número", nil, http.StatusUnprocessableEntity)
 	}
 	if !COD_10.MatchString(senha) {
-		return errors.New("senha deve conter pelo menos 1 caractere especial")
+		return WrapError("senha deve conter pelo menos 1 caractere especial", nil, http.StatusUnprocessableEntity)
 	}
 	return nil
 }
@@ -82,11 +81,11 @@ func ValidaCPF(cpf string) error {
 	cpf = strings.ReplaceAll(cpf, "-", "")
 
 	if len(cpf) != 11 {
-		return errors.New("CPF deve ter 11 dígitos")
+		return WrapError("CPF deve ter 11 dígitos", nil, http.StatusUnprocessableEntity)
 	}
 
 	if strings.Count(cpf, string(cpf[0])) == 11 {
-		return errors.New("CPF inválido: todos os dígitos são iguais")
+		return WrapError("CPF inválido: todos os dígitos são iguais", nil, http.StatusUnprocessableEntity)
 	}
 
 	// Validação do primeiro dígito verificador
@@ -103,7 +102,7 @@ func ValidaCPF(cpf string) error {
 
 	digito1, _ := strconv.Atoi(string(cpf[9]))
 	if digito1 != primeiroDigito {
-		return errors.New("CPF inválido: primeiro dígito verificador incorreto")
+		return WrapError("CPF inválido: primeiro dígito verificador incorreto", nil, http.StatusUnprocessableEntity)
 	}
 
 	// Validação do segundo dígito verificador
@@ -120,7 +119,7 @@ func ValidaCPF(cpf string) error {
 
 	digito2, _ := strconv.Atoi(string(cpf[10]))
 	if digito2 != segundoDigito {
-		return errors.New("CPF inválido: segundo dígito verificador incorreto")
+		return WrapError("CPF inválido: segundo dígito verificador incorreto", nil, http.StatusUnprocessableEntity)
 	}
 
 	return nil
@@ -133,11 +132,11 @@ func ValidaCNPJ(cnpj string) error {
 	cnpj = strings.ReplaceAll(cnpj, "-", "")
 
 	if len(cnpj) != 14 {
-		return errors.New("CNPJ deve ter 14 dígitos")
+		return WrapError("CNPJ deve ter 14 dígitos", nil, http.StatusUnprocessableEntity)
 	}
 
 	if strings.Count(cnpj, string(cnpj[0])) == 14 {
-		return errors.New("CNPJ inválido: todos os dígitos são iguais")
+		return WrapError("CNPJ inválido: todos os dígitos são iguais", nil, http.StatusUnprocessableEntity)
 	}
 
 	soma := 0
@@ -158,7 +157,7 @@ func ValidaCNPJ(cnpj string) error {
 
 	digito1, _ := strconv.Atoi(string(cnpj[12]))
 	if digito1 != primeiroDigito {
-		return errors.New("CNPJ inválido: primeiro dígito verificador incorreto")
+		return WrapError("CNPJ inválido: primeiro dígito verificador incorreto", nil, http.StatusUnprocessableEntity)
 	}
 
 	soma = 0
@@ -179,7 +178,7 @@ func ValidaCNPJ(cnpj string) error {
 
 	digito2, _ := strconv.Atoi(string(cnpj[13]))
 	if digito2 != segundoDigito {
-		return errors.New("CNPJ inválido: segundo dígito verificador incorreto")
+		return WrapError("CNPJ inválido: segundo dígito verificador incorreto", nil, http.StatusUnprocessableEntity)
 	}
 
 	return nil

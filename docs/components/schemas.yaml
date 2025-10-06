@@ -248,3 +248,125 @@ ErrorResponse:
     error:
       type: string
       example: "campo obrigatório não informado"
+
+LoginUnifiedRequest:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: "usuario@exemplo.com"
+      description: "Email do usuário (empresa ou cliente)"
+    password:
+      type: string
+      example: "minhasenha123"
+      description: "Senha do usuário"
+      minLength: 8
+      maxLength: 50
+
+LoginResponse:
+  type: object
+  properties:
+    message:
+      type: string
+      example: "Login realizado com sucesso"
+    type:
+      type: string
+      enum: [company, client]
+      example: "company"
+      description: "Tipo do usuário logado"
+    data:
+      $ref: '#/components/schemas/UserLoginData'
+
+UserLoginData:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: "ID do usuário"
+    name:
+      type: string
+      example: "Nome do Usuário"
+      description: "Nome do usuário"
+    email:
+      type: string
+      format: email
+      example: "usuario@exemplo.com"
+      description: "Email do usuário"
+
+CreateClientRequest:
+  type: object
+  required:
+    - name
+    - email
+    - password
+    - cpf
+    - phone
+    - birth_date
+  properties:
+    name:
+      type: string
+      example: "João Silva"
+      description: "Nome completo do cliente"
+    email:
+      type: string
+      format: email
+      example: "cliente@exemplo.com"
+      description: "Email do cliente"
+    password:
+      type: string
+      example: "minhasenha123"
+      description: "Senha do cliente"
+    cpf:
+      type: string
+      example: "123.456.789-00"
+      description: "CPF do cliente"
+    phone:
+      type: string
+      example: "(83) 99999-9999"
+      description: "Telefone do cliente"
+    birth_date:
+      type: string
+      format: date
+      example: "1990-01-01"
+      description: "Data de nascimento do cliente"
+
+CreateCompanyRequest:
+  type: object
+  required:
+    - name
+    - email
+    - password
+    - cnpj
+    - phone
+    - address
+  properties:
+    name:
+      type: string
+      example: "Empresa Exemplo"
+      description: "Nome da empresa"
+    email:
+      type: string
+      format: email
+      example: "empresa@exemplo.com"
+      description: "Email da empresa"
+    password:
+      type: string
+      example: "minhasenha123"
+      description: "Senha da empresa"
+    cnpj:
+      type: string
+      example: "12.345.678/0001-90"
+      description: "CNPJ da empresa"
+    phone:
+      type: string
+      example: "(83) 99999-9999"
+      description: "Telefone da empresa"
+    address:
+      type: string
+      example: "Rua Exemplo, 123, Centro"
+      description: "Endereço da empresa"

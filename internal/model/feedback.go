@@ -15,8 +15,8 @@ type Feedback struct {
 	MomentoAtualizacao time.Time `gorm:"column:momento_atualizacao;not null;default:CURRENT_TIMESTAMP"`
 
 	// Relacionamentos
-	Cliente Cliente `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	Empresa Empresa `gorm:"foreignKey:EmpresaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Cliente Client `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Empresa Company `gorm:"foreignKey:EmpresaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	Reserva Reserva `gorm:"foreignKey:ReservaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 

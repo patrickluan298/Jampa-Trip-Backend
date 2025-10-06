@@ -8,10 +8,9 @@ import (
 	"os/signal"
 	"time"
 
-	app "github.com/jampa_trip/internal"
-	"github.com/jampa_trip/internal/middleware"
 	"github.com/jampa_trip/pkg/config"
 	"github.com/jampa_trip/pkg/database"
+	"github.com/jampa_trip/pkg/middleware"
 	"github.com/jampa_trip/pkg/util"
 	"github.com/jampa_trip/pkg/webserver"
 	"github.com/swaggo/swag"
@@ -43,19 +42,19 @@ func init() {
 	os.Setenv("VERSION_APPLICATION", VersionApplication)
 	log.Println("Versão da Aplicação: ", VersionApplication)
 
-	app.Config, err = config.LoadConfig()
+	database.Config, err = config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	app.DB, err = database.GormPostgresDatabaseNew().Init(database.GormPostgresDatabaseConfig{
-		Host:     app.Config.DatabaseHost,
-		Port:     app.Config.DatabasePort,
-		User:     app.Config.DatabaseUser,
-		Password: app.Config.DatabasePassword,
-		DB:       app.Config.DatabaseName,
-		Logger:   app.Config.DatabaseLog,
+	database.DB, err = database.GormPostgresDatabaseNew().Init(database.GormPostgresDatabaseConfig{
+		Host:     database.Config.DatabaseHost,
+		Port:     database.Config.DatabasePort,
+		User:     database.Config.DatabaseUser,
+		Password: database.Config.DatabasePassword,
+		DB:       database.Config.DatabaseName,
+		Logger:   database.Config.DatabaseLog,
 	})
 	if err != nil {
 		log.Fatalf("erro ao inicializar conexão com o banco de dados: %s", err.Error())
@@ -68,10 +67,10 @@ func main() {
 	defer cancel()
 
 	server := webserver.EchoWebServerNew().Init(webserver.EchoWebServerConfig{
-		Debug:        app.Config.Debug,
-		ReadTimeout:  app.Config.HTTPServerReadTimeout,
-		WriteTimeout: app.Config.HTTPServerWriteTimeout,
-		IDleTimeout:  app.Config.HTTPServerIdleTimeout,
+		Debug:        database.Config.Debug,
+		ReadTimeout:  database.Config.HTTPServerReadTimeout,
+		WriteTimeout: database.Config.HTTPServerWriteTimeout,
+		IDleTimeout:  database.Config.HTTPServerIdleTimeout,
 	})
 
 	middleware.SetupMiddlewares(server)
@@ -79,7 +78,7 @@ func main() {
 	ConfigureRoutes(server)
 
 	go func() {
-		if err := server.Start(app.Config.HTTPServerPort); err != nil {
+		if err := server.Start(database.Config.HTTPServerPort); err != nil {
 			server.Logger.Fatalf("Finalizando servidor de aplicação: %s", err.Error())
 		}
 	}()

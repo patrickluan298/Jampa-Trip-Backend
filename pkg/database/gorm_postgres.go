@@ -9,10 +9,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jampa_trip/pkg/config"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+)
+
+var (
+	// Conexão com o banco de dados
+	DB *gorm.DB
+
+	// Configurações
+	Config *config.Config
 )
 
 // GormPostgresDatabaseConfig - objeto com as configurações do banco
@@ -76,14 +85,14 @@ func (receiver GormPostgresDatabase) Init(config GormPostgresDatabaseConfig) (da
 		return
 	}
 
-	DB, err := database.DB()
+	sqlDB, err := database.DB()
 
 	if err != nil {
 		return
 	}
 
 	maxLifetimeConnection, _ := strconv.Atoi(config.MaxLifetimeConnection)
-	DB.SetConnMaxLifetime(time.Duration(maxLifetimeConnection) * time.Second)
+	sqlDB.SetConnMaxLifetime(time.Duration(maxLifetimeConnection) * time.Second)
 
 	return
 }

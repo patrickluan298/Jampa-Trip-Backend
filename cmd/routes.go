@@ -11,50 +11,58 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.GET("/health-check", handler.HealthCheckResponse{}.HealthCheck)
 	e.HEAD("/health-check", handler.HealthCheckResponse{}.HealthCheck)
 
-	// EMPRESAS
-	e.POST("/jampa-trip/api/v1/empresas/login", handler.EmpresaHandler{}.Login)
-	e.POST("/jampa-trip/api/v1/empresas/cadastrar", handler.EmpresaHandler{}.Create)
-	e.PUT("/jampa-trip/api/v1/empresas/atualizar/:id", handler.EmpresaHandler{}.Update)
-	e.GET("/jampa-trip/api/v1/empresas/listar", handler.EmpresaHandler{}.List)
-	e.GET("/jampa-trip/api/v1/empresas/obter/:id", handler.EmpresaHandler{}.Get)
+	// LOGIN
+	e.POST("/jampa-trip/api/v1/login", handler.LoginHandler{}.Login)
 
-	// CLIENTES
-	e.POST("/jampa-trip/api/v1/clientes/login", handler.ClienteHandler{}.Login)
-	e.POST("/jampa-trip/api/v1/clientes/cadastrar", handler.ClienteHandler{}.Create)
-	e.PUT("/jampa-trip/api/v1/clientes/atualizar/:id", handler.ClienteHandler{}.Update)
-	e.GET("/jampa-trip/api/v1/clientes/listar", handler.ClienteHandler{}.List)
-	e.GET("/jampa-trip/api/v1/clientes/obter/:id", handler.ClienteHandler{}.Get)
+	// COMPANIES
+	e.POST("/jampa-trip/api/v1/companies", handler.CompanyHandler{}.Create)
+	e.PUT("/jampa-trip/api/v1/companies/:id", handler.CompanyHandler{}.Update)
+	e.GET("/jampa-trip/api/v1/companies", handler.CompanyHandler{}.List)
+	e.GET("/jampa-trip/api/v1/companies/:id", handler.CompanyHandler{}.Get)
 
-	// CARTÕES
-	e.POST("/jampa-trip/api/v1/clientes/:customer_id/cartoes", handler.CartaoHandler{}.Create)
-	e.GET("/jampa-trip/api/v1/clientes/:customer_id/cartoes", handler.CartaoHandler{}.List)
-	e.GET("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Get)
-	e.PUT("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Update)
-	e.DELETE("/jampa-trip/api/v1/clientes/:customer_id/cartoes/:card_id", handler.CartaoHandler{}.Delete)
+	// CLIENTS
+	e.POST("/jampa-trip/api/v1/clients", handler.ClientHandler{}.Create)
+	e.PUT("/jampa-trip/api/v1/clients/:id", handler.ClientHandler{}.Update)
+	e.GET("/jampa-trip/api/v1/clients", handler.ClientHandler{}.List)
+	e.GET("/jampa-trip/api/v1/clients/:id", handler.ClientHandler{}.Get)
 
-	// MÉTODOS DE PAGAMENTO
-	e.POST("/jampa-trip/api/v1/pagamentos/cartao-credito", handler.PagamentoHandler{}.CriarPagamentoCartaoCredito)
-	e.POST("/jampa-trip/api/v1/pagamentos/cartao-debito", handler.PagamentoHandler{}.CriarPagamentoCartaoDebito)
-	e.POST("/jampa-trip/api/v1/pagamentos/pix", handler.PagamentoHandler{}.CriarPagamentoPIX)
-	e.GET("/jampa-trip/api/v1/pagamentos", handler.PagamentoHandler{}.BuscarPagamentos)
-	e.GET("/jampa-trip/api/v1/pagamentos/:id", handler.PagamentoHandler{}.ObterPagamento)
-	e.PUT("/jampa-trip/api/v1/pagamentos/:id", handler.PagamentoHandler{}.AtualizarPagamento)
+	// CARDS
+	e.POST("/jampa-trip/api/v1/clients/:customer_id/cards", handler.CartaoHandler{}.Create)
+	e.GET("/jampa-trip/api/v1/clients/:customer_id/cards", handler.CartaoHandler{}.List)
+	e.GET("/jampa-trip/api/v1/clients/:customer_id/cards/:card_id", handler.CartaoHandler{}.Get)
+	e.PUT("/jampa-trip/api/v1/clients/:customer_id/cards/:card_id", handler.CartaoHandler{}.Update)
+	e.DELETE("/jampa-trip/api/v1/clients/:customer_id/cards/:card_id", handler.CartaoHandler{}.Delete)
 
-	// RESERVAS
-	// e.POST("/jampa-trip/api/v1/reservas", handler.ReservaHandler{}.Create)
-	// e.GET("/jampa-trip/api/v1/reservas/:id", handler.ReservaHandler{}.Get)
-	// e.GET("/jampa-trip/api/v1/reservas", handler.ReservaHandler{}.List)
-	// e.PUT("/jampa-trip/api/v1/reservas/:id", handler.ReservaHandler{}.Update)
-	// e.PUT("/jampa-trip/api/v1/reservas/:id/cancelar", handler.ReservaHandler{}.Cancel)
-	// e.GET("/jampa-trip/api/v1/reservas/futuras", handler.ReservaHandler{}.GetUpcoming)
-	// e.GET("/jampa-trip/api/v1/reservas/historico", handler.ReservaHandler{}.GetHistory)
+	// PAYMENT METHODS
+	e.POST("/jampa-trip/api/v1/payments/credit-card", handler.PagamentoHandler{}.CriarPagamentoCartaoCredito)
+	e.POST("/jampa-trip/api/v1/payments/debit-card", handler.PagamentoHandler{}.CriarPagamentoCartaoDebito)
+	e.POST("/jampa-trip/api/v1/payments/pix", handler.PagamentoHandler{}.CriarPagamentoPIX)
+	e.GET("/jampa-trip/api/v1/payments", handler.PagamentoHandler{}.BuscarPagamentos)
+	e.GET("/jampa-trip/api/v1/payments/:id", handler.PagamentoHandler{}.ObterPagamento)
+	e.PUT("/jampa-trip/api/v1/payments/:id", handler.PagamentoHandler{}.AtualizarPagamento)
 
-	// FEEDBACK E COMENTÁRIOS
+	// TOURS
+	e.POST("/jampa-trip/api/v1/tours", handler.TourHandler{}.Create)
+	e.GET("/jampa-trip/api/v1/tours", handler.TourHandler{}.List)
+	e.PUT("/jampa-trip/api/v1/tours/:id", handler.TourHandler{}.Update)
+	e.DELETE("/jampa-trip/api/v1/tours/:id", handler.TourHandler{}.Delete)
+	e.GET("/jampa-trip/api/v1/tours/my-tours", handler.TourHandler{}.GetMyTours)
+
+	// RESERVATIONS
+	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)
+	// e.GET("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Get)
+	// e.GET("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.List)
+	// e.PUT("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Update)
+	// e.PUT("/jampa-trip/api/v1/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
+	// e.GET("/jampa-trip/api/v1/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
+	// e.GET("/jampa-trip/api/v1/reservations/history", handler.ReservaHandler{}.GetHistory)
+
+	// FEEDBACK AND COMMENTS
 	// e.POST("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.Create)
 	// e.GET("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Get)
 	// e.GET("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.List)
 	// e.PUT("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Update)
-	// e.GET("/jampa-trip/api/v1/feedback/avaliacao-media", handler.FeedbackHandler{}.GetAverageRating)
-	// e.GET("/jampa-trip/api/v1/feedback/distribuicao-notas", handler.FeedbackHandler{}.GetRatingDistribution)
-	// e.GET("/jampa-trip/api/v1/feedback/recentes", handler.FeedbackHandler{}.GetRecent)
+	// e.GET("/jampa-trip/api/v1/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
+	// e.GET("/jampa-trip/api/v1/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
+	// e.GET("/jampa-trip/api/v1/feedback/recent", handler.FeedbackHandler{}.GetRecent)
 }

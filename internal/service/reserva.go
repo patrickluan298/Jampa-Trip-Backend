@@ -111,7 +111,7 @@ func (s *ReservaService) List(request *contract.ListReservaRequest) (*contract.L
 		responseReservas[i] = s.mapReservaToResponse(&reserva)
 	}
 
-	pages := int((total + int64(request.Limit) - 1) / int64(request.Limit))
+	pages := util.CalculateTotalPages(total, request.Limit)
 
 	response := &contract.ListReservaResponse{
 		Reservas: responseReservas,
@@ -200,12 +200,9 @@ func (s *ReservaService) Cancel(request *contract.CancelarReservaRequest) (*cont
 
 // GetUpcoming - busca reservas futuras de um cliente
 func (s *ReservaService) GetUpcoming(clienteID int, page, limit int) (*contract.ListReservaResponse, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
+	config := util.NormalizePagination(page, limit)
+	page = config.Page
+	limit = config.Limit
 
 	reservas, total, err := s.ReservaRepository.GetUpcoming(clienteID, page, limit)
 	if err != nil {
@@ -218,7 +215,7 @@ func (s *ReservaService) GetUpcoming(clienteID int, page, limit int) (*contract.
 		responseReservas[i] = s.mapReservaToResponse(&reserva)
 	}
 
-	pages := int((total + int64(limit) - 1) / int64(limit))
+	pages := util.CalculateTotalPages(total, limit)
 
 	response := &contract.ListReservaResponse{
 		Reservas: responseReservas,
@@ -233,12 +230,9 @@ func (s *ReservaService) GetUpcoming(clienteID int, page, limit int) (*contract.
 
 // GetHistory - busca histórico de reservas de um cliente
 func (s *ReservaService) GetHistory(clienteID int, page, limit int) (*contract.ListReservaResponse, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
+	config := util.NormalizePagination(page, limit)
+	page = config.Page
+	limit = config.Limit
 
 	reservas, total, err := s.ReservaRepository.GetHistory(clienteID, page, limit)
 	if err != nil {
@@ -251,7 +245,7 @@ func (s *ReservaService) GetHistory(clienteID int, page, limit int) (*contract.L
 		responseReservas[i] = s.mapReservaToResponse(&reserva)
 	}
 
-	pages := int((total + int64(limit) - 1) / int64(limit))
+	pages := util.CalculateTotalPages(total, limit)
 
 	response := &contract.ListReservaResponse{
 		Reservas: responseReservas,

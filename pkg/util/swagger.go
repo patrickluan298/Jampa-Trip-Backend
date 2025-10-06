@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Função principal para mesclar o Swagger a partir do index.yaml
+// ParseSwagger - mescla o Swagger a partir do index.yaml
 func ParseSwagger(indexPath string) {
 	basePath := filepath.Dir(indexPath)
 	swagger, err := loadYAMLFile(indexPath)
@@ -17,13 +17,11 @@ func ParseSwagger(indexPath string) {
 		return
 	}
 
-	// Resolve referências recursivamente
 	if err = resolveRefs(swagger, basePath); err != nil {
 		fmt.Printf("Erro ao resolver referências: %v\n", err)
 		return
 	}
 
-	// Gera o arquivo final consolidado
 	output, err := yaml.Marshal(swagger)
 	if err != nil {
 		fmt.Printf("Erro ao serializar YAML consolidado: %v\n", err)
@@ -35,7 +33,7 @@ func ParseSwagger(indexPath string) {
 	}
 }
 
-// Função para carregar um arquivo YAML como map
+// loadYAMLFile - carrega um arquivo YAML como map
 func loadYAMLFile(filePath string) (map[string]interface{}, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -50,26 +48,23 @@ func loadYAMLFile(filePath string) (map[string]interface{}, error) {
 	return content, nil
 }
 
-// Função recursiva para resolver referências $ref no YAML
+// resolveRefs - resolve referências $ref no YAML
 func resolveRefs(content map[string]interface{}, basePath string) error {
 	for _, value := range content {
 		if v, ok := value.(map[string]interface{}); ok {
 			if ref, exists := v["$ref"]; exists {
 				refPath := filepath.Join(basePath, ref.(string))
 
-				// Carrega o arquivo referenciado
 				resolved, err := loadYAMLFile(refPath)
 				if err != nil {
 					return fmt.Errorf("falha ao resolver referência %s: %v", refPath, err)
 				}
 
-				// Substitui a referência pelo conteúdo resolvido
 				delete(v, "$ref")
 				for k, val := range resolved {
 					v[k] = val
 				}
 			} else {
-				// Resolução recursiva para sub-níveis
 				if err := resolveRefs(v, basePath); err != nil {
 					return err
 				}

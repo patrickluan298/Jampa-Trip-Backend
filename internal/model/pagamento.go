@@ -37,8 +37,8 @@ type Pagamento struct {
 	MomentoCaptura      *time.Time `gorm:"column:momento_captura"`
 
 	// Relacionamentos
-	Cliente Cliente `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	Empresa Empresa `gorm:"foreignKey:EmpresaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Cliente Client `gorm:"foreignKey:ClienteID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Empresa Company `gorm:"foreignKey:EmpresaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 // TableName - especifica o nome da tabela no banco de dados

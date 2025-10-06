@@ -1,0 +1,152 @@
+get:
+  summary: Get client by ID
+  tags:
+    - Clients
+  parameters:
+    - name: id
+      in: path
+      description: Client ID
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: Client retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Cliente obtido com sucesso"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "João Silva"
+                  email:
+                    type: string
+                    example: "cliente@exemplo.com"
+                  cpf:
+                    type: string
+                    example: "123.456.789-00"
+                  phone:
+                    type: string
+                    example: "(83) 99999-9999"
+                  birth_date:
+                    type: string
+                    example: "1990-01-01"
+                  created_at:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+                  updated_at:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+    '404':
+      description: Client not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+put:
+  summary: Update client
+  tags:
+    - Clients
+  parameters:
+    - name: id
+      in: path
+      description: Client ID
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Full name of the client
+              example: "João Silva"
+            email:
+              type: string
+              format: email
+              description: Client email
+              example: "cliente@exemplo.com"
+            password:
+              type: string
+              format: password
+              description: Client password
+              example: "mypassword123"
+            cpf:
+              type: string
+              description: Client CPF
+              example: "123.456.789-00"
+            phone:
+              type: string
+              description: Client phone
+              example: "(83) 99999-9999"
+            birth_date:
+              type: string
+              format: date
+              description: Client birth date
+              example: "1990-01-01"
+          required:
+            - name
+            - email
+            - password
+            - cpf
+            - phone
+            - birth_date
+  responses:
+    '200':
+      description: Client updated successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Cliente atualizado com sucesso"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "João Silva"
+                  email:
+                    type: string
+                    example: "cliente@exemplo.com"
+                  cpf:
+                    type: string
+                    example: "123.456.789-00"
+                  phone:
+                    type: string
+                    example: "(83) 99999-9999"
+                  birth_date:
+                    type: string
+                    example: "1990-01-01"
+                  created_at:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+                  updated_at:
+                    type: string
+                    example: "2024-01-01T10:00:00Z"
+    '404':
+      description: Client not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
