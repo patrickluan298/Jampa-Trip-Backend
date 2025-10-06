@@ -100,10 +100,7 @@ func (receiver CompanyHandler) Get(ctx echo.Context) error {
 	}
 
 	if ID < 1 {
-		return ctx.JSON(http.StatusBadRequest, contract.ResponseJSON{
-			StatusCode: http.StatusBadRequest,
-			Message:    "ID não pode ser zero ou negativo",
-		})
+		return webserver.ErrorResponse(ctx, util.WrapError("ID não pode ser zero ou negativo", nil, http.StatusBadRequest))
 	}
 
 	serviceEmpresa := service.CompanyServiceNew(database.DB)

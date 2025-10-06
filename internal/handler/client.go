@@ -98,10 +98,7 @@ func (h ClientHandler) Get(ctx echo.Context) error {
 	}
 
 	if ID < 1 {
-		return ctx.JSON(http.StatusBadRequest, contract.ResponseJSON{
-			StatusCode: http.StatusBadRequest,
-			Message:    "ID não pode ser zero ou negativo",
-		})
+		return webserver.ErrorResponse(ctx, util.WrapError("ID não pode ser zero ou negativo", nil, http.StatusBadRequest))
 	}
 
 	serviceCliente := service.ClientServiceNew(database.DB)

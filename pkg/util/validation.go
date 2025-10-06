@@ -124,7 +124,7 @@ func ValidateParameterType(ctx echo.Context, expectedTypes map[string]string) er
 func TimeValidator() validation.Rule {
 	return validation.By(func(value interface{}) error {
 		if !ValidateTimeFormat(value.(string)) {
-			return errors.New("formato de horário inválido")
+			return WrapError("formato de horário inválido", nil, http.StatusUnprocessableEntity)
 		}
 		return nil
 	})

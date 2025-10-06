@@ -49,10 +49,7 @@ func (h TourHandler) Update(ctx echo.Context) error {
 	}
 
 	if ID < 1 {
-		return ctx.JSON(http.StatusBadRequest, contract.ResponseJSON{
-			StatusCode: http.StatusBadRequest,
-			Message:    "ID não pode ser zero ou negativo",
-		})
+		return webserver.ErrorResponse(ctx, util.WrapError("ID não pode ser zero ou negativo", nil, http.StatusBadRequest))
 	}
 
 	request := &contract.UpdateTourRequest{}
@@ -136,10 +133,7 @@ func (h TourHandler) Delete(ctx echo.Context) error {
 	}
 
 	if ID < 1 {
-		return ctx.JSON(http.StatusBadRequest, contract.ResponseJSON{
-			StatusCode: http.StatusBadRequest,
-			Message:    "ID não pode ser zero ou negativo",
-		})
+		return webserver.ErrorResponse(ctx, util.WrapError("ID não pode ser zero ou negativo", nil, http.StatusBadRequest))
 	}
 
 	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)

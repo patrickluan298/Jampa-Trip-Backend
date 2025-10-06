@@ -1,8 +1,10 @@
 package contract
 
 import (
-	"errors"
+	"net/http"
 	"strings"
+
+	"github.com/jampa_trip/pkg/util"
 )
 
 // CreateCartaoRequest - representa a requisição para criar um cartão
@@ -36,19 +38,19 @@ type UpdateCartaoRequest struct {
 // Validate - valida os dados da requisição de criação de cartão
 func (r *CreateCartaoRequest) Validate() error {
 	if strings.TrimSpace(r.Token) == "" {
-		return errors.New("token é obrigatório")
+		return util.WrapError("token é obrigatório", nil, http.StatusUnprocessableEntity)
 	}
 	if strings.TrimSpace(r.PaymentMethodID) == "" {
-		return errors.New("payment_method_id é obrigatório")
+		return util.WrapError("payment_method_id é obrigatório", nil, http.StatusUnprocessableEntity)
 	}
 	if strings.TrimSpace(r.Cardholder.Name) == "" {
-		return errors.New("nome do portador é obrigatório")
+		return util.WrapError("nome do portador é obrigatório", nil, http.StatusUnprocessableEntity)
 	}
 	if strings.TrimSpace(r.Cardholder.Identification.Type) == "" {
-		return errors.New("tipo de identificação é obrigatório")
+		return util.WrapError("tipo de identificação é obrigatório", nil, http.StatusUnprocessableEntity)
 	}
 	if strings.TrimSpace(r.Cardholder.Identification.Number) == "" {
-		return errors.New("número de identificação é obrigatório")
+		return util.WrapError("número de identificação é obrigatório", nil, http.StatusUnprocessableEntity)
 	}
 	return nil
 }
@@ -58,15 +60,15 @@ func (r *UpdateCartaoRequest) Validate() error {
 
 	if r.Cardholder.Name == "" && r.Cardholder.Identification.Type == "" &&
 		r.Cardholder.Identification.Number == "" && len(r.Metadata) == 0 {
-		return errors.New("pelo menos um campo deve ser fornecido para atualização")
+		return util.WrapError("pelo menos um campo deve ser fornecido para atualização", nil, http.StatusUnprocessableEntity)
 	}
 
 	if r.Cardholder.Identification.Type != "" || r.Cardholder.Identification.Number != "" {
 		if strings.TrimSpace(r.Cardholder.Identification.Type) == "" {
-			return errors.New("tipo de identificação é obrigatório quando número é fornecido")
+			return util.WrapError("tipo de identificação é obrigatório quando número é fornecido", nil, http.StatusUnprocessableEntity)
 		}
 		if strings.TrimSpace(r.Cardholder.Identification.Number) == "" {
-			return errors.New("número de identificação é obrigatório quando tipo é fornecido")
+			return util.WrapError("número de identificação é obrigatório quando tipo é fornecido", nil, http.StatusUnprocessableEntity)
 		}
 	}
 
