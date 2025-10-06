@@ -21,7 +21,7 @@ func (receiver CompanyHandler) Create(ctx echo.Context) error {
 	request := &contract.CreateCompanyRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -46,7 +46,7 @@ func (receiver CompanyHandler) Update(ctx echo.Context) error {
 	request := &contract.UpdateCompanyRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)

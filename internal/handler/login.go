@@ -19,7 +19,7 @@ func (h LoginHandler) Login(ctx echo.Context) error {
 	request := &contract.LoginRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)

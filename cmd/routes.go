@@ -41,6 +41,13 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.GET("/jampa-trip/api/v1/payments/:id", handler.PagamentoHandler{}.ObterPagamento)
 	e.PUT("/jampa-trip/api/v1/payments/:id", handler.PagamentoHandler{}.AtualizarPagamento)
 
+	// TOURS
+	e.POST("/jampa-trip/api/v1/tours", handler.TourHandler{}.Create)
+	e.GET("/jampa-trip/api/v1/tours", handler.TourHandler{}.List)
+	e.PUT("/jampa-trip/api/v1/tours/:id", handler.TourHandler{}.Update)
+	e.DELETE("/jampa-trip/api/v1/tours/:id", handler.TourHandler{}.Delete)
+	e.GET("/jampa-trip/api/v1/tours/my-tours", handler.TourHandler{}.GetMyTours)
+
 	// RESERVATIONS
 	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)
 	// e.GET("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Get)

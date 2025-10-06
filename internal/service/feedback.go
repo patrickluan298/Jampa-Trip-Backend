@@ -100,7 +100,7 @@ func (s *FeedbackService) List(request *contract.ListFeedbackRequest) (*contract
 		responseFeedbacks[i] = s.mapFeedbackToResponse(&feedback)
 	}
 
-	pages := int((total + int64(request.Limit) - 1) / int64(request.Limit))
+	pages := util.CalculateTotalPages(total, request.Limit)
 
 	response := &contract.ListFeedbackResponse{
 		Feedbacks: responseFeedbacks,
@@ -170,12 +170,9 @@ func (s *FeedbackService) GetRatingDistribution(empresaID int) (map[int]int, err
 
 // GetRecentFeedbacks - busca feedbacks recentes de uma empresa
 func (s *FeedbackService) GetRecentFeedbacks(empresaID int, days int, page, limit int) (*contract.ListFeedbackResponse, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
+	config := util.NormalizePagination(page, limit)
+	page = config.Page
+	limit = config.Limit
 
 	feedbacks, total, err := s.FeedbackRepository.GetRecentFeedbacks(empresaID, days, page, limit)
 	if err != nil {
@@ -188,7 +185,7 @@ func (s *FeedbackService) GetRecentFeedbacks(empresaID int, days int, page, limi
 		responseFeedbacks[i] = s.mapFeedbackToResponse(&feedback)
 	}
 
-	pages := int((total + int64(limit) - 1) / int64(limit))
+	pages := util.CalculateTotalPages(total, limit)
 
 	response := &contract.ListFeedbackResponse{
 		Feedbacks: responseFeedbacks,

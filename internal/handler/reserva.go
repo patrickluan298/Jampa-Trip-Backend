@@ -7,7 +7,7 @@ type ReservaHandler struct{}
 // 	request := &contract.CreateReservaRequest{}
 
 // 	if err := ctx.Bind(request); err != nil {
-// 		if erro := util.ValidarTipoBody(err); erro != nil {
+// 		if erro := util.ValidateBodyType(err); erro != nil {
 // 			return webserver.ErrorResponse(ctx, erro)
 // 		}
 // 		return webserver.BadJSONResponse(ctx, err)
@@ -104,7 +104,7 @@ type ReservaHandler struct{}
 // 	request := &contract.UpdateReservaRequest{}
 
 // 	if err := ctx.Bind(request); err != nil {
-// 		if erro := util.ValidarTipoBody(err); erro != nil {
+// 		if erro := util.ValidateBodyType(err); erro != nil {
 // 			return webserver.ErrorResponse(ctx, erro)
 // 		}
 // 		return webserver.BadJSONResponse(ctx, err)

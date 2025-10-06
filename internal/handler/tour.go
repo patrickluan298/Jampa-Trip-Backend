@@ -1,0 +1,155 @@
+package handler
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/jampa_trip/internal/contract"
+	"github.com/jampa_trip/internal/service"
+	"github.com/jampa_trip/pkg/database"
+	"github.com/jampa_trip/pkg/util"
+	"github.com/jampa_trip/pkg/webserver"
+	"github.com/labstack/echo/v4"
+)
+
+type TourHandler struct{}
+
+// Create - cria um novo passeio
+func (h TourHandler) Create(ctx echo.Context) error {
+	request := &contract.CreateTourRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
+	companyID := 1
+
+	serviceTour := service.TourServiceNew(database.DB)
+	response, err := serviceTour.Create(request, companyID)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusCreated, response)
+}
+
+// Update - atualiza um passeio existente
+func (h TourHandler) Update(ctx echo.Context) error {
+	ID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return webserver.InvalidIDResponse(ctx, err)
+	}
+
+	if ID < 1 {
+		return ctx.JSON(http.StatusBadRequest, contract.ResponseJSON{
+			StatusCode: http.StatusBadRequest,
+			Message:    "ID não pode ser zero ou negativo",
+		})
+	}
+
+	request := &contract.UpdateTourRequest{}
+
+	if err := ctx.Bind(request); err != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
+			return webserver.ErrorResponse(ctx, erro)
+		}
+		return webserver.BadJSONResponse(ctx, err)
+	}
+
+	// Definir ID do path no request
+	request.ID = ID
+
+	if err := request.Validate(); err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
+	companyID := 1
+
+	serviceTour := service.TourServiceNew(database.DB)
+	response, err := serviceTour.Update(request, companyID)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+// List - lista todos os passeios
+func (h TourHandler) List(ctx echo.Context) error {
+
+	search := ctx.QueryParam("search")
+	pageStr := ctx.QueryParam("page")
+	limitStr := ctx.QueryParam("limit")
+
+	page, limit := util.ParseQueryParams(pageStr, limitStr)
+
+	request := &contract.ListToursRequest{
+		Search: search,
+		Page:   page,
+		Limit:  limit,
+	}
+
+	serviceTour := service.TourServiceNew(database.DB)
+	response, err := serviceTour.List(request)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+// GetMyTours - lista passeios da empresa
+func (h TourHandler) GetMyTours(ctx echo.Context) error {
+
+	pageStr := ctx.QueryParam("page")
+	limitStr := ctx.QueryParam("limit")
+
+	page, limit := util.ParseQueryParams(pageStr, limitStr)
+
+	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
+	companyID := 1
+
+	serviceTour := service.TourServiceNew(database.DB)
+	response, err := serviceTour.GetMyTours(companyID, page, limit)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+// Delete - deleta um passeio
+func (h TourHandler) Delete(ctx echo.Context) error {
+
+	ID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return webserver.InvalidIDResponse(ctx, err)
+	}
+
+	if ID < 1 {
+		return ctx.JSON(http.StatusBadRequest, contract.ResponseJSON{
+			StatusCode: http.StatusBadRequest,
+			Message:    "ID não pode ser zero ou negativo",
+		})
+	}
+
+	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
+	companyID := 1
+
+	serviceTour := service.TourServiceNew(database.DB)
+	response, err := serviceTour.Delete(ID, companyID)
+	if err != nil {
+		return webserver.ErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}

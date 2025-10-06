@@ -56,3 +56,32 @@ CREATE INDEX IF NOT EXISTS idx_clients_email ON clients(email);
 CREATE INDEX IF NOT EXISTS idx_clients_cpf ON clients(cpf);
 CREATE INDEX IF NOT EXISTS idx_clients_created_at ON clients(created_at);
 CREATE INDEX IF NOT EXISTS idx_clients_updated_at ON clients(updated_at);
+
+-- =============================================================================
+-- TOURS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS tours (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    dates TIMESTAMP[],
+    departure_time VARCHAR(10),
+    arrival_time VARCHAR(10),
+    max_people INTEGER DEFAULT 1,
+    description TEXT,
+    images TEXT[],
+    price DECIMAL(10,2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+-- =============================================================================
+-- INDEXES FOR TOURS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_tours_company_id ON tours(company_id);
+CREATE INDEX IF NOT EXISTS idx_tours_created_at ON tours(created_at);
+CREATE INDEX IF NOT EXISTS idx_tours_price ON tours(price);
+CREATE INDEX IF NOT EXISTS idx_tours_name ON tours(name);

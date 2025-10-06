@@ -20,7 +20,7 @@ func (h PagamentoHandler) CriarPagamentoCartaoCredito(ctx echo.Context) error {
 	request := &contract.CriarPagamentoCartaoCreditoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -45,7 +45,7 @@ func (h PagamentoHandler) CriarPagamentoCartaoDebito(ctx echo.Context) error {
 	request := &contract.CriarPagamentoCartaoDebitoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -70,7 +70,7 @@ func (h PagamentoHandler) CriarPagamentoPIX(ctx echo.Context) error {
 	request := &contract.CriarPagamentoPIXRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -95,7 +95,7 @@ func (h PagamentoHandler) BuscarPagamentos(ctx echo.Context) error {
 	request := &contract.BuscarPagamentosRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
@@ -138,7 +138,7 @@ func (h PagamentoHandler) AtualizarPagamento(ctx echo.Context) error {
 	request := &contract.AtualizarPagamentoRequest{}
 
 	if err := ctx.Bind(request); err != nil {
-		if erro := util.ValidarTipoBody(err); erro != nil {
+		if erro := util.ValidateBodyType(err); erro != nil {
 			return webserver.ErrorResponse(ctx, erro)
 		}
 		return webserver.BadJSONResponse(ctx, err)
