@@ -1,0 +1,53 @@
+post:
+  tags:
+    - Authentication
+  summary: Refresh Token
+  description: Renova o par de tokens (access e refresh) usando um refresh token válido
+  operationId: refreshToken
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RefreshTokenRequest'
+        example:
+          refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  responses:
+    '200':
+      description: Tokens renovados com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefreshTokenResponse'
+          example:
+            access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            expires_in: 1703123456
+    '401':
+      description: Refresh token inválido ou expirado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 401
+            message: "refresh token inválido"
+    '422':
+      description: Dados de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 422
+            message: "refresh_token é obrigatório"
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 500
+            message: "Erro interno do servidor"
