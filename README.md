@@ -774,7 +774,3 @@ docker exec -it jampa-trip-redis redis-cli keys "*token*"
 # Verificar TTL de uma chave
 docker exec -it jampa-trip-redis redis-cli ttl access_token:123:client
 ```
-
----
-
-**Desenvolvido como parte do TCC do curso de Ciência da Computação** 🎓
