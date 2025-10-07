@@ -1,4 +1,4 @@
-PagamentoResponse:
+PaymentResponse:
   type: object
   properties:
     id:

@@ -12,12 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type PagamentoHandler struct{}
+type PaymentHandler struct{}
 
-// CriarPagamentoCartaoCredito - cria um pagamento com cartão de crédito
-func (h PagamentoHandler) CriarPagamentoCartaoCredito(ctx echo.Context) error {
+// CreateCreditCardPayment - cria um pagamento com cartão de crédito
+func (h PaymentHandler) CreateCreditCardPayment(ctx echo.Context) error {
 
-	request := &contract.CriarPagamentoCartaoCreditoRequest{}
+	request := &contract.CreateCreditCardPaymentRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidateBodyType(err); erro != nil {
@@ -31,7 +31,7 @@ func (h PagamentoHandler) CriarPagamentoCartaoCredito(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(database.DB)
-	response, err := servicePagamento.CriarPagamentoCartaoCredito(ctx.Request().Context(), request)
+	response, err := servicePagamento.CreateCreditCardPayment(ctx.Request().Context(), request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -39,10 +39,10 @@ func (h PagamentoHandler) CriarPagamentoCartaoCredito(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, response)
 }
 
-// CriarPagamentoCartaoDebito - cria um pagamento com cartão de débito
-func (h PagamentoHandler) CriarPagamentoCartaoDebito(ctx echo.Context) error {
+// CreateDebitCardPayment - cria um pagamento com cartão de débito
+func (h PaymentHandler) CreateDebitCardPayment(ctx echo.Context) error {
 
-	request := &contract.CriarPagamentoCartaoDebitoRequest{}
+	request := &contract.CreateDebitCardPaymentRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidateBodyType(err); erro != nil {
@@ -56,7 +56,7 @@ func (h PagamentoHandler) CriarPagamentoCartaoDebito(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(database.DB)
-	response, err := servicePagamento.CriarPagamentoCartaoDebito(ctx.Request().Context(), request)
+	response, err := servicePagamento.CreateDebitCardPayment(ctx.Request().Context(), request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -64,10 +64,10 @@ func (h PagamentoHandler) CriarPagamentoCartaoDebito(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, response)
 }
 
-// CriarPagamentoPIX - cria um pagamento com PIX
-func (h PagamentoHandler) CriarPagamentoPIX(ctx echo.Context) error {
+// CreatePIXPayment - cria um pagamento com PIX
+func (h PaymentHandler) CreatePIXPayment(ctx echo.Context) error {
 
-	request := &contract.CriarPagamentoPIXRequest{}
+	request := &contract.CreatePIXPaymentRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidateBodyType(err); erro != nil {
@@ -81,7 +81,7 @@ func (h PagamentoHandler) CriarPagamentoPIX(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(database.DB)
-	response, err := servicePagamento.CriarPagamentoPIX(ctx.Request().Context(), request)
+	response, err := servicePagamento.CreatePIXPayment(ctx.Request().Context(), request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -89,10 +89,10 @@ func (h PagamentoHandler) CriarPagamentoPIX(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, response)
 }
 
-// BuscarPagamentos - busca pagamentos com filtros
-func (h PagamentoHandler) BuscarPagamentos(ctx echo.Context) error {
+// List - busca pagamentos com filtros
+func (h PaymentHandler) List(ctx echo.Context) error {
 
-	request := &contract.BuscarPagamentosRequest{}
+	request := &contract.ListPaymentsRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidateBodyType(err); erro != nil {
@@ -106,7 +106,7 @@ func (h PagamentoHandler) BuscarPagamentos(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(database.DB)
-	response, err := servicePagamento.BuscarPagamentos(ctx.Request().Context(), request)
+	response, err := servicePagamento.List(ctx.Request().Context(), request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -114,8 +114,8 @@ func (h PagamentoHandler) BuscarPagamentos(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// ObterPagamento - obtém um pagamento por ID
-func (h PagamentoHandler) ObterPagamento(ctx echo.Context) error {
+// Get - obtém um pagamento por ID
+func (h PaymentHandler) Get(ctx echo.Context) error {
 
 	paymentIDStr := ctx.Param("id")
 	paymentID, err := strconv.ParseInt(paymentIDStr, 10, 64)
@@ -124,7 +124,7 @@ func (h PagamentoHandler) ObterPagamento(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(database.DB)
-	response, err := servicePagamento.ObterPagamentoPorID(ctx.Request().Context(), paymentID)
+	response, err := servicePagamento.Get(ctx.Request().Context(), paymentID)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}
@@ -132,10 +132,10 @@ func (h PagamentoHandler) ObterPagamento(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// AtualizarPagamento - atualiza um pagamento
-func (h PagamentoHandler) AtualizarPagamento(ctx echo.Context) error {
+// Update - atualiza um pagamento
+func (h PaymentHandler) Update(ctx echo.Context) error {
 
-	request := &contract.AtualizarPagamentoRequest{}
+	request := &contract.UpdatePaymentRequest{}
 
 	if err := ctx.Bind(request); err != nil {
 		if erro := util.ValidateBodyType(err); erro != nil {
@@ -149,7 +149,7 @@ func (h PagamentoHandler) AtualizarPagamento(ctx echo.Context) error {
 	}
 
 	servicePagamento := service.PagamentoServiceNew(database.DB)
-	response, err := servicePagamento.AtualizarPagamento(ctx.Request().Context(), request)
+	response, err := servicePagamento.Update(ctx.Request().Context(), request)
 	if err != nil {
 		return webserver.ErrorResponse(ctx, err)
 	}

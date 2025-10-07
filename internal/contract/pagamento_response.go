@@ -2,8 +2,8 @@ package contract
 
 import "time"
 
-// PagamentoResponse - representa a resposta de um pagamento
-type PagamentoResponse struct {
+// PaymentResponse - representa a resposta de um pagamento
+type PaymentResponse struct {
 	ID                   int     `json:"id"`
 	ClienteID            int     `json:"cliente_id"`
 	EmpresaID            int     `json:"empresa_id"`
@@ -41,43 +41,43 @@ type PagamentoResponse struct {
 	MetodoPagamentoDisplay string `json:"metodo_pagamento_display"`
 }
 
-// CriarPagamentoCartaoCreditoResponse - representa a resposta da criação de pagamento com cartão de crédito
-type CriarPagamentoCartaoCreditoResponse struct {
-	Pagamento PagamentoResponse `json:"pagamento"`
-	Message   string            `json:"message"`
+// CreateCreditCardPaymentResponse - representa a resposta da criação de pagamento com cartão de crédito
+type CreateCreditCardPaymentResponse struct {
+	Pagamento PaymentResponse `json:"pagamento"`
+	Message   string          `json:"message"`
 }
 
-// CriarPagamentoCartaoDebitoResponse - representa a resposta da criação de pagamento com cartão de débito
-type CriarPagamentoCartaoDebitoResponse struct {
-	Pagamento PagamentoResponse `json:"pagamento"`
-	Message   string            `json:"message"`
+// CreateDebitCardPaymentResponse - representa a resposta da criação de pagamento com cartão de débito
+type CreateDebitCardPaymentResponse struct {
+	Pagamento PaymentResponse `json:"pagamento"`
+	Message   string          `json:"message"`
 }
 
-// CriarPagamentoPIXResponse - representa a resposta da criação de pagamento com PIX
-type CriarPagamentoPIXResponse struct {
-	Pagamento    PagamentoResponse `json:"pagamento"`
-	Message      string            `json:"message"`
-	QRCode       string            `json:"qr_code,omitempty"`
-	QRCodeBase64 string            `json:"qr_code_base64,omitempty"`
-	TicketURL    string            `json:"ticket_url,omitempty"`
+// CreatePIXPaymentResponse - representa a resposta da criação de pagamento com PIX
+type CreatePIXPaymentResponse struct {
+	Pagamento    PaymentResponse `json:"pagamento"`
+	Message      string          `json:"message"`
+	QRCode       string          `json:"qr_code,omitempty"`
+	QRCodeBase64 string          `json:"qr_code_base64,omitempty"`
+	TicketURL    string          `json:"ticket_url,omitempty"`
 }
 
-// BuscarPagamentosResponse - representa a resposta da busca de pagamentos
-type BuscarPagamentosResponse struct {
-	Pagamentos []PagamentoResponse `json:"pagamentos"`
-	Total      int                 `json:"total"`
-	Offset     int                 `json:"offset"`
-	Limit      int                 `json:"limit"`
-	HasMore    bool                `json:"has_more"`
+// ListPaymentsResponse - representa a resposta da busca de pagamentos
+type ListPaymentsResponse struct {
+	Pagamentos []PaymentResponse `json:"pagamentos"`
+	Total      int               `json:"total"`
+	Offset     int               `json:"offset"`
+	Limit      int               `json:"limit"`
+	HasMore    bool              `json:"has_more"`
 }
 
-// ObterPagamentoResponse - representa a resposta de obter pagamento por ID
-type ObterPagamentoResponse struct {
-	Pagamento PagamentoResponse `json:"pagamento"`
+// GetPaymentResponse - representa a resposta de obter pagamento por ID
+type GetPaymentResponse struct {
+	Pagamento PaymentResponse `json:"pagamento"`
 }
 
-// AtualizarPagamentoResponse - representa a resposta de atualizar pagamento
-type AtualizarPagamentoResponse struct {
-	Pagamento PagamentoResponse `json:"pagamento"`
-	Message   string            `json:"message"`
+// UpdatePaymentResponse - representa a resposta de atualizar pagamento
+type UpdatePaymentResponse struct {
+	Pagamento PaymentResponse `json:"pagamento"`
+	Message   string          `json:"message"`
 }
