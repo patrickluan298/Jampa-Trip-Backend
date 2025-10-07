@@ -11,10 +11,8 @@ import (
 )
 
 func TestJWTMiddleware(t *testing.T) {
-	// Create a new Echo instance for testing
 	e := echo.New()
 
-	// Create a test handler that sets user info in context
 	testHandler := func(c echo.Context) error {
 		userID := middleware.GetUserID(c)
 		userType := middleware.GetUserType(c)
@@ -29,7 +27,6 @@ func TestJWTMiddleware(t *testing.T) {
 		})
 	}
 
-	// Apply JWT middleware
 	e.Use(middleware.JWTMiddleware())
 	e.GET("/test", testHandler)
 
@@ -99,7 +96,6 @@ func TestJWTMiddleware(t *testing.T) {
 
 			err := testHandler(c)
 			if err != nil {
-				// Handle error response
 				if rec.Code != tt.expectedStatus {
 					t.Errorf("Expected status %d, got %d", tt.expectedStatus, rec.Code)
 				}
@@ -109,7 +105,6 @@ func TestJWTMiddleware(t *testing.T) {
 					t.Errorf("Expected body to contain '%s', got '%s'", tt.expectedBody, body)
 				}
 			} else {
-				// Success case
 				if rec.Code != http.StatusOK {
 					t.Errorf("Expected status 200, got %d", rec.Code)
 				}
@@ -280,7 +275,6 @@ func TestGetUserEmail(t *testing.T) {
 func TestGetJWTClaims(t *testing.T) {
 	e := echo.New()
 
-	// Mock JWT claims
 	mockClaims := &struct {
 		UserID   int    `json:"user_id"`
 		UserType string `json:"user_type"`
@@ -329,8 +323,14 @@ func TestGetJWTClaims(t *testing.T) {
 			}
 
 			result := middleware.GetJWTClaims(c)
-			if (result == nil) != (tt.expected == nil) {
-				t.Errorf("GetJWTClaims() = %v, expected %v", result, tt.expected)
+			if tt.expected == nil {
+				if result != nil {
+					t.Errorf("GetJWTClaims() = %v, expected nil", result)
+				}
+			} else {
+				if result == nil {
+					t.Errorf("GetJWTClaims() = nil, expected %v", tt.expected)
+				}
 			}
 		})
 	}
@@ -343,7 +343,6 @@ func TestJWTMiddlewareIntegration(t *testing.T) {
 
 	e := echo.New()
 
-	// Protected route
 	e.Use(middleware.JWTMiddleware())
 	e.GET("/protected", func(c echo.Context) error {
 		userID := middleware.GetUserID(c)
@@ -358,14 +357,12 @@ func TestJWTMiddlewareIntegration(t *testing.T) {
 		})
 	})
 
-	// Public route (no middleware)
 	e.GET("/public", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{
 			"message": "Public access",
 		})
 	})
 
-	// Test public route (should work)
 	req := httptest.NewRequest(http.MethodGet, "/public", nil)
 	rec := httptest.NewRecorder()
 
@@ -375,7 +372,6 @@ func TestJWTMiddlewareIntegration(t *testing.T) {
 		t.Errorf("Expected status 200, got %d", rec.Code)
 	}
 
-	// Test protected route without token (should fail)
 	req = httptest.NewRequest(http.MethodGet, "/protected", nil)
 	rec = httptest.NewRecorder()
 

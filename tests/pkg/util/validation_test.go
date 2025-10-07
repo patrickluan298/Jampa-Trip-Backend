@@ -26,7 +26,7 @@ func TestValidateTimeFormat(t *testing.T) {
 		{
 			name:     "Invalid time format - no leading zero",
 			timeStr:  "9:05",
-			expected: true, // This format might be valid in some implementations
+			expected: true,
 		},
 		{
 			name:     "Invalid time format - wrong format",

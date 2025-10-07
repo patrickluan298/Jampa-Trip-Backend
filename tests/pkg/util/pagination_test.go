@@ -184,7 +184,6 @@ func TestCalculateTotalPages(t *testing.T) {
 }
 
 func TestPaginationConfig(t *testing.T) {
-	// Test that PaginationConfig struct works correctly
 	config := util.PaginationConfig{
 		Page:  5,
 		Limit: 25,

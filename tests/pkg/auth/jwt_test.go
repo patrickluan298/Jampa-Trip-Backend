@@ -44,21 +44,21 @@ func TestGenerateTokenPair(t *testing.T) {
 			userID:   0,
 			userType: "client",
 			email:    "test@example.com",
-			expected: nil, // Should still work
+			expected: nil,
 		},
 		{
 			name:     "Empty user type",
 			userID:   1,
 			userType: "",
 			email:    "test@example.com",
-			expected: nil, // Should still work
+			expected: nil,
 		},
 		{
 			name:     "Empty email",
 			userID:   1,
 			userType: "client",
 			email:    "",
-			expected: nil, // Should still work
+			expected: nil,
 		},
 	}
 
@@ -104,28 +104,27 @@ func TestValidateToken(t *testing.T) {
 		{
 			name:        "Valid token",
 			tokenString: "valid.jwt.token",
-			expected:    nil, // Should return an error due to invalid token format
+			expected:    nil,
 		},
 		{
 			name:        "Invalid token format",
 			tokenString: "invalid-token",
-			expected:    nil, // Should return an error
+			expected:    nil,
 		},
 		{
 			name:        "Empty token",
 			tokenString: "",
-			expected:    nil, // Should return an error
+			expected:    nil,
 		},
 		{
 			name:        "Malformed token",
 			tokenString: "not.a.valid.jwt",
-			expected:    nil, // Should return an error
+			expected:    nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Note: This test will fail in real environment due to config dependencies
 			t.Skip("Skipping due to config dependencies - requires proper mocking")
 
 			claims, err := auth.ValidateToken(tt.tokenString)
@@ -134,7 +133,6 @@ func TestValidateToken(t *testing.T) {
 			}
 
 			if err == nil && claims != nil {
-				// Verify claims structure
 				if claims.UserID == 0 {
 					t.Errorf("ValidateToken() returned claims with zero UserID")
 				}
@@ -150,7 +148,6 @@ func TestValidateToken(t *testing.T) {
 }
 
 func TestParseToken(t *testing.T) {
-	// This test requires a valid JWT secret and proper setup
 	tests := []struct {
 		name        string
 		tokenString string
@@ -159,23 +156,22 @@ func TestParseToken(t *testing.T) {
 		{
 			name:        "Valid token",
 			tokenString: "valid.jwt.token",
-			expected:    nil, // Should return an error due to invalid token format
+			expected:    nil,
 		},
 		{
 			name:        "Invalid token format",
 			tokenString: "invalid-token",
-			expected:    nil, // Should return an error
+			expected:    nil,
 		},
 		{
 			name:        "Empty token",
 			tokenString: "",
-			expected:    nil, // Should return an error
+			expected:    nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Note: This test will fail in real environment due to config dependencies
 			t.Skip("Skipping due to config dependencies - requires proper mocking")
 
 			token, err := auth.ParseToken(tt.tokenString)
@@ -207,7 +203,7 @@ func TestIsTokenExpired(t *testing.T) {
 				UserType: "client",
 				Email:    "test@example.com",
 				RegisteredClaims: jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(now.Add(-1 * time.Hour)), // Expired 1 hour ago
+					ExpiresAt: jwt.NewNumericDate(now.Add(-1 * time.Hour)),
 				},
 			},
 			expected: true,
@@ -219,7 +215,7 @@ func TestIsTokenExpired(t *testing.T) {
 				UserType: "client",
 				Email:    "test@example.com",
 				RegisteredClaims: jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(now.Add(1 * time.Hour)), // Expires in 1 hour
+					ExpiresAt: jwt.NewNumericDate(now.Add(1 * time.Hour)),
 				},
 			},
 			expected: false,
@@ -231,10 +227,10 @@ func TestIsTokenExpired(t *testing.T) {
 				UserType: "client",
 				Email:    "test@example.com",
 				RegisteredClaims: jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(now), // Expires now
+					ExpiresAt: jwt.NewNumericDate(now),
 				},
 			},
-			expected: true, // Should be considered expired
+			expected: true,
 		},
 		{
 			name: "Token with no expiration",
@@ -243,10 +239,10 @@ func TestIsTokenExpired(t *testing.T) {
 				UserType: "client",
 				Email:    "test@example.com",
 				RegisteredClaims: jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)), // Set expiration to avoid nil pointer
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 				},
 			},
-			expected: false, // Should not be considered expired
+			expected: false,
 		},
 	}
 
@@ -261,7 +257,6 @@ func TestIsTokenExpired(t *testing.T) {
 }
 
 func TestJWTClaims(t *testing.T) {
-	// Test JWTClaims struct
 	claims := &auth.JWTClaims{
 		UserID:   123,
 		UserType: "client",
@@ -297,11 +292,10 @@ func TestJWTClaims(t *testing.T) {
 }
 
 func TestTokenPair(t *testing.T) {
-	// Test TokenPair struct
 	tokenPair := &auth.TokenPair{
 		AccessToken:  "access-token-string",
 		RefreshToken: "refresh-token-string",
-		ExpiresIn:    3600, // 1 hour
+		ExpiresIn:    3600,
 	}
 
 	if tokenPair.AccessToken != "access-token-string" {

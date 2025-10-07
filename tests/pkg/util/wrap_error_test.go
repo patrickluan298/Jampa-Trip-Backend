@@ -142,26 +142,20 @@ func TestAppError_MarshalJSON(t *testing.T) {
 				return
 			}
 
-			// Check that all expected fields are present and have correct types
 			for key, expectedValue := range tt.expected {
 				if _, exists := result[key]; !exists {
 					t.Errorf("AppError.MarshalJSON() missing field: %s", key)
 					continue
 				}
 
-				// For complex types like maps, just check that they exist
 				if key == "Err" {
-					// Skip comparison for nested errors as they're complex to compare
 					continue
 				}
 
-				// For simple types, do basic comparison
 				if key == "Line" || key == "StatusCode" {
-					// These are numeric fields, just verify they exist
 					continue
 				}
 
-				// For string fields, do comparison
 				if key == "Msg" || key == "File" || key == "FuncName" {
 					if result[key] != expectedValue {
 						t.Errorf("AppError.MarshalJSON() field %s = %v, expected %v", key, result[key], expectedValue)
@@ -232,7 +226,7 @@ func TestWrapError(t *testing.T) {
 			expected: &util.AppError{
 				Msg:        "Outer error",
 				Err:        &util.AppError{Msg: "Inner error", StatusCode: http.StatusBadRequest},
-				StatusCode: http.StatusBadRequest, // Should inherit from wrapped error
+				StatusCode: http.StatusBadRequest,
 			},
 		},
 	}
@@ -249,7 +243,6 @@ func TestWrapError(t *testing.T) {
 				t.Errorf("WrapError() StatusCode = %d, expected %d", result.StatusCode, tt.expected.StatusCode)
 			}
 
-			// Check error field
 			if (result.Err == nil) != (tt.expected.Err == nil) {
 				t.Errorf("WrapError() Err = %v, expected %v", result.Err, tt.expected.Err)
 			}
@@ -260,7 +253,6 @@ func TestWrapError(t *testing.T) {
 				}
 			}
 
-			// Check that file and line are set (runtime info)
 			if result.File == "" {
 				t.Errorf("WrapError() File should not be empty")
 			}
@@ -338,7 +330,6 @@ func TestHandleError(t *testing.T) {
 }
 
 func TestResponseError(t *testing.T) {
-	// Test ResponseError struct
 	responseError := util.ResponseError{
 		StatusCode: http.StatusBadRequest,
 		Message:    "Test error message",

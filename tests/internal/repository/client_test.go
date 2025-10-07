@@ -41,7 +41,7 @@ func TestClientRepository_GetByID(t *testing.T) {
 			name: "Valid client ID",
 			id:   1,
 			mockRows: sqlmock.NewRows([]string{"id", "name", "email", "password", "cpf", "phone", "birth_date", "created_at", "updated_at"}).
-				AddRow(1, "João Silva", "joao@example.com", "hashed_password", "12345678901", "11999999999", "1990-01-01", time.Now(), time.Now()),
+				AddRow(1, "João Silva", "joao@example.com", "hashed_password", "12345678901", "11999999999", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()),
 			expected: &model.Client{
 				ID:        1,
 				Name:      "João Silva",
@@ -112,7 +112,7 @@ func TestClientRepository_GetByEmail(t *testing.T) {
 			name:  "Valid email",
 			email: "joao@example.com",
 			mockRows: sqlmock.NewRows([]string{"id", "name", "email", "password", "cpf", "phone", "birth_date", "created_at", "updated_at"}).
-				AddRow(1, "João Silva", "joao@example.com", "hashed_password", "12345678901", "11999999999", "1990-01-01", time.Now(), time.Now()),
+				AddRow(1, "João Silva", "joao@example.com", "hashed_password", "12345678901", "11999999999", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()),
 			expected: &model.Client{
 				ID:        1,
 				Name:      "João Silva",
@@ -279,7 +279,7 @@ func TestClientRepository_Update(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mock.ExpectExec(`UPDATE clients`).
+			mock.ExpectQuery(`UPDATE clients`).
 				WithArgs(
 					tt.client.Name,
 					tt.client.Email,
@@ -290,7 +290,7 @@ func TestClientRepository_Update(t *testing.T) {
 					tt.client.UpdatedAt,
 					tt.client.ID,
 				).
-				WillReturnResult(sqlmock.NewResult(1, 1))
+				WillReturnRows(sqlmock.NewRows([]string{}))
 
 			err := repo.Update(tt.client)
 			if (err != nil) != tt.hasError {
@@ -322,8 +322,8 @@ func TestClientRepository_List(t *testing.T) {
 				Phone: "",
 			},
 			mockRows: sqlmock.NewRows([]string{"id", "name", "email", "cpf", "phone", "birth_date", "created_at", "updated_at"}).
-				AddRow(1, "João Silva", "joao@example.com", "12345678901", "11999999999", "1990-01-01", time.Now(), time.Now()).
-				AddRow(2, "Maria Santos", "maria@example.com", "98765432100", "11888888888", "1985-05-15", time.Now(), time.Now()),
+				AddRow(1, "João Silva", "joao@example.com", "12345678901", "11999999999", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()).
+				AddRow(2, "Maria Santos", "maria@example.com", "98765432100", "11888888888", time.Date(1985, 5, 15, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()),
 			expected: 2,
 			hasError: false,
 		},
@@ -336,7 +336,7 @@ func TestClientRepository_List(t *testing.T) {
 				Phone: "",
 			},
 			mockRows: sqlmock.NewRows([]string{"id", "name", "email", "cpf", "phone", "birth_date", "created_at", "updated_at"}).
-				AddRow(1, "João Silva", "joao@example.com", "12345678901", "11999999999", "1990-01-01", time.Now(), time.Now()),
+				AddRow(1, "João Silva", "joao@example.com", "12345678901", "11999999999", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()),
 			expected: 1,
 			hasError: false,
 		},
@@ -349,7 +349,7 @@ func TestClientRepository_List(t *testing.T) {
 				Phone: "",
 			},
 			mockRows: sqlmock.NewRows([]string{"id", "name", "email", "cpf", "phone", "birth_date", "created_at", "updated_at"}).
-				AddRow(1, "João Silva", "joao@example.com", "12345678901", "11999999999", "1990-01-01", time.Now(), time.Now()),
+				AddRow(1, "João Silva", "joao@example.com", "12345678901", "11999999999", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()),
 			expected: 1,
 			hasError: false,
 		},

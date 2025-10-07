@@ -150,7 +150,6 @@ func TestClient_CreateOrder(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create mock server
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
 					t.Errorf("Expected POST request, got %s", r.Method)
@@ -176,10 +175,8 @@ func TestClient_CreateOrder(t *testing.T) {
 			}))
 			defer server.Close()
 
-			// Create client with mock server URL
 			client := mercadopago.NewClient("test-token", server.URL)
 
-			// Test the method
 			result, err := client.CreateOrder(tt.orderReq)
 
 			if (err != nil) != tt.expectedError {
@@ -236,7 +233,6 @@ func TestClient_GetOrder(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create mock server
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodGet {
 					t.Errorf("Expected GET request, got %s", r.Method)
@@ -258,10 +254,8 @@ func TestClient_GetOrder(t *testing.T) {
 			}))
 			defer server.Close()
 
-			// Create client with mock server URL
 			client := mercadopago.NewClient("test-token", server.URL)
 
-			// Test the method
 			result, err := client.GetOrder(tt.orderID)
 
 			if (err != nil) != tt.expectedError {
@@ -327,7 +321,6 @@ func TestClient_CreatePayment(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create mock server
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
 					t.Errorf("Expected POST request, got %s", r.Method)
@@ -353,10 +346,8 @@ func TestClient_CreatePayment(t *testing.T) {
 			}))
 			defer server.Close()
 
-			// Create client with mock server URL
 			client := mercadopago.NewClient("test-token", server.URL)
 
-			// Test the method
 			result, err := client.CreatePayment(tt.paymentReq)
 
 			if (err != nil) != tt.expectedError {
@@ -432,7 +423,6 @@ func TestClient_CreatePIXPayment(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create mock server
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
 					t.Errorf("Expected POST request, got %s", r.Method)
@@ -458,10 +448,8 @@ func TestClient_CreatePIXPayment(t *testing.T) {
 			}))
 			defer server.Close()
 
-			// Create client with mock server URL
 			client := mercadopago.NewClient("test-token", server.URL)
 
-			// Test the method
 			result, err := client.CreatePIXPayment(tt.pixReq)
 
 			if (err != nil) != tt.expectedError {
@@ -523,7 +511,6 @@ func TestClient_GetPayment(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create mock server
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodGet {
 					t.Errorf("Expected GET request, got %s", r.Method)
@@ -545,10 +532,8 @@ func TestClient_GetPayment(t *testing.T) {
 			}))
 			defer server.Close()
 
-			// Create client with mock server URL
 			client := mercadopago.NewClient("test-token", server.URL)
 
-			// Test the method
 			result, err := client.GetPayment(tt.paymentID)
 
 			if (err != nil) != tt.expectedError {
@@ -566,7 +551,6 @@ func TestClient_GetPayment(t *testing.T) {
 
 func TestClient_HTTPErrorHandling(t *testing.T) {
 	t.Run("Network error", func(t *testing.T) {
-		// Create client with invalid URL
 		client := mercadopago.NewClient("test-token", "http://invalid-url:9999")
 
 		orderReq := &mercadopago.OrderRequest{
@@ -581,14 +565,12 @@ func TestClient_HTTPErrorHandling(t *testing.T) {
 	})
 
 	t.Run("Timeout error", func(t *testing.T) {
-		// Create mock server that delays response
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			time.Sleep(2 * time.Second) // Longer than client timeout
+			time.Sleep(2 * time.Second)
 			w.WriteHeader(http.StatusOK)
 		}))
 		defer server.Close()
 
-		// Create client with short timeout
 		client := mercadopago.NewClient("test-token", server.URL)
 		client.HTTPClient.Timeout = 100 * time.Millisecond
 
@@ -606,7 +588,6 @@ func TestClient_HTTPErrorHandling(t *testing.T) {
 
 func TestClient_ContextHandling(t *testing.T) {
 	t.Run("Context cancellation", func(t *testing.T) {
-		// Create mock server that delays response
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(2 * time.Second)
 			w.WriteHeader(http.StatusOK)
@@ -615,7 +596,6 @@ func TestClient_ContextHandling(t *testing.T) {
 
 		client := mercadopago.NewClient("test-token", server.URL)
 
-		// Create context with short timeout
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 		defer cancel()
 
@@ -629,7 +609,7 @@ func TestClient_ContextHandling(t *testing.T) {
 			TransactionAmount: paymentReq.TransactionAmount,
 			Description:       paymentReq.Description,
 			PaymentMethodID:   paymentReq.PaymentMethodID,
-			Token:             "test-token-12345678", // Token válido para evitar erro de slice bounds
+			Token:             "test-token-12345678",
 		})
 
 		if err == nil {

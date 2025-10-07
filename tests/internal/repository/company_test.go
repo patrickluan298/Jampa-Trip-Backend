@@ -295,7 +295,7 @@ func TestCompanyRepository_Update(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mock.ExpectExec(`UPDATE companies`).
+			mock.ExpectQuery(`UPDATE companies`).
 				WithArgs(
 					tt.company.Name,
 					tt.company.Email,
@@ -306,7 +306,7 @@ func TestCompanyRepository_Update(t *testing.T) {
 					tt.company.UpdatedAt,
 					tt.company.ID,
 				).
-				WillReturnResult(sqlmock.NewResult(1, 1))
+				WillReturnRows(sqlmock.NewRows([]string{}))
 
 			err := repo.Update(tt.company)
 			if (err != nil) != tt.hasError {

@@ -7,7 +7,6 @@ import (
 )
 
 func TestGenerateToken(t *testing.T) {
-	// Test multiple token generation to ensure uniqueness
 	tokens := make(map[string]bool)
 
 	for i := 0; i < 100; i++ {
@@ -16,12 +15,10 @@ func TestGenerateToken(t *testing.T) {
 			t.Errorf("GenerateToken() failed: %v", err)
 		}
 
-		// Check token length (should be 64 characters for hex encoded 32 bytes)
 		if len(token) != 64 {
 			t.Errorf("GenerateToken() returned token with length %d, expected 64", len(token))
 		}
 
-		// Check for uniqueness
 		if tokens[token] {
 			t.Errorf("GenerateToken() returned duplicate token: %s", token)
 		}
@@ -65,17 +62,14 @@ func TestCriptografarSenha(t *testing.T) {
 			}
 
 			if err == nil {
-				// Check that hash is not empty
 				if hash == "" {
 					t.Errorf("CriptografarSenha(%s) returned empty hash", tt.senha)
 				}
 
-				// Check that hash is different from original password
 				if hash == tt.senha {
 					t.Errorf("CriptografarSenha(%s) returned same value as input", tt.senha)
 				}
 
-				// Check that same password generates different hashes (due to salt)
 				hash2, err2 := util.CriptografarSenha(tt.senha)
 				if err2 != nil {
 					t.Errorf("CriptografarSenha(%s) second call failed: %v", tt.senha, err2)
@@ -89,7 +83,6 @@ func TestCriptografarSenha(t *testing.T) {
 }
 
 func TestVerificaSenha(t *testing.T) {
-	// Test with a known password
 	password := "testpassword123"
 	hash, err := util.CriptografarSenha(password)
 	if err != nil {
@@ -145,7 +138,6 @@ func TestVerificaSenha(t *testing.T) {
 }
 
 func TestVerificaSenhaWithDifferentPasswords(t *testing.T) {
-	// Test with multiple different passwords
 	passwords := []string{
 		"password1",
 		"P@ssw0rd!",
@@ -161,12 +153,10 @@ func TestVerificaSenhaWithDifferentPasswords(t *testing.T) {
 			continue
 		}
 
-		// Verify correct password works
 		if !util.VerificaSenha(password, hash) {
 			t.Errorf("VerificaSenha(%s, hash) should return true", password)
 		}
 
-		// Verify wrong passwords don't work
 		wrongPasswords := []string{
 			password + "wrong",
 			"wrong" + password,
