@@ -25,6 +25,24 @@ services:
     logging:
       driver: "none"
 
+  redis:
+    image: redis:7-alpine
+    container_name: jampa-trip-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - jampa-trip-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "none"
+
   app:
     build:
       context: ..
@@ -51,12 +69,23 @@ services:
       MERCADO_PAGO_WEBHOOK_SECRET: "webhook_secret_dev"
       MERCADO_PAGO_ENVIRONMENT: "sandbox"
       MERCADO_PAGO_BASE_URL: "https://api.mercadopago.com"
+      
+      JWT_SECRET: "jampa_trip_jwt_secret_key_2024_very_secure"
+      JWT_ACCESS_TOKEN_EXPIRATION: "15m"
+      JWT_REFRESH_TOKEN_EXPIRATION: "168h"
+      
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ""
+      REDIS_DB: "0"
     ports:
       - "1450:1450"
     networks:
       - jampa-trip-network
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1450/health-check"]
@@ -71,6 +100,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:

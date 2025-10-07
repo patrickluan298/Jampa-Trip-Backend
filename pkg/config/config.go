@@ -29,6 +29,17 @@ type Config struct {
 	MercadoPagoWebhookSecret string
 	MercadoPagoEnvironment   string
 	MercadoPagoBaseURL       string
+
+	// JWT
+	JWTSecret                 string
+	JWTAccessTokenExpiration  string
+	JWTRefreshTokenExpiration string
+
+	// Redis
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+	RedisDB       string
 }
 
 // Validate - valida os parâmetros da requisição
@@ -49,6 +60,15 @@ func (receiver Config) Validate() (err error) {
 		validation.Field(&receiver.MercadoPagoPublicKey, validation.Required),
 		validation.Field(&receiver.MercadoPagoEnvironment, validation.Required, validation.In("sandbox", "production")),
 		validation.Field(&receiver.MercadoPagoBaseURL, validation.Required),
+
+		// Validações JWT
+		validation.Field(&receiver.JWTSecret, validation.Required),
+		validation.Field(&receiver.JWTAccessTokenExpiration, validation.Required),
+		validation.Field(&receiver.JWTRefreshTokenExpiration, validation.Required),
+
+		// Validações Redis
+		validation.Field(&receiver.RedisHost, validation.Required),
+		validation.Field(&receiver.RedisPort, validation.Required),
 	)
 	return
 }
@@ -75,6 +95,17 @@ func LoadConfig() (config *Config, err error) {
 		MercadoPagoWebhookSecret: os.Getenv("MERCADO_PAGO_WEBHOOK_SECRET"),
 		MercadoPagoEnvironment:   os.Getenv("MERCADO_PAGO_ENVIRONMENT"),
 		MercadoPagoBaseURL:       os.Getenv("MERCADO_PAGO_BASE_URL"),
+
+		// JWT
+		JWTSecret:                 os.Getenv("JWT_SECRET"),
+		JWTAccessTokenExpiration:  os.Getenv("JWT_ACCESS_TOKEN_EXPIRATION"),
+		JWTRefreshTokenExpiration: os.Getenv("JWT_REFRESH_TOKEN_EXPIRATION"),
+
+		// Redis
+		RedisHost:     os.Getenv("REDIS_HOST"),
+		RedisPort:     os.Getenv("REDIS_PORT"),
+		RedisPassword: os.Getenv("REDIS_PASSWORD"),
+		RedisDB:       os.Getenv("REDIS_DB"),
 	}
 
 	if err = config.Validate(); err != nil {

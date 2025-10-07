@@ -5,6 +5,7 @@ import (
 
 	"github.com/jampa_trip/internal/contract"
 	"github.com/jampa_trip/internal/repository"
+	"github.com/jampa_trip/pkg/auth"
 	"github.com/jampa_trip/pkg/util"
 	"gorm.io/gorm"
 )
@@ -29,6 +30,17 @@ func (receiver *LoginService) Login(request *contract.LoginRequest) (*contract.L
 	company, err := receiver.CompanyRepository.GetByEmail(request.Email)
 	if err == nil {
 		if util.VerificaSenha(request.Password, company.Password) {
+			tokenPair, err := auth.GenerateTokenPair(company.ID, "company", company.Email)
+			if err != nil {
+				return nil, util.WrapError("erro ao gerar tokens JWT", err, http.StatusInternalServerError)
+			}
+
+			tokenStore := auth.NewRedisTokenStore()
+			err = tokenStore.StoreTokenPair(company.ID, "company", tokenPair.AccessToken, tokenPair.RefreshToken)
+			if err != nil {
+				return nil, util.WrapError("erro ao armazenar tokens no Redis", err, http.StatusInternalServerError)
+			}
+
 			response := &contract.LoginResponse{
 				Message: "Login realizado com sucesso",
 				Type:    "company",
@@ -37,6 +49,9 @@ func (receiver *LoginService) Login(request *contract.LoginRequest) (*contract.L
 					Name:  company.Name,
 					Email: company.Email,
 				},
+				AccessToken:  tokenPair.AccessToken,
+				RefreshToken: tokenPair.RefreshToken,
+				ExpiresIn:    tokenPair.ExpiresIn,
 			}
 			return response, nil
 		}
@@ -55,6 +70,17 @@ func (receiver *LoginService) Login(request *contract.LoginRequest) (*contract.L
 		return nil, util.WrapError("Email e/ou senha incorretos", nil, http.StatusUnauthorized)
 	}
 
+	tokenPair, err := auth.GenerateTokenPair(client.ID, "client", client.Email)
+	if err != nil {
+		return nil, util.WrapError("erro ao gerar tokens JWT", err, http.StatusInternalServerError)
+	}
+
+	tokenStore := auth.NewRedisTokenStore()
+	err = tokenStore.StoreTokenPair(client.ID, "client", tokenPair.AccessToken, tokenPair.RefreshToken)
+	if err != nil {
+		return nil, util.WrapError("erro ao armazenar tokens no Redis", err, http.StatusInternalServerError)
+	}
+
 	response := &contract.LoginResponse{
 		Message: "Login realizado com sucesso",
 		Type:    "client",
@@ -63,6 +89,9 @@ func (receiver *LoginService) Login(request *contract.LoginRequest) (*contract.L
 			Name:  client.Name,
 			Email: client.Email,
 		},
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		ExpiresIn:    tokenPair.ExpiresIn,
 	}
 
 	return response, nil
