@@ -14,9 +14,11 @@ paths:
   /health-check:
     $ref: './paths/health-check/health-check.yaml'
 
-  # LOGIN
+  # AUTHENTICATION
   /jampa-trip/api/v1/login:
     $ref: './paths/login/login.yaml'
+  /jampa-trip/api/v1/refresh:
+    $ref: './paths/auth/refresh.yaml'
 
   # COMPANIES
   /jampa-trip/api/v1/companies:
@@ -29,6 +31,32 @@ paths:
     $ref: './paths/clients/create_list.yaml'
   /jampa-trip/api/v1/clients/{id}:
     $ref: './paths/clients/get_update.yaml'
+
+  # CARDS
+  /jampa-trip/api/v1/clients/{customer_id}/cards:
+    $ref: './paths/cards/cards.yaml'
+  /jampa-trip/api/v1/clients/{customer_id}/cards/{card_id}:
+    $ref: './paths/cards/card_operations.yaml'
+
+  # PAYMENTS
+  /jampa-trip/api/v1/payments/credit-card:
+    $ref: './paths/payments/credit_card.yaml'
+  /jampa-trip/api/v1/payments/debit-card:
+    $ref: './paths/payments/debit_card.yaml'
+  /jampa-trip/api/v1/payments/pix:
+    $ref: './paths/payments/pix.yaml'
+  /jampa-trip/api/v1/payments:
+    $ref: './paths/payments/list_payments.yaml'
+  /jampa-trip/api/v1/payments/{id}:
+    $ref: './paths/payments/payment_operations.yaml'
+
+  # TOURS
+  /jampa-trip/api/v1/tours:
+    $ref: './paths/tours/tours.yaml'
+  /jampa-trip/api/v1/tours/{id}:
+    $ref: './paths/tours/tour_operations.yaml'
+  /jampa-trip/api/v1/tours/my-tours:
+    $ref: './paths/tours/my_tours.yaml'
 
 components:
   schemas:

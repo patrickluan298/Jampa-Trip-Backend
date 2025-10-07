@@ -12,10 +12,8 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.GET("/health-check", handler.HealthCheckResponse{}.HealthCheck)
 	e.HEAD("/health-check", handler.HealthCheckResponse{}.HealthCheck)
 
-	// LOGIN
+	// AUTHENTICATION
 	e.POST("/jampa-trip/api/v1/login", handler.LoginHandler{}.Login)
-
-	// REFRESH TOKEN
 	e.POST("/jampa-trip/api/v1/refresh", handler.RefreshHandler{}.RefreshToken)
 
 	// GRUPO PROTEGIDO - todas as rotas abaixo precisam de autenticação JWT

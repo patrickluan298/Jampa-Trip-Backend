@@ -280,6 +280,18 @@ LoginResponse:
       description: "Tipo do usuário logado"
     data:
       $ref: '#/components/schemas/UserLoginData'
+    access_token:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      description: "Token de acesso JWT"
+    refresh_token:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      description: "Token de renovação JWT"
+    expires_in:
+      type: integer
+      example: 1703123456
+      description: "Timestamp de expiração do access token"
 
 UserLoginData:
   type: object
@@ -370,3 +382,90 @@ CreateCompanyRequest:
       type: string
       example: "Rua Exemplo, 123, Centro"
       description: "Endereço da empresa"
+
+RefreshTokenRequest:
+  type: object
+  required:
+    - refresh_token
+  properties:
+    refresh_token:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      description: "Token de renovação JWT"
+      minLength: 1
+      maxLength: 500
+
+RefreshTokenResponse:
+  type: object
+  properties:
+    access_token:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      description: "Novo token de acesso JWT"
+    refresh_token:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      description: "Novo token de renovação JWT"
+    expires_in:
+      type: integer
+      example: 1703123456
+      description: "Timestamp de expiração do novo access token"
+
+Company:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: "ID da empresa"
+    name:
+      type: string
+      example: "Empresa Exemplo"
+      description: "Nome da empresa"
+    email:
+      type: string
+      format: email
+      example: "empresa@exemplo.com"
+      description: "Email da empresa"
+    cnpj:
+      type: string
+      example: "12.345.678/0001-90"
+      description: "CNPJ da empresa"
+    phone:
+      type: string
+      example: "(83) 99999-9999"
+      description: "Telefone da empresa"
+    address:
+      type: string
+      example: "Rua Exemplo, 123, Centro"
+      description: "Endereço da empresa"
+    created_at:
+      type: string
+      format: date-time
+      example: "2025-01-01T10:00:00Z"
+      description: "Data de criação"
+    updated_at:
+      type: string
+      format: date-time
+      example: "2025-01-01T10:00:00Z"
+      description: "Data de atualização"
+
+Pagination:
+  type: object
+  properties:
+    page:
+      type: integer
+      example: 1
+      description: "Página atual"
+    limit:
+      type: integer
+      example: 10
+      description: "Itens por página"
+    total:
+      type: integer
+      example: 100
+      description: "Total de itens"
+    pages:
+      type: integer
+      example: 10
+      description: "Total de páginas"
