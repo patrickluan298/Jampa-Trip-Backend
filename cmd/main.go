@@ -40,7 +40,6 @@ func init() {
 	swag.Register(swag.Name, &swagger{})
 
 	os.Setenv("VERSION_APPLICATION", VersionApplication)
-	log.Println("Versão da Aplicação: ", VersionApplication)
 
 	database.Config, err = config.LoadConfig()
 	if err != nil {
@@ -59,7 +58,6 @@ func init() {
 	if err != nil {
 		log.Fatalf("erro ao inicializar conexão com o banco de dados: %s", err.Error())
 	}
-	log.Println("Database OK")
 
 	database.RedisClientNew()
 }
@@ -78,6 +76,8 @@ func main() {
 	middleware.SetupMiddlewares(server)
 
 	ConfigureRoutes(server)
+
+	log.Printf("📖 Documentação da API disponível em: http://localhost%s/docs/", database.Config.HTTPServerPort)
 
 	go func() {
 		if err := server.Start(database.Config.HTTPServerPort); err != nil {

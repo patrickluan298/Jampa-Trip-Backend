@@ -46,7 +46,6 @@ func RedisClientNew() *redis.Client {
 		log.Fatalf("Erro ao conectar com Redis: %s", err.Error())
 	}
 
-	log.Println("Redis OK")
 	return RedisClient
 }
 

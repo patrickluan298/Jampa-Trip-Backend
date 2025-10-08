@@ -32,8 +32,8 @@ func PagamentoServiceNew(DB *gorm.DB) *PagamentoService {
 }
 
 // modelToResponse - converte model para response
-func (s *PagamentoService) modelToResponse(p *model.Pagamento) contract.PagamentoResponse {
-	return contract.PagamentoResponse{
+func (s *PagamentoService) modelToResponse(p *model.Pagamento) contract.PaymentResponse {
+	return contract.PaymentResponse{
 		ID:                        p.ID,
 		ClienteID:                 p.ClienteID,
 		EmpresaID:                 p.EmpresaID,
@@ -64,8 +64,8 @@ func (s *PagamentoService) modelToResponse(p *model.Pagamento) contract.Pagament
 	}
 }
 
-// CriarPagamentoCartaoCredito - cria um pagamento com cartão de crédito
-func (s *PagamentoService) CriarPagamentoCartaoCredito(ctx context.Context, req *contract.CriarPagamentoCartaoCreditoRequest) (*contract.CriarPagamentoCartaoCreditoResponse, error) {
+// CreateCreditCardPayment - cria um pagamento com cartão de crédito
+func (s *PagamentoService) CreateCreditCardPayment(ctx context.Context, req *contract.CreateCreditCardPaymentRequest) (*contract.CreateCreditCardPaymentResponse, error) {
 
 	if err := req.Validate(); err != nil {
 		return nil, util.WrapError("erro de validação", err, http.StatusBadRequest)
@@ -103,7 +103,7 @@ func (s *PagamentoService) CriarPagamentoCartaoCredito(ctx context.Context, req 
 	statusMessage := s.getStatusDetailMessage(mpResp.StatusDetail)
 
 	now := time.Now()
-	pagamento := &model.Pagamento{
+	payment := &model.Pagamento{
 		ClienteID:            req.ClienteID,
 		EmpresaID:            req.EmpresaID,
 		MercadoPagoPaymentID: strconv.FormatInt(mpResp.ID, 10),
@@ -125,25 +125,25 @@ func (s *PagamentoService) CriarPagamentoCartaoCredito(ctx context.Context, req 
 	}
 
 	if mpResp.Status == "approved" {
-		pagamento.MomentoAprovacao = &now
+		payment.MomentoAprovacao = &now
 	}
 
 	if mpResp.Status == "authorized" {
-		pagamento.MomentoAutorizacao = &now
+		payment.MomentoAutorizacao = &now
 	}
 
-	if err := s.PagamentoRepository.Create(pagamento); err != nil {
+	if err := s.PagamentoRepository.Create(payment); err != nil {
 		return nil, util.WrapError("erro ao salvar pagamento", err, http.StatusInternalServerError)
 	}
 
-	return &contract.CriarPagamentoCartaoCreditoResponse{
-		Pagamento: s.modelToResponse(pagamento),
+	return &contract.CreateCreditCardPaymentResponse{
+		Pagamento: s.modelToResponse(payment),
 		Message:   statusMessage,
 	}, nil
 }
 
-// CriarPagamentoCartaoDebito - cria um pagamento com cartão de débito
-func (s *PagamentoService) CriarPagamentoCartaoDebito(ctx context.Context, req *contract.CriarPagamentoCartaoDebitoRequest) (*contract.CriarPagamentoCartaoDebitoResponse, error) {
+// CreateDebitCardPayment - cria um pagamento com cartão de débito
+func (s *PagamentoService) CreateDebitCardPayment(ctx context.Context, req *contract.CreateDebitCardPaymentRequest) (*contract.CreateDebitCardPaymentResponse, error) {
 
 	if err := req.Validate(); err != nil {
 		return nil, util.WrapError("erro de validação", err, http.StatusBadRequest)
@@ -181,7 +181,7 @@ func (s *PagamentoService) CriarPagamentoCartaoDebito(ctx context.Context, req *
 	statusMessage := s.getStatusDetailMessage(mpResp.StatusDetail)
 
 	now := time.Now()
-	pagamento := &model.Pagamento{
+	payment := &model.Pagamento{
 		ClienteID:            req.ClienteID,
 		EmpresaID:            req.EmpresaID,
 		MercadoPagoPaymentID: strconv.FormatInt(mpResp.ID, 10),
@@ -203,21 +203,21 @@ func (s *PagamentoService) CriarPagamentoCartaoDebito(ctx context.Context, req *
 	}
 
 	if mpResp.Status == "approved" {
-		pagamento.MomentoAprovacao = &now
+		payment.MomentoAprovacao = &now
 	}
 
-	if err := s.PagamentoRepository.Create(pagamento); err != nil {
+	if err := s.PagamentoRepository.Create(payment); err != nil {
 		return nil, util.WrapError("erro ao salvar pagamento", err, http.StatusInternalServerError)
 	}
 
-	return &contract.CriarPagamentoCartaoDebitoResponse{
-		Pagamento: s.modelToResponse(pagamento),
+	return &contract.CreateDebitCardPaymentResponse{
+		Pagamento: s.modelToResponse(payment),
 		Message:   statusMessage,
 	}, nil
 }
 
-// CriarPagamentoPIX - cria um pagamento com PIX
-func (s *PagamentoService) CriarPagamentoPIX(ctx context.Context, req *contract.CriarPagamentoPIXRequest) (*contract.CriarPagamentoPIXResponse, error) {
+// CreatePIXPayment - cria um pagamento com PIX
+func (s *PagamentoService) CreatePIXPayment(ctx context.Context, req *contract.CreatePIXPaymentRequest) (*contract.CreatePIXPaymentResponse, error) {
 
 	if err := req.Validate(); err != nil {
 		return nil, util.WrapError("erro de validação", err, http.StatusBadRequest)
@@ -244,7 +244,7 @@ func (s *PagamentoService) CriarPagamentoPIX(ctx context.Context, req *contract.
 	statusMessage := s.getStatusDetailMessage(mpResp.StatusDetail)
 
 	now := time.Now()
-	pagamento := &model.Pagamento{
+	payment := &model.Pagamento{
 		ClienteID:            req.ClienteID,
 		EmpresaID:            req.EmpresaID,
 		MercadoPagoPaymentID: strconv.FormatInt(mpResp.ID, 10),
@@ -260,10 +260,10 @@ func (s *PagamentoService) CriarPagamentoPIX(ctx context.Context, req *contract.
 	}
 
 	if mpResp.Status == "approved" {
-		pagamento.MomentoAprovacao = &now
+		payment.MomentoAprovacao = &now
 	}
 
-	if err := s.PagamentoRepository.Create(pagamento); err != nil {
+	if err := s.PagamentoRepository.Create(payment); err != nil {
 		return nil, util.WrapError("erro ao salvar pagamento", err, http.StatusInternalServerError)
 	}
 
@@ -276,8 +276,8 @@ func (s *PagamentoService) CriarPagamentoPIX(ctx context.Context, req *contract.
 		// Dependendo da estrutura da resposta do Mercado Pago
 	}
 
-	return &contract.CriarPagamentoPIXResponse{
-		Pagamento:    s.modelToResponse(pagamento),
+	return &contract.CreatePIXPaymentResponse{
+		Pagamento:    s.modelToResponse(payment),
 		Message:      statusMessage,
 		QRCode:       qrCode,
 		QRCodeBase64: qrCodeBase64,
@@ -285,8 +285,8 @@ func (s *PagamentoService) CriarPagamentoPIX(ctx context.Context, req *contract.
 	}, nil
 }
 
-// BuscarPagamentos - busca pagamentos com filtros
-func (s *PagamentoService) BuscarPagamentos(ctx context.Context, req *contract.BuscarPagamentosRequest) (*contract.BuscarPagamentosResponse, error) {
+// List - busca pagamentos com filtros
+func (s *PagamentoService) List(ctx context.Context, req *contract.ListPaymentsRequest) (*contract.ListPaymentsResponse, error) {
 
 	if err := req.Validate(); err != nil {
 		return nil, util.WrapError("erro de validação", err, http.StatusBadRequest)
@@ -298,24 +298,24 @@ func (s *PagamentoService) BuscarPagamentos(ctx context.Context, req *contract.B
 
 	// Por enquanto, vamos usar uma busca simples por cliente ou empresa
 	// Em uma implementação real, você criaria um método Search no repository
-	var pagamentos []model.Pagamento
+	var payments []model.Pagamento
 	var total int64
 
-	pagamentos, err := s.PagamentoRepository.GetByClienteID(1)
+	payments, err := s.PagamentoRepository.GetByClienteID(1)
 	if err != nil {
 		return nil, util.WrapError("erro ao buscar pagamentos", err, http.StatusInternalServerError)
 	}
 
-	total = int64(len(pagamentos))
+	total = int64(len(payments))
 
-	var pagamentosResponse []contract.PagamentoResponse
-	for _, pagamento := range pagamentos {
+	var pagamentosResponse []contract.PaymentResponse
+	for _, pagamento := range payments {
 		pagamentosResponse = append(pagamentosResponse, s.modelToResponse(&pagamento))
 	}
 
-	hasMore := (req.Offset + len(pagamentos)) < int(total)
+	hasMore := (req.Offset + len(payments)) < int(total)
 
-	return &contract.BuscarPagamentosResponse{
+	return &contract.ListPaymentsResponse{
 		Pagamentos: pagamentosResponse,
 		Total:      int(total),
 		Offset:     req.Offset,
@@ -324,11 +324,11 @@ func (s *PagamentoService) BuscarPagamentos(ctx context.Context, req *contract.B
 	}, nil
 }
 
-// ObterPagamentoPorID - obtém um pagamento por ID
-func (s *PagamentoService) ObterPagamentoPorID(ctx context.Context, paymentID int64) (*contract.ObterPagamentoResponse, error) {
+// Get - obtém um pagamento por ID
+func (s *PagamentoService) Get(ctx context.Context, paymentID int64) (*contract.GetPaymentResponse, error) {
 
 	paymentIDStr := strconv.FormatInt(paymentID, 10)
-	pagamento, err := s.PagamentoRepository.GetByMercadoPagoPaymentID(paymentIDStr)
+	payment, err := s.PagamentoRepository.GetByMercadoPagoPaymentID(paymentIDStr)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, util.WrapError("pagamento não encontrado", err, http.StatusNotFound)
@@ -338,30 +338,30 @@ func (s *PagamentoService) ObterPagamentoPorID(ctx context.Context, paymentID in
 
 	mpResp, err := s.MPClient.GetCreditCardPayment(ctx, paymentID)
 	if err == nil {
-		if mpResp.Status != pagamento.Status || mpResp.StatusDetail != pagamento.StatusDetail {
-			pagamento.Status = mpResp.Status
-			pagamento.StatusDetail = mpResp.StatusDetail
-			pagamento.Captured = mpResp.Captured
-			pagamento.TransactionAmountRefunded = mpResp.TransactionAmountRefunded
-			pagamento.MomentoAtualizacao = time.Now()
-			s.PagamentoRepository.Update(pagamento)
+		if mpResp.Status != payment.Status || mpResp.StatusDetail != payment.StatusDetail {
+			payment.Status = mpResp.Status
+			payment.StatusDetail = mpResp.StatusDetail
+			payment.Captured = mpResp.Captured
+			payment.TransactionAmountRefunded = mpResp.TransactionAmountRefunded
+			payment.MomentoAtualizacao = time.Now()
+			s.PagamentoRepository.Update(payment)
 		}
 	}
 
-	return &contract.ObterPagamentoResponse{
-		Pagamento: s.modelToResponse(pagamento),
+	return &contract.GetPaymentResponse{
+		Pagamento: s.modelToResponse(payment),
 	}, nil
 }
 
-// AtualizarPagamento - atualiza um pagamento
-func (s *PagamentoService) AtualizarPagamento(ctx context.Context, req *contract.AtualizarPagamentoRequest) (*contract.AtualizarPagamentoResponse, error) {
+// Update - atualiza um pagamento
+func (s *PagamentoService) Update(ctx context.Context, req *contract.UpdatePaymentRequest) (*contract.UpdatePaymentResponse, error) {
 
 	if err := req.Validate(); err != nil {
 		return nil, util.WrapError("erro de validação", err, http.StatusBadRequest)
 	}
 
 	paymentIDStr := strconv.FormatInt(req.ID, 10)
-	pagamento, err := s.PagamentoRepository.GetByMercadoPagoPaymentID(paymentIDStr)
+	payment, err := s.PagamentoRepository.GetByMercadoPagoPaymentID(paymentIDStr)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, util.WrapError("pagamento não encontrado", err, http.StatusNotFound)
@@ -370,7 +370,7 @@ func (s *PagamentoService) AtualizarPagamento(ctx context.Context, req *contract
 	}
 
 	if req.Description != "" {
-		pagamento.Descricao = req.Description
+		payment.Descricao = req.Description
 	}
 
 	if req.Metadata != nil {
@@ -383,14 +383,14 @@ func (s *PagamentoService) AtualizarPagamento(ctx context.Context, req *contract
 		// Dependendo da estrutura do seu modelo
 	}
 
-	pagamento.MomentoAtualizacao = time.Now()
+	payment.MomentoAtualizacao = time.Now()
 
-	if err := s.PagamentoRepository.Update(pagamento); err != nil {
+	if err := s.PagamentoRepository.Update(payment); err != nil {
 		return nil, util.WrapError("erro ao atualizar pagamento", err, http.StatusInternalServerError)
 	}
 
-	return &contract.AtualizarPagamentoResponse{
-		Pagamento: s.modelToResponse(pagamento),
+	return &contract.UpdatePaymentResponse{
+		Pagamento: s.modelToResponse(payment),
 		Message:   "Pagamento atualizado com sucesso",
 	}, nil
 }

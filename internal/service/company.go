@@ -79,6 +79,10 @@ func (receiver *CompanyService) Create(request *contract.CreateCompanyRequest) (
 // Update - realiza a atualização de uma empresa existente
 func (receiver *CompanyService) Update(request *contract.UpdateCompanyRequest) (*contract.UpdateCompanyResponse, error) {
 
+	if request.Password != request.ConfirmPassword {
+		return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
+	}
+
 	existingCompany, err := receiver.CompanyRepository.GetByID(request.ID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

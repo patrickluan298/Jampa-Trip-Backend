@@ -4,7 +4,7 @@ info:
   title: Jampa Trip API
   version: 1.0.0
   description: >
-    API para sistema de turismo e reservas.
+    O **Jampa Trip Backend** é uma API REST desenvolvida em Go que serve como backend para uma aplicação mobile de turismo. O projeto foi desenvolvido como parte de um TCC (Trabalho de Conclusão de Curso) do curso de Ciência da Computação, focando na gestão de fornecedores de serviços turísticos e clientes.
 servers:
   - url: http://127.0.0.1:1450
     description: Servidor da Aplicação

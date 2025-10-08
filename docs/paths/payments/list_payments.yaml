@@ -1,0 +1,42 @@
+get:
+  tags:
+    - Payments
+  summary: Listar pagamentos
+  description: Lista todos os pagamentos do usuário autenticado
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: page
+      in: query
+      description: Número da página
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    - name: limit
+      in: query
+      description: Itens por página
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    '200':
+      description: Lista de pagamentos
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              payments:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentResponse'
+              pagination:
+                $ref: '#/components/schemas/PaginationResponse'
+    '401':
+      description: Não autorizado

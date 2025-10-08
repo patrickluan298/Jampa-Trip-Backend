@@ -11,10 +11,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type CartaoHandler struct{}
+type CardHandler struct{}
 
 // Create - cria um cartão para um cliente
-func (h CartaoHandler) Create(ctx echo.Context) error {
+func (h CardHandler) Create(ctx echo.Context) error {
 
 	customerID := ctx.Param("customer_id")
 	if customerID == "" {
@@ -44,7 +44,7 @@ func (h CartaoHandler) Create(ctx echo.Context) error {
 }
 
 // List - lista os cartões de um cliente
-func (h CartaoHandler) List(ctx echo.Context) error {
+func (h CardHandler) List(ctx echo.Context) error {
 	customerID := ctx.Param("customer_id")
 	if customerID == "" {
 		return webserver.ErrorResponse(ctx, util.WrapError("customer_id é obrigatório", nil, http.StatusBadRequest))
@@ -60,7 +60,7 @@ func (h CartaoHandler) List(ctx echo.Context) error {
 }
 
 // Get - obtém um cartão específico de um cliente
-func (h CartaoHandler) Get(ctx echo.Context) error {
+func (h CardHandler) Get(ctx echo.Context) error {
 	customerID := ctx.Param("customer_id")
 	if customerID == "" {
 		return webserver.ErrorResponse(ctx, util.WrapError("customer_id é obrigatório", nil, http.StatusBadRequest))
@@ -81,7 +81,7 @@ func (h CartaoHandler) Get(ctx echo.Context) error {
 }
 
 // Update - atualiza um cartão de um cliente
-func (h CartaoHandler) Update(ctx echo.Context) error {
+func (h CardHandler) Update(ctx echo.Context) error {
 	customerID := ctx.Param("customer_id")
 	if customerID == "" {
 		return webserver.ErrorResponse(ctx, util.WrapError("customer_id é obrigatório", nil, http.StatusBadRequest))
@@ -115,7 +115,7 @@ func (h CartaoHandler) Update(ctx echo.Context) error {
 }
 
 // Delete - exclui um cartão de um cliente
-func (h CartaoHandler) Delete(ctx echo.Context) error {
+func (h CardHandler) Delete(ctx echo.Context) error {
 	customerID := ctx.Param("customer_id")
 	if customerID == "" {
 		return webserver.ErrorResponse(ctx, util.WrapError("customer_id é obrigatório", nil, http.StatusBadRequest))

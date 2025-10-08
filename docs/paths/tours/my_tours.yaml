@@ -1,0 +1,32 @@
+get:
+  tags:
+    - Tours
+  summary: Listar meus passeios
+  description: Lista os passeios da empresa autenticada
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: page
+      in: query
+      description: Número da página
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    - name: limit
+      in: query
+      description: Itens por página
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    '200':
+      description: Lista de passeios da empresa
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetMyToursResponse'
+    '401':
+      description: Não autorizado
