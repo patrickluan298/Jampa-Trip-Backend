@@ -30,6 +30,9 @@ post:
                   id: 1
                   name: "Empresa Exemplo"
                   email: "empresa@exemplo.com"
+                access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expires_in: 1703123456
             client:
               summary: Login de cliente
               value:
@@ -39,6 +42,9 @@ post:
                   id: 1
                   name: "Cliente Exemplo"
                   email: "cliente@exemplo.com"
+                access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expires_in: 1703123456
     '401':
       description: Email e/ou senha incorretos
       content:

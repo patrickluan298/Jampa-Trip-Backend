@@ -1,0 +1,44 @@
+post:
+  tags:
+    - Payments
+  summary: Criar pagamento com cartão de débito
+  description: Processa um pagamento usando cartão de débito
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - valor
+            - descricao
+            - card_token
+          properties:
+            valor:
+              type: number
+              format: float
+              example: 150.50
+              description: Valor do pagamento
+            descricao:
+              type: string
+              example: "Reserva de passeio turístico"
+              description: Descrição do pagamento
+            card_token:
+              type: string
+              example: "card_token_123456"
+              description: Token do cartão de débito
+  responses:
+    '201':
+      description: Pagamento criado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentResponse'
+    '400':
+      description: Dados inválidos
+    '401':
+      description: Não autorizado
+    '422':
+      description: Erro de validação

@@ -7,6 +7,7 @@ import (
 	"github.com/jampa_trip/internal/contract"
 	"github.com/jampa_trip/internal/service"
 	"github.com/jampa_trip/pkg/database"
+	"github.com/jampa_trip/pkg/middleware"
 	"github.com/jampa_trip/pkg/util"
 	"github.com/jampa_trip/pkg/webserver"
 	"github.com/labstack/echo/v4"
@@ -29,8 +30,11 @@ func (h TourHandler) Create(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
-	companyID := 1
+	userType := middleware.GetUserType(ctx)
+	if userType != "company" {
+		return webserver.ErrorResponse(ctx, util.WrapError("Apenas empresas podem criar passeios", nil, http.StatusForbidden))
+	}
+	companyID := middleware.GetUserID(ctx)
 
 	serviceTour := service.TourServiceNew(database.DB)
 	response, err := serviceTour.Create(request, companyID)
@@ -67,8 +71,11 @@ func (h TourHandler) Update(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, err)
 	}
 
-	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
-	companyID := 1
+	userType := middleware.GetUserType(ctx)
+	if userType != "company" {
+		return webserver.ErrorResponse(ctx, util.WrapError("Apenas empresas podem atualizar passeios", nil, http.StatusForbidden))
+	}
+	companyID := middleware.GetUserID(ctx)
 
 	serviceTour := service.TourServiceNew(database.DB)
 	response, err := serviceTour.Update(request, companyID)
@@ -111,8 +118,11 @@ func (h TourHandler) GetMyTours(ctx echo.Context) error {
 
 	page, limit := util.ParseQueryParams(pageStr, limitStr)
 
-	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
-	companyID := 1
+	userType := middleware.GetUserType(ctx)
+	if userType != "company" {
+		return webserver.ErrorResponse(ctx, util.WrapError("Apenas empresas podem acessar esta rota", nil, http.StatusForbidden))
+	}
+	companyID := middleware.GetUserID(ctx)
 
 	serviceTour := service.TourServiceNew(database.DB)
 	response, err := serviceTour.GetMyTours(companyID, page, limit)
@@ -135,8 +145,11 @@ func (h TourHandler) Delete(ctx echo.Context) error {
 		return webserver.ErrorResponse(ctx, util.WrapError("ID não pode ser zero ou negativo", nil, http.StatusBadRequest))
 	}
 
-	// Por enquanto, usar company_id mockado (será substituído por JWT no futuro)
-	companyID := 1
+	userType := middleware.GetUserType(ctx)
+	if userType != "company" {
+		return webserver.ErrorResponse(ctx, util.WrapError("Apenas empresas podem deletar passeios", nil, http.StatusForbidden))
+	}
+	companyID := middleware.GetUserID(ctx)
 
 	serviceTour := service.TourServiceNew(database.DB)
 	response, err := serviceTour.Delete(ID, companyID)

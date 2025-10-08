@@ -1,0 +1,66 @@
+get:
+  tags:
+    - Payments
+  summary: Obter pagamento
+  description: Obtém detalhes de um pagamento específico
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do pagamento
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Pagamento encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentResponse'
+    '401':
+      description: Não autorizado
+    '404':
+      description: Pagamento não encontrado
+
+put:
+  tags:
+    - Payments
+  summary: Atualizar pagamento
+  description: Atualiza um pagamento existente
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do pagamento
+      schema:
+        type: integer
+        minimum: 1
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [pending, approved, authorized, in_process, in_mediation, rejected, cancelled, refunded, charged_back]
+              example: "approved"
+  responses:
+    '200':
+      description: Pagamento atualizado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentResponse'
+    '400':
+      description: Dados inválidos
+    '401':
+      description: Não autorizado
+    '404':
+      description: Pagamento não encontrado

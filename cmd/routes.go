@@ -4,50 +4,54 @@ import (
 	"github.com/jampa_trip/internal/handler"
 	"github.com/jampa_trip/pkg/middleware"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func ConfigureRoutes(e *echo.Echo) {
+
+	// DOCUMENTATION
+	e.GET("/docs/*", echoSwagger.WrapHandler)
 
 	// HEALTH-CHECK
 	e.GET("/health-check", handler.HealthCheckResponse{}.HealthCheck)
 	e.HEAD("/health-check", handler.HealthCheckResponse{}.HealthCheck)
 
-	// LOGIN
+	// AUTHENTICATION
 	e.POST("/jampa-trip/api/v1/login", handler.LoginHandler{}.Login)
-
-	// REFRESH TOKEN
 	e.POST("/jampa-trip/api/v1/refresh", handler.RefreshHandler{}.RefreshToken)
+
+	// PUBLIC REGISTER ROUTES
+	e.POST("/jampa-trip/api/v1/companies", handler.CompanyHandler{}.Create)
+	e.POST("/jampa-trip/api/v1/clients", handler.ClientHandler{}.Create)
 
 	// GRUPO PROTEGIDO - todas as rotas abaixo precisam de autenticação JWT
 	protected := e.Group("/jampa-trip/api/v1")
 	protected.Use(middleware.JWTMiddleware())
 
-	// COMPANIES
-	protected.POST("/companies", handler.CompanyHandler{}.Create)
+	// COMPANIES - Operações protegidas
 	protected.PUT("/companies/:id", handler.CompanyHandler{}.Update)
 	protected.GET("/companies", handler.CompanyHandler{}.List)
 	protected.GET("/companies/:id", handler.CompanyHandler{}.Get)
 
-	// CLIENTS
-	protected.POST("/clients", handler.ClientHandler{}.Create)
+	// CLIENTS - Operações protegidas
 	protected.PUT("/clients/:id", handler.ClientHandler{}.Update)
 	protected.GET("/clients", handler.ClientHandler{}.List)
 	protected.GET("/clients/:id", handler.ClientHandler{}.Get)
 
 	// CARDS
-	protected.POST("/clients/:customer_id/cards", handler.CartaoHandler{}.Create)
-	protected.GET("/clients/:customer_id/cards", handler.CartaoHandler{}.List)
-	protected.GET("/clients/:customer_id/cards/:card_id", handler.CartaoHandler{}.Get)
-	protected.PUT("/clients/:customer_id/cards/:card_id", handler.CartaoHandler{}.Update)
-	protected.DELETE("/clients/:customer_id/cards/:card_id", handler.CartaoHandler{}.Delete)
+	protected.POST("/clients/:customer_id/cards", handler.CardHandler{}.Create)
+	protected.GET("/clients/:customer_id/cards", handler.CardHandler{}.List)
+	protected.GET("/clients/:customer_id/cards/:card_id", handler.CardHandler{}.Get)
+	protected.PUT("/clients/:customer_id/cards/:card_id", handler.CardHandler{}.Update)
+	protected.DELETE("/clients/:customer_id/cards/:card_id", handler.CardHandler{}.Delete)
 
 	// PAYMENT METHODS
-	protected.POST("/payments/credit-card", handler.PagamentoHandler{}.CriarPagamentoCartaoCredito)
-	protected.POST("/payments/debit-card", handler.PagamentoHandler{}.CriarPagamentoCartaoDebito)
-	protected.POST("/payments/pix", handler.PagamentoHandler{}.CriarPagamentoPIX)
-	protected.GET("/payments", handler.PagamentoHandler{}.BuscarPagamentos)
-	protected.GET("/payments/:id", handler.PagamentoHandler{}.ObterPagamento)
-	protected.PUT("/payments/:id", handler.PagamentoHandler{}.AtualizarPagamento)
+	protected.POST("/payments/credit-card", handler.PaymentHandler{}.CreateCreditCardPayment)
+	protected.POST("/payments/debit-card", handler.PaymentHandler{}.CreateDebitCardPayment)
+	protected.POST("/payments/pix", handler.PaymentHandler{}.CreatePIXPayment)
+	protected.GET("/payments", handler.PaymentHandler{}.List)
+	protected.GET("/payments/:id", handler.PaymentHandler{}.Get)
+	protected.PUT("/payments/:id", handler.PaymentHandler{}.Update)
 
 	// TOURS
 	protected.POST("/tours", handler.TourHandler{}.Create)

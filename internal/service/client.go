@@ -84,6 +84,10 @@ func (receiver *ClientService) Create(request *contract.CreateClientRequest) (*c
 // Update - realiza a atualização de um cliente existente
 func (receiver *ClientService) Update(request *contract.UpdateClientRequest) (*contract.UpdateClientResponse, error) {
 
+	if request.Password != request.ConfirmPassword {
+		return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
+	}
+
 	existingClient, err := receiver.ClientRepository.GetByID(request.ID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

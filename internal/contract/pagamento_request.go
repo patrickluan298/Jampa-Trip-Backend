@@ -79,8 +79,8 @@ func (r *ListPagamentoRequest) Validate() error {
 	)
 }
 
-// CriarPagamentoCartaoCreditoRequest - representa a requisição para criar pagamento com cartão de crédito
-type CriarPagamentoCartaoCreditoRequest struct {
+// CreateCreditCardPaymentRequest - representa a requisição para criar pagamento com cartão de crédito
+type CreateCreditCardPaymentRequest struct {
 	ClienteID         int          `json:"cliente_id" validate:"required,min=1"`
 	EmpresaID         int          `json:"empresa_id" validate:"required,min=1"`
 	Token             string       `json:"token" validate:"required,min=1"`
@@ -95,7 +95,7 @@ type CriarPagamentoCartaoCreditoRequest struct {
 }
 
 // Validate - valida os campos da requisição
-func (r *CriarPagamentoCartaoCreditoRequest) Validate() error {
+func (r *CreateCreditCardPaymentRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ClienteID, validation.Required, validation.Min(1)),
 		validation.Field(&r.EmpresaID, validation.Required, validation.Min(1)),
@@ -109,8 +109,8 @@ func (r *CriarPagamentoCartaoCreditoRequest) Validate() error {
 	)
 }
 
-// CriarPagamentoCartaoDebitoRequest - representa a requisição para criar pagamento com cartão de débito
-type CriarPagamentoCartaoDebitoRequest struct {
+// CreateDebitCardPaymentRequest - representa a requisição para criar pagamento com cartão de débito
+type CreateDebitCardPaymentRequest struct {
 	ClienteID         int          `json:"cliente_id" validate:"required,min=1"`
 	EmpresaID         int          `json:"empresa_id" validate:"required,min=1"`
 	Token             string       `json:"token" validate:"required,min=1"`
@@ -123,7 +123,7 @@ type CriarPagamentoCartaoDebitoRequest struct {
 }
 
 // Validate - valida os campos da requisição
-func (r *CriarPagamentoCartaoDebitoRequest) Validate() error {
+func (r *CreateDebitCardPaymentRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ClienteID, validation.Required, validation.Min(1)),
 		validation.Field(&r.EmpresaID, validation.Required, validation.Min(1)),
@@ -136,8 +136,8 @@ func (r *CriarPagamentoCartaoDebitoRequest) Validate() error {
 	)
 }
 
-// CriarPagamentoPIXRequest - representa a requisição para criar pagamento com PIX
-type CriarPagamentoPIXRequest struct {
+// CreatePIXPaymentRequest - representa a requisição para criar pagamento com PIX
+type CreatePIXPaymentRequest struct {
 	ClienteID         int          `json:"cliente_id" validate:"required,min=1"`
 	EmpresaID         int          `json:"empresa_id" validate:"required,min=1"`
 	TransactionAmount float64      `json:"transaction_amount" validate:"required,min=0.01"`
@@ -147,7 +147,7 @@ type CriarPagamentoPIXRequest struct {
 }
 
 // Validate - valida os campos da requisição
-func (r *CriarPagamentoPIXRequest) Validate() error {
+func (r *CreatePIXPaymentRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ClienteID, validation.Required, validation.Min(1)),
 		validation.Field(&r.EmpresaID, validation.Required, validation.Min(1)),
@@ -157,8 +157,8 @@ func (r *CriarPagamentoPIXRequest) Validate() error {
 	)
 }
 
-// BuscarPagamentosRequest - representa a requisição para buscar pagamentos
-type BuscarPagamentosRequest struct {
+// ListPaymentsRequest - representa a requisição para buscar pagamentos
+type ListPaymentsRequest struct {
 	ExternalReference string `json:"external_reference"`
 	Status            string `json:"status"`
 	PaymentMethod     string `json:"payment_method"`
@@ -169,7 +169,7 @@ type BuscarPagamentosRequest struct {
 }
 
 // Validate - valida os campos da requisição
-func (r *BuscarPagamentosRequest) Validate() error {
+func (r *ListPaymentsRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.Status, validation.In("pending", "approved", "authorized", "in_process", "in_mediation", "rejected", "cancelled", "refunded", "charged_back")),
 		validation.Field(&r.PaymentMethod, validation.In("credit_card", "debit_card", "pix", "bolbradesco")),
@@ -190,8 +190,8 @@ func (r *ObterPagamentoRequest) Validate() error {
 	)
 }
 
-// AtualizarPagamentoRequest - representa a requisição para atualizar um pagamento
-type AtualizarPagamentoRequest struct {
+// UpdatePaymentRequest - representa a requisição para atualizar um pagamento
+type UpdatePaymentRequest struct {
 	ID              int64             `json:"id" validate:"required,min=1"`
 	Description     string            `json:"description,omitempty"`
 	Metadata        map[string]string `json:"metadata,omitempty"`
@@ -199,7 +199,7 @@ type AtualizarPagamentoRequest struct {
 }
 
 // Validate - valida os campos da requisição
-func (r *AtualizarPagamentoRequest) Validate() error {
+func (r *UpdatePaymentRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ID, validation.Required, validation.Min(1)),
 		validation.Field(&r.Description, validation.Length(0, 500)),

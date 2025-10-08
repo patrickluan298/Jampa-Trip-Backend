@@ -1,0 +1,147 @@
+get:
+  tags:
+    - Cards
+  summary: Obter cartão
+  description: Obtém detalhes de um cartão específico
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: customer_id
+      in: path
+      required: true
+      description: ID do cliente
+      schema:
+        type: integer
+        minimum: 1
+    - name: card_id
+      in: path
+      required: true
+      description: ID do cartão
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Cartão encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              card:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  cardholder_name:
+                    type: string
+                    example: "JOAO SILVA"
+                  last_four_digits:
+                    type: string
+                    example: "4321"
+                  payment_method_id:
+                    type: string
+                    example: "visa"
+    '401':
+      description: Não autorizado
+    '404':
+      description: Cartão não encontrado
+
+put:
+  tags:
+    - Cards
+  summary: Atualizar cartão
+  description: Atualiza um cartão existente
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: customer_id
+      in: path
+      required: true
+      description: ID do cliente
+      schema:
+        type: integer
+        minimum: 1
+    - name: card_id
+      in: path
+      required: true
+      description: ID do cartão
+      schema:
+        type: integer
+        minimum: 1
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            cardholder_name:
+              type: string
+              example: "JOAO SILVA SANTOS"
+              description: Nome do titular do cartão
+  responses:
+    '200':
+      description: Cartão atualizado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Cartão atualizado com sucesso"
+    '400':
+      description: Dados inválidos
+    '401':
+      description: Não autorizado
+    '404':
+      description: Cartão não encontrado
+
+delete:
+  tags:
+    - Cards
+  summary: Deletar cartão
+  description: Remove um cartão
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: customer_id
+      in: path
+      required: true
+      description: ID do cliente
+      schema:
+        type: integer
+        minimum: 1
+    - name: card_id
+      in: path
+      required: true
+      description: ID do cartão
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Cartão deletado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Cartão removido com sucesso"
+    '401':
+      description: Não autorizado
+    '404':
+      description: Cartão não encontrado

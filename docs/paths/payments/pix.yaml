@@ -1,0 +1,39 @@
+post:
+  tags:
+    - Payments
+  summary: Criar pagamento PIX
+  description: Processa um pagamento usando PIX
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - valor
+            - descricao
+          properties:
+            valor:
+              type: number
+              format: float
+              example: 150.50
+              description: Valor do pagamento
+            descricao:
+              type: string
+              example: "Reserva de passeio turístico"
+              description: Descrição do pagamento
+  responses:
+    '201':
+      description: Pagamento criado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentResponse'
+    '400':
+      description: Dados inválidos
+    '401':
+      description: Não autorizado
+    '422':
+      description: Erro de validação
