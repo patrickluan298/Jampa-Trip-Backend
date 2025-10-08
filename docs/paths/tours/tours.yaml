@@ -1,0 +1,64 @@
+post:
+  tags:
+    - Tours
+  summary: Criar um novo passeio
+  description: Cria um novo passeio para a empresa autenticada
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/CreateTourRequest'
+  responses:
+    '201':
+      description: Passeio criado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateTourResponse'
+    '400':
+      description: Dados inválidos
+    '401':
+      description: Não autorizado
+    '422':
+      description: Erro de validação
+
+get:
+  tags:
+    - Tours
+  summary: Listar passeios
+  description: Lista todos os passeios disponíveis com paginação e busca
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: search
+      in: query
+      description: Termo de busca
+      schema:
+        type: string
+    - name: page
+      in: query
+      description: Número da página
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    - name: limit
+      in: query
+      description: Itens por página
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    '200':
+      description: Lista de passeios
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListToursResponse'
+    '401':
+      description: Não autorizado

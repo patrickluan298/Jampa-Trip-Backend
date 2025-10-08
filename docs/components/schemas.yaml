@@ -469,3 +469,321 @@ Pagination:
       type: integer
       example: 10
       description: "Total de páginas"
+
+# Tour Schemas
+CreateTourRequest:
+  type: object
+  required:
+    - name
+    - dates
+    - departure_time
+    - arrival_time
+    - max_people
+    - price
+  properties:
+    name:
+      type: string
+      example: "Passeio pela Praia de Tambaú"
+      description: "Nome do passeio"
+      minLength: 3
+      maxLength: 255
+    dates:
+      type: array
+      items:
+        type: string
+        format: date
+      example: ["2025-12-25", "2025-12-26"]
+      description: "Datas disponíveis para o passeio"
+    departure_time:
+      type: string
+      example: "08:00"
+      description: "Horário de partida (formato HH:MM)"
+    arrival_time:
+      type: string
+      example: "17:00"
+      description: "Horário de chegada (formato HH:MM)"
+    max_people:
+      type: integer
+      example: 20
+      description: "Número máximo de pessoas"
+      minimum: 1
+    description:
+      type: string
+      example: "Um passeio incrível pela praia mais famosa de João Pessoa"
+      description: "Descrição do passeio"
+      maxLength: 1000
+    images:
+      type: array
+      items:
+        type: string
+        format: uri
+      example: ["https://exemplo.com/imagem1.jpg", "https://exemplo.com/imagem2.jpg"]
+      description: "URLs das imagens do passeio"
+    price:
+      type: number
+      format: float
+      example: 150.50
+      description: "Preço do passeio"
+      minimum: 0.01
+
+UpdateTourRequest:
+  type: object
+  required:
+    - id
+    - name
+    - dates
+    - departure_time
+    - arrival_time
+    - max_people
+    - price
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: "ID do passeio"
+      minimum: 1
+    name:
+      type: string
+      example: "Passeio pela Praia de Tambaú"
+      description: "Nome do passeio"
+      minLength: 3
+      maxLength: 255
+    dates:
+      type: array
+      items:
+        type: string
+        format: date
+      example: ["2025-12-25", "2025-12-26"]
+      description: "Datas disponíveis para o passeio"
+    departure_time:
+      type: string
+      example: "08:00"
+      description: "Horário de partida (formato HH:MM)"
+    arrival_time:
+      type: string
+      example: "17:00"
+      description: "Horário de chegada (formato HH:MM)"
+    max_people:
+      type: integer
+      example: 20
+      description: "Número máximo de pessoas"
+      minimum: 1
+    description:
+      type: string
+      example: "Um passeio incrível pela praia mais famosa de João Pessoa"
+      description: "Descrição do passeio"
+      maxLength: 1000
+    images:
+      type: array
+      items:
+        type: string
+        format: uri
+      example: ["https://exemplo.com/imagem1.jpg", "https://exemplo.com/imagem2.jpg"]
+      description: "URLs das imagens do passeio"
+    price:
+      type: number
+      format: float
+      example: 150.50
+      description: "Preço do passeio"
+      minimum: 0.01
+
+TourResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: "ID do passeio"
+    name:
+      type: string
+      example: "Passeio pela Praia de Tambaú"
+      description: "Nome do passeio"
+    dates:
+      type: array
+      items:
+        type: string
+        format: date
+      example: ["2025-12-25", "2025-12-26"]
+      description: "Datas disponíveis para o passeio"
+    departure_time:
+      type: string
+      example: "08:00"
+      description: "Horário de partida"
+    arrival_time:
+      type: string
+      example: "17:00"
+      description: "Horário de chegada"
+    max_people:
+      type: integer
+      example: 20
+      description: "Número máximo de pessoas"
+    description:
+      type: string
+      example: "Um passeio incrível pela praia mais famosa de João Pessoa"
+      description: "Descrição do passeio"
+    images:
+      type: array
+      items:
+        type: string
+        format: uri
+      example: ["https://exemplo.com/imagem1.jpg", "https://exemplo.com/imagem2.jpg"]
+      description: "URLs das imagens do passeio"
+    price:
+      type: number
+      format: float
+      example: 150.50
+      description: "Preço do passeio"
+    company_id:
+      type: integer
+      example: 1
+      description: "ID da empresa"
+    company_name:
+      type: string
+      example: "Empresa Exemplo"
+      description: "Nome da empresa"
+    created_at:
+      type: string
+      format: date-time
+      example: "2025-01-01T10:00:00Z"
+      description: "Data de criação"
+    updated_at:
+      type: string
+      format: date-time
+      example: "2025-01-01T10:00:00Z"
+      description: "Data de atualização"
+
+CreateTourResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+      description: "Indica se a operação foi bem-sucedida"
+    tour:
+      $ref: '#/components/schemas/TourResponse'
+
+UpdateTourResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+      description: "Indica se a operação foi bem-sucedida"
+    tour:
+      $ref: '#/components/schemas/TourResponse'
+
+ListToursResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+      description: "Indica se a operação foi bem-sucedida"
+    tours:
+      type: array
+      items:
+        $ref: '#/components/schemas/TourResponse'
+    pagination:
+      $ref: '#/components/schemas/PaginationResponse'
+
+MyTourResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: "ID do passeio"
+    name:
+      type: string
+      example: "Passeio pela Praia de Tambaú"
+      description: "Nome do passeio"
+    dates:
+      type: array
+      items:
+        type: string
+        format: date
+      example: ["2025-12-25", "2025-12-26"]
+      description: "Datas disponíveis para o passeio"
+    departure_time:
+      type: string
+      example: "08:00"
+      description: "Horário de partida"
+    arrival_time:
+      type: string
+      example: "17:00"
+      description: "Horário de chegada"
+    max_people:
+      type: integer
+      example: 20
+      description: "Número máximo de pessoas"
+    description:
+      type: string
+      example: "Um passeio incrível pela praia mais famosa de João Pessoa"
+      description: "Descrição do passeio"
+    images:
+      type: array
+      items:
+        type: string
+        format: uri
+      example: ["https://exemplo.com/imagem1.jpg", "https://exemplo.com/imagem2.jpg"]
+      description: "URLs das imagens do passeio"
+    price:
+      type: number
+      format: float
+      example: 150.50
+      description: "Preço do passeio"
+    created_at:
+      type: string
+      format: date-time
+      example: "2025-01-01T10:00:00Z"
+      description: "Data de criação"
+    reservations_count:
+      type: integer
+      example: 5
+      description: "Número de reservas para este passeio"
+
+GetMyToursResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+      description: "Indica se a operação foi bem-sucedida"
+    tours:
+      type: array
+      items:
+        $ref: '#/components/schemas/MyTourResponse'
+    pagination:
+      $ref: '#/components/schemas/PaginationResponse'
+
+DeleteTourResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+      description: "Indica se a operação foi bem-sucedida"
+    message:
+      type: string
+      example: "Passeio deletado com sucesso"
+      description: "Mensagem de confirmação"
+
+PaginationResponse:
+  type: object
+  properties:
+    current_page:
+      type: integer
+      example: 1
+      description: "Página atual"
+    total_pages:
+      type: integer
+      example: 10
+      description: "Total de páginas"
+    total_items:
+      type: integer
+      example: 100
+      description: "Total de itens"
+    items_per_page:
+      type: integer
+      example: 10
+      description: "Itens por página"

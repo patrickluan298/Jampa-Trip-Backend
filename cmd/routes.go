@@ -4,9 +4,13 @@ import (
 	"github.com/jampa_trip/internal/handler"
 	"github.com/jampa_trip/pkg/middleware"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func ConfigureRoutes(e *echo.Echo) {
+
+	// DOCUMENTATION
+	e.GET("/docs/*", echoSwagger.WrapHandler)
 
 	// HEALTH-CHECK
 	e.GET("/health-check", handler.HealthCheckResponse{}.HealthCheck)

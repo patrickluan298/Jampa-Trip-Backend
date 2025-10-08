@@ -1,0 +1,63 @@
+put:
+  tags:
+    - Tours
+  summary: Atualizar passeio
+  description: Atualiza um passeio existente
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do passeio
+      schema:
+        type: integer
+        minimum: 1
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UpdateTourRequest'
+  responses:
+    '200':
+      description: Passeio atualizado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateTourResponse'
+    '400':
+      description: Dados inválidos
+    '401':
+      description: Não autorizado
+    '404':
+      description: Passeio não encontrado
+    '422':
+      description: Erro de validação
+
+delete:
+  tags:
+    - Tours
+  summary: Deletar passeio
+  description: Deleta um passeio existente
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do passeio
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Passeio deletado com sucesso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeleteTourResponse'
+    '401':
+      description: Não autorizado
+    '404':
+      description: Passeio não encontrado

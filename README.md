@@ -131,7 +131,7 @@ make docker-dev-volume-remove  # Remove o volume do banco de dados
 ## 📖 Documentação da API
 
 A documentação Swagger está disponível em:
-- **Local:** `http://localhost:1450/swagger/index.html`
+- **Swagger UI:** `http://localhost:1450/docs/`
 - **Arquivos:** `docs/` (formato OpenAPI 3.0.3)
 
 ## 🏗️ Estrutura do Projeto
