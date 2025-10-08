@@ -77,7 +77,7 @@ func main() {
 
 	ConfigureRoutes(server)
 
-	log.Printf("📖 Documentação da API disponível em: http://localhost%s/docs/", database.Config.HTTPServerPort)
+	log.Printf("📚 Documentação da API disponível em: http://localhost%s/docs/", database.Config.HTTPServerPort)
 
 	go func() {
 		if err := server.Start(database.Config.HTTPServerPort); err != nil {

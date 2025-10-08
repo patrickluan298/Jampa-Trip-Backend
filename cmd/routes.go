@@ -20,18 +20,20 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.POST("/jampa-trip/api/v1/login", handler.LoginHandler{}.Login)
 	e.POST("/jampa-trip/api/v1/refresh", handler.RefreshHandler{}.RefreshToken)
 
+	// PUBLIC REGISTER ROUTES
+	e.POST("/jampa-trip/api/v1/companies", handler.CompanyHandler{}.Create)
+	e.POST("/jampa-trip/api/v1/clients", handler.ClientHandler{}.Create)
+
 	// GRUPO PROTEGIDO - todas as rotas abaixo precisam de autenticação JWT
 	protected := e.Group("/jampa-trip/api/v1")
 	protected.Use(middleware.JWTMiddleware())
 
-	// COMPANIES
-	protected.POST("/companies", handler.CompanyHandler{}.Create)
+	// COMPANIES - Operações protegidas
 	protected.PUT("/companies/:id", handler.CompanyHandler{}.Update)
 	protected.GET("/companies", handler.CompanyHandler{}.List)
 	protected.GET("/companies/:id", handler.CompanyHandler{}.Get)
 
-	// CLIENTS
-	protected.POST("/clients", handler.ClientHandler{}.Create)
+	// CLIENTS - Operações protegidas
 	protected.PUT("/clients/:id", handler.ClientHandler{}.Update)
 	protected.GET("/clients", handler.ClientHandler{}.List)
 	protected.GET("/clients/:id", handler.ClientHandler{}.Get)
