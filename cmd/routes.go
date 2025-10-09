@@ -60,6 +60,15 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.DELETE("/tours/:id", handler.TourHandler{}.Delete)
 	protected.GET("/tours/my-tours", handler.TourHandler{}.GetMyTours)
 
+	// IMAGE UPLOAD
+	protected.POST("/upload/images", handler.ImageHandler{}.UploadImages)
+	protected.GET("/upload/images", handler.ImageHandler{}.ListImages)
+	protected.DELETE("/upload/images/:id", handler.ImageHandler{}.DeleteImage)
+	protected.PUT("/upload/images/:id", handler.ImageHandler{}.UpdateImage)
+	protected.POST("/upload/images/reorder", handler.ImageHandler{}.ReorderImages)
+	protected.GET("/upload/images/:id/info", handler.ImageHandler{}.GetImageInfo)
+	protected.POST("/upload/images/batch-delete", handler.ImageHandler{}.BatchDeleteImages)
+
 	// RESERVATIONS
 	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)
 	// e.GET("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Get)
