@@ -666,6 +666,109 @@ CREATE TABLE pagamentos (
 );
 ```
 
+### Fluxos de Pagamento
+
+#### 1. Fluxo de Pagamento com Cartão de Crédito
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant PaymentHandler
+    participant PaymentService
+    participant MercadoPago
+    participant Database
+    participant Redis
+
+    Client->>PaymentHandler: POST /payments/credit-card
+    PaymentHandler->>PaymentService: CreateCreditCardPayment(request)
+    PaymentService->>PaymentService: Validar dados de entrada
+    PaymentService->>MercadoPago: CreateCreditCardPayment(mpRequest)
+    MercadoPago-->>PaymentService: {status, payment_id, card_info}
+    PaymentService->>Database: Salvar pagamento
+    Database-->>PaymentService: Pagamento salvo
+    PaymentService->>PaymentService: Atualizar timestamps
+    PaymentService-->>PaymentHandler: PaymentResponse
+    PaymentHandler-->>Client: 200 OK {pagamento, message}
+    
+    Note over Client,Redis: Em caso de erro
+    MercadoPago-->>PaymentService: Erro de pagamento
+    PaymentService-->>PaymentHandler: Erro
+    PaymentHandler-->>Client: 400/500 {erro}
+```
+
+#### 2. Fluxo de Pagamento com Cartão de Débito
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant PaymentHandler
+    participant PaymentService
+    participant MercadoPago
+    participant Database
+
+    Client->>PaymentHandler: POST /payments/debit-card
+    PaymentHandler->>PaymentService: CreateDebitCardPayment(request)
+    PaymentService->>PaymentService: Validar dados (installments=1, capture=true)
+    PaymentService->>MercadoPago: CreateCreditCardPayment(mpRequest)
+    MercadoPago-->>PaymentService: {status: approved, payment_id}
+    PaymentService->>Database: Salvar pagamento
+    Database-->>PaymentService: Pagamento salvo
+    PaymentService-->>PaymentHandler: PaymentResponse
+    PaymentHandler-->>Client: 200 OK {pagamento aprovado}
+```
+
+#### 3. Fluxo de Pagamento PIX
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant PaymentHandler
+    participant PaymentService
+    participant MercadoPago
+    participant Database
+
+    Client->>PaymentHandler: POST /payments/pix
+    PaymentHandler->>PaymentService: CreatePIXPayment(request)
+    PaymentService->>PaymentService: Validar dados PIX
+    PaymentService->>MercadoPago: CreatePIXPayment(mpRequest)
+    MercadoPago-->>PaymentService: {status: pending, qr_code, ticket_url}
+    PaymentService->>Database: Salvar pagamento pendente
+    Database-->>PaymentService: Pagamento salvo
+    PaymentService-->>PaymentHandler: PIXResponse
+    PaymentHandler-->>Client: 200 OK {qr_code, ticket_url}
+    
+    Note over Client,Database: Cliente paga via PIX
+    MercadoPago->>PaymentService: Webhook: status=approved
+    PaymentService->>Database: Atualizar status
+    Database-->>PaymentService: Status atualizado
+```
+
+#### 4. Fluxo de Gestão de Cartões
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant CardHandler
+    participant CardService
+    participant MercadoPago
+    participant Database
+
+    Client->>CardHandler: POST /clients/:id/cards
+    CardHandler->>CardService: Create(customerID, request)
+    CardService->>MercadoPago: CreateCustomerCard(customerID, cardData)
+    MercadoPago-->>CardService: {card_id, card_info}
+    CardService-->>CardHandler: CardResponse
+    CardHandler-->>Client: 200 OK {cartão criado}
+    
+    Note over Client,Database: Listar cartões
+    Client->>CardHandler: GET /clients/:id/cards
+    CardHandler->>CardService: List(customerID)
+    CardService->>MercadoPago: ListCustomerCards(customerID)
+    MercadoPago-->>CardService: [cartões]
+    CardService-->>CardHandler: ListResponse
+    CardHandler-->>Client: 200 OK {lista de cartões}
+```
+
 ### Exemplos de Uso
 
 #### Pagamento com Cartão de Crédito
@@ -724,6 +827,109 @@ O sistema inclui **logs estruturados** para monitoramento de pagamentos:
 6. **`internal/repository/pagamento.go`** - Acesso a dados
 7. **`internal/contract/pagamento_request.go`** - Contratos de request
 8. **`internal/contract/pagamento_response.go`** - Contratos de response
+
+## 📋 Fluxo de Reservas
+
+O sistema de reservas conecta clientes, tours e pagamentos, permitindo o agendamento de passeios turísticos com controle completo do ciclo de vida.
+
+### Funcionalidades Implementadas
+
+- ✅ **Criação de Reservas** - Agendamento de passeios com validações
+- ✅ **Gestão de Status** - Controle de estados (pendente, confirmada, cancelada)
+- ✅ **Validações de Data** - Verificação de datas futuras e disponibilidade
+- ✅ **Histórico de Reservas** - Consulta de reservas passadas e futuras
+- ✅ **Cancelamento** - Cancelamento com regras de negócio
+- ✅ **Integração com Pagamentos** - Vinculação automática com pagamentos
+
+### Status de Reserva Suportados
+
+| Status | Descrição |
+|--------|-----------|
+| `pending` | Pendente de confirmação |
+| `confirmed` | Confirmada |
+| `cancelled` | Cancelada |
+| `completed` | Concluída |
+
+### Fluxos de Reserva
+
+#### 1. Fluxo Completo de Reserva
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant ReservaHandler
+    participant ReservaService
+    participant TourService
+    participant PaymentService
+    participant Database
+
+    Client->>ReservaHandler: POST /reservations
+    ReservaHandler->>ReservaService: Create(request)
+    ReservaService->>ReservaService: Validar data futura
+    ReservaService->>ReservaService: Validar data reserva < data passeio
+    ReservaService->>TourService: Verificar disponibilidade
+    TourService-->>ReservaService: Tour disponível
+    ReservaService->>Database: Criar reserva (status: pending)
+    Database-->>ReservaService: Reserva criada
+    ReservaService->>PaymentService: Processar pagamento
+    PaymentService-->>ReservaService: Pagamento aprovado
+    ReservaService->>Database: Atualizar status (confirmed)
+    Database-->>ReservaService: Status atualizado
+    ReservaService-->>ReservaHandler: ReservaResponse
+    ReservaHandler-->>Client: 200 OK {reserva confirmada}
+    
+    Note over Client,Database: Em caso de erro
+    ReservaService-->>ReservaHandler: Erro de validação
+    ReservaHandler-->>Client: 400 {erro de validação}
+```
+
+#### 2. Fluxo de Cancelamento de Reserva
+
+```mermaid
+flowchart TD
+    A[Cliente solicita cancelamento] --> B{Reserva existe?}
+    B -->|Não| C[Erro: Reserva não encontrada]
+    B -->|Sim| D{Status permite cancelamento?}
+    D -->|Não| E[Erro: Não pode ser cancelada]
+    D -->|Sim| F[Verificar regras de negócio]
+    F --> G{Data do passeio > hoje?}
+    G -->|Não| H[Erro: Passeio já ocorreu]
+    G -->|Sim| I[Atualizar status para 'cancelled']
+    I --> J[Processar reembolso se necessário]
+    J --> K[Atualizar timestamps]
+    K --> L[Reserva cancelada com sucesso]
+    
+    style C fill:#ffcccc
+    style E fill:#ffcccc
+    style H fill:#ffcccc
+    style L fill:#ccffcc
+```
+
+### Exemplos de Uso
+
+#### Criar Reserva
+
+```bash
+curl -X POST http://localhost:1450/jampa-trip/api/v1/reservations \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cliente_id": 123,
+    "empresa_id": 456,
+    "tour_id": 789,
+    "data_passeio": "2024-12-25T10:00:00Z",
+    "quantidade_pessoas": 2,
+    "valor_total": 200.00,
+    "observacoes": "Dieta vegetariana"
+  }'
+```
+
+#### Cancelar Reserva
+
+```bash
+curl -X PUT http://localhost:1450/jampa-trip/api/v1/reservations/123/cancel \
+  -H "Authorization: Bearer <access_token>"
+```
 
 ## 🛠️ Tecnologias Utilizadas
 

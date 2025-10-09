@@ -24,16 +24,16 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.POST("/jampa-trip/api/v1/companies", handler.CompanyHandler{}.Create)
 	e.POST("/jampa-trip/api/v1/clients", handler.ClientHandler{}.Create)
 
-	// GRUPO PROTEGIDO - todas as rotas abaixo precisam de autenticação JWT
+	// PROTECTED GROUP – all routes below require JWT authentication
 	protected := e.Group("/jampa-trip/api/v1")
 	protected.Use(middleware.JWTMiddleware())
 
-	// COMPANIES - Operações protegidas
+	// COMPANIES
 	protected.PUT("/companies/:id", handler.CompanyHandler{}.Update)
 	protected.GET("/companies", handler.CompanyHandler{}.List)
 	protected.GET("/companies/:id", handler.CompanyHandler{}.Get)
 
-	// CLIENTS - Operações protegidas
+	// CLIENTS
 	protected.PUT("/clients/:id", handler.ClientHandler{}.Update)
 	protected.GET("/clients", handler.ClientHandler{}.List)
 	protected.GET("/clients/:id", handler.ClientHandler{}.Get)
@@ -79,11 +79,11 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.GET("/feedback/recent", handler.FeedbackHandler{}.GetRecent)
 
 	// RESERVATIONS
-	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)
-	// e.GET("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Get)
-	// e.GET("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.List)
-	// e.PUT("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Update)
-	// e.PUT("/jampa-trip/api/v1/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
-	// e.GET("/jampa-trip/api/v1/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
-	// e.GET("/jampa-trip/api/v1/reservations/history", handler.ReservaHandler{}.GetHistory)
+	// protected.POST("/reservations", handler.ReservaHandler{}.Create)
+	// protected.GET("/reservations/:id", handler.ReservaHandler{}.Get)
+	// protected.GET("/reservations", handler.ReservaHandler{}.List)
+	// protected.PUT("/reservations/:id", handler.ReservaHandler{}.Update)
+	// protected.PUT("/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
+	// protected.GET("/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
+	// protected.GET("/reservations/history", handler.ReservaHandler{}.GetHistory)
 }
