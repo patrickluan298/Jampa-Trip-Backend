@@ -85,3 +85,40 @@ CREATE INDEX IF NOT EXISTS idx_tours_company_id ON tours(company_id);
 CREATE INDEX IF NOT EXISTS idx_tours_created_at ON tours(created_at);
 CREATE INDEX IF NOT EXISTS idx_tours_price ON tours(price);
 CREATE INDEX IF NOT EXISTS idx_tours_name ON tours(name);
+
+-- =============================================================================
+-- FEEDBACKS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS feedbacks (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    empresa_id INTEGER NOT NULL,
+    reserva_id INTEGER,
+    nota INTEGER NOT NULL CHECK (nota >= 1 AND nota <= 5),
+    comentario TEXT,
+    status VARCHAR(50) NOT NULL DEFAULT 'ativo',
+    momento_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clients(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (empresa_id) REFERENCES companies(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+-- =============================================================================
+-- INDEXES FOR FEEDBACKS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_feedbacks_cliente_id ON feedbacks(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_empresa_id ON feedbacks(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_reserva_id ON feedbacks(reserva_id);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_nota ON feedbacks(nota);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_status ON feedbacks(status);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_momento_criacao ON feedbacks(momento_criacao);
+
+-- =============================================================================
+-- COMMENTS FOR DOCUMENTATION
+-- =============================================================================
+
+COMMENT ON TABLE feedbacks IS 'Tabela para armazenar feedbacks e avaliações de clientes sobre empresas';
+COMMENT ON COLUMN feedbacks.nota IS 'Nota de avaliação de 1 a 5 estrelas';
+COMMENT ON COLUMN feedbacks.status IS 'Status do feedback: ativo, inativo ou moderado';
