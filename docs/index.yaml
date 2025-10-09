@@ -57,6 +57,18 @@ paths:
     $ref: './paths/tours/tour_operations.yaml'
   /jampa-trip/api/v1/tours/my-tours:
     $ref: './paths/tours/my_tours.yaml'
+  
+  # FEEDBACKS
+  /jampa-trip/api/v1/feedback:
+    $ref: './paths/feedback/feedbacks.yaml'
+  /jampa-trip/api/v1/feedback/{id}:
+    $ref: './paths/feedback/feedback_operations.yaml'
+  /jampa-trip/api/v1/feedback/average-rating:
+    $ref: './paths/feedback/average_rating.yaml'
+  /jampa-trip/api/v1/feedback/rating-distribution:
+    $ref: './paths/feedback/rating_distribution.yaml'
+  /jampa-trip/api/v1/feedback/recent:
+    $ref: './paths/feedback/recent_feedbacks.yaml'
 
 components:
   schemas:
