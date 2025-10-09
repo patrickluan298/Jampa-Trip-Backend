@@ -60,14 +60,23 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.DELETE("/tours/:id", handler.TourHandler{}.Delete)
 	protected.GET("/tours/my-tours", handler.TourHandler{}.GetMyTours)
 
-	// FEEDBACK AND COMMENTS
-	e.POST("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.Create)
-	e.GET("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Get)
-	e.GET("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.List)
-	e.PUT("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Update)
-	e.GET("/jampa-trip/api/v1/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
-	e.GET("/jampa-trip/api/v1/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
-	e.GET("/jampa-trip/api/v1/feedback/recent", handler.FeedbackHandler{}.GetRecent)
+	// IMAGE UPLOAD
+	protected.POST("/upload/images", handler.ImageHandler{}.UploadImages)
+	protected.GET("/upload/images", handler.ImageHandler{}.ListImages)
+	protected.DELETE("/upload/images/:id", handler.ImageHandler{}.DeleteImage)
+	protected.PUT("/upload/images/:id", handler.ImageHandler{}.UpdateImage)
+	protected.POST("/upload/images/reorder", handler.ImageHandler{}.ReorderImages)
+	protected.GET("/upload/images/:id/info", handler.ImageHandler{}.GetImageInfo)
+	protected.POST("/upload/images/batch-delete", handler.ImageHandler{}.BatchDeleteImages)
+
+	// FEEDBACK
+	protected.POST("/feedback", handler.FeedbackHandler{}.Create)
+	protected.GET("/feedback/:id", handler.FeedbackHandler{}.Get)
+	protected.GET("/feedback", handler.FeedbackHandler{}.List)
+	protected.PUT("/feedback/:id", handler.FeedbackHandler{}.Update)
+	protected.GET("/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
+	protected.GET("/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
+	protected.GET("/feedback/recent", handler.FeedbackHandler{}.GetRecent)
 
 	// RESERVATIONS
 	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)

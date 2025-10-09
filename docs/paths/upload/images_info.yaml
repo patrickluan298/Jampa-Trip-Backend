@@ -1,0 +1,65 @@
+get:
+  tags:
+    - Upload
+  summary: Informações detalhadas de uma imagem
+  description: |
+    Endpoint para obter informações detalhadas de uma imagem específica.
+    Inclui metadados completos e informações de uso.
+  security:
+    - BearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      description: ID da imagem
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    '200':
+      description: Informações da imagem
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              image:
+                $ref: '#/components/schemas/ImageResponse'
+              usage:
+                type: object
+                properties:
+                  tour_name:
+                    type: string
+                    description: Nome do passeio associado
+                    example: "Passeio pela Praia de Tambaba"
+                  is_used:
+                    type: boolean
+                    description: Se a imagem está sendo usada
+                    example: true
+    '404':
+      description: Imagem não encontrada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Imagem não encontrada"
+    '403':
+      description: Acesso negado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Você não tem permissão para acessar esta imagem"
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

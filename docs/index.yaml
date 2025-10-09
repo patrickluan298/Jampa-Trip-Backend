@@ -57,7 +57,7 @@ paths:
     $ref: './paths/tours/tour_operations.yaml'
   /jampa-trip/api/v1/tours/my-tours:
     $ref: './paths/tours/my_tours.yaml'
-
+  
   # FEEDBACKS
   /jampa-trip/api/v1/feedback:
     $ref: './paths/feedback/feedbacks.yaml'
@@ -72,62 +72,7 @@ paths:
 
 components:
   schemas:
-    PaymentResponse:
-      $ref: './components/schemas.yaml#/PaymentResponse'
-    PaymentMethodsResponse:
-      $ref: './components/schemas.yaml#/PaymentMethodsResponse'
-    PaymentMethodInfo:
-      $ref: './components/schemas.yaml#/PaymentMethodInfo'
-    PaymentMethodSetting:
-      $ref: './components/schemas.yaml#/PaymentMethodSetting'
-    CardNumberSetting:
-      $ref: './components/schemas.yaml#/CardNumberSetting'
-    BinSetting:
-      $ref: './components/schemas.yaml#/BinSetting'
-    SecurityCodeSetting:
-      $ref: './components/schemas.yaml#/SecurityCodeSetting'
-    FinancialInstitution:
-      $ref: './components/schemas.yaml#/FinancialInstitution'
-    ErrorResponse:
-      $ref: './components/schemas.yaml#/ErrorResponse'
-    LoginUnifiedRequest:
-      $ref: './components/schemas.yaml#/LoginUnifiedRequest'
-    LoginResponse:
-      $ref: './components/schemas.yaml#/LoginResponse'
-    UserLoginData:
-      $ref: './components/schemas.yaml#/UserLoginData'
-    CreateClientRequest:
-      $ref: './components/schemas.yaml#/CreateClientRequest'
-    CreateCompanyRequest:
-      $ref: './components/schemas.yaml#/CreateCompanyRequest'
-    RefreshTokenRequest:
-      $ref: './components/schemas.yaml#/RefreshTokenRequest'
-    RefreshTokenResponse:
-      $ref: './components/schemas.yaml#/RefreshTokenResponse'
-    Company:
-      $ref: './components/schemas.yaml#/Company'
-    Pagination:
-      $ref: './components/schemas.yaml#/Pagination'
-    CreateTourRequest:
-      $ref: './components/schemas.yaml#/CreateTourRequest'
-    UpdateTourRequest:
-      $ref: './components/schemas.yaml#/UpdateTourRequest'
-    TourResponse:
-      $ref: './components/schemas.yaml#/TourResponse'
-    CreateTourResponse:
-      $ref: './components/schemas.yaml#/CreateTourResponse'
-    UpdateTourResponse:
-      $ref: './components/schemas.yaml#/UpdateTourResponse'
-    ListToursResponse:
-      $ref: './components/schemas.yaml#/ListToursResponse'
-    MyTourResponse:
-      $ref: './components/schemas.yaml#/MyTourResponse'
-    GetMyToursResponse:
-      $ref: './components/schemas.yaml#/GetMyToursResponse'
-    DeleteTourResponse:
-      $ref: './components/schemas.yaml#/DeleteTourResponse'
-    PaginationResponse:
-      $ref: './components/schemas.yaml#/PaginationResponse'
+    $ref: './components/schemas.yaml'
   securitySchemes:
     bearerAuth:
       type: http

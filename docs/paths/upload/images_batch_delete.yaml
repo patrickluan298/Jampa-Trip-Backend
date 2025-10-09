@@ -1,0 +1,110 @@
+post:
+  tags:
+    - Upload
+  summary: Deletar múltiplas imagens
+  description: |
+    Endpoint para deletar múltiplas imagens de uma vez.
+    Retorna relatório de sucessos e falhas.
+    Máximo de 100 imagens por operação.
+  security:
+    - BearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - image_ids
+          properties:
+            image_ids:
+              type: array
+              items:
+                type: integer
+              description: Array de IDs das imagens para deletar
+              minItems: 1
+              maxItems: 100
+              example: [1, 2, 3]
+  responses:
+    '200':
+      description: Resultado da exclusão em lote
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              deleted_count:
+                type: integer
+                description: Número de imagens deletadas com sucesso
+                example: 3
+              failed_count:
+                type: integer
+                description: Número de imagens que falharam
+                example: 0
+              message:
+                type: string
+                description: Mensagem descritiva do resultado
+                example: "3 imagens deletadas com sucesso"
+              errors:
+                type: array
+                description: Lista de erros para imagens que falharam
+                items:
+                  type: object
+                  properties:
+                    image_id:
+                      type: integer
+                      description: ID da imagem que falhou
+                      example: 3
+                    error:
+                      type: string
+                      description: Descrição do erro
+                      example: "Imagem está sendo usada em passeio ativo"
+          examples:
+            success:
+              summary: Sucesso total
+              value:
+                success: true
+                deleted_count: 3
+                failed_count: 0
+                message: "3 imagens deletadas com sucesso"
+            partial_success:
+              summary: Sucesso parcial
+              value:
+                success: true
+                deleted_count: 2
+                failed_count: 1
+                message: "2 imagens deletadas, 1 falhou"
+                errors:
+                  - image_id: 3
+                    error: "Imagem está sendo usada em passeio ativo"
+    '400':
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            empty_list:
+              summary: Lista vazia
+              value:
+                success: false
+                error: "image_ids não pode estar vazio"
+            too_many_images:
+              summary: Muitas imagens
+              value:
+                success: false
+                error: "Máximo de 100 imagens por exclusão em lote"
+            invalid_ids:
+              summary: IDs inválidos
+              value:
+                success: false
+                error: "todos os image_ids devem ser números positivos"
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,326 @@
+post:
+  tags:
+    - Upload
+  summary: Upload de múltiplas imagens
+  description: |
+    Endpoint para upload de múltiplas imagens para passeios.
+    Apenas empresas podem fazer upload de imagens.
+    
+    **Validações:**
+    - Máximo 10 imagens por upload
+    - Tamanho máximo: 10MB por imagem
+    - Formatos aceitos: jpg, jpeg, png, gif, webp
+    - Usuário deve estar autenticado como empresa
+  security:
+    - BearerAuth: []
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            images[]:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Arquivos de imagem para upload
+              maxItems: 10
+            tour_id:
+              type: integer
+              description: ID do passeio (opcional)
+              example: 1
+            description:
+              type: string
+              description: Descrição das imagens (opcional)
+              maxLength: 500
+              example: "Imagens do passeio pela praia de Tambaba"
+        encoding:
+          images[]:
+            contentType: image/jpeg, image/png, image/gif, image/webp
+  responses:
+    '201':
+      description: Imagens enviadas com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              images:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImageResponse'
+              total_uploaded:
+                type: integer
+                description: Número total de imagens enviadas
+                example: 2
+              total_size:
+                type: integer
+                description: Tamanho total em bytes
+                example: 3584576
+    '400':
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_files:
+              summary: Arquivos inválidos
+              value:
+                success: false
+                error: "Arquivos inválidos"
+                message: "Formato não suportado. Use JPG, PNG, GIF ou WEBP"
+            too_many_files:
+              summary: Muitos arquivos
+              value:
+                success: false
+                error: "Muitos arquivos"
+                message: "Máximo de 10 imagens por upload"
+    '413':
+      description: Arquivo muito grande
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Arquivo muito grande"
+            message: "Tamanho máximo permitido: 10MB por imagem"
+    '403':
+      description: Acesso negado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Acesso negado"
+            message: "Apenas empresas podem fazer upload de imagens"
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+get:
+  tags:
+    - Upload
+  summary: Listar imagens do usuário
+  description: |
+    Endpoint para listar imagens do usuário logado com filtros opcionais.
+  security:
+    - BearerAuth: []
+  parameters:
+    - name: tour_id
+      in: query
+      description: Filtrar por passeio específico
+      required: false
+      schema:
+        type: integer
+        example: 1
+    - name: page
+      in: query
+      description: Número da página
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+        example: 1
+    - name: limit
+      in: query
+      description: Itens por página
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+        example: 20
+    - name: format
+      in: query
+      description: Filtrar por formato
+      required: false
+      schema:
+        type: string
+        enum: [jpg, jpeg, png, gif, webp]
+        example: jpg
+  responses:
+    '200':
+      description: Lista de imagens
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              images:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImageResponse'
+              pagination:
+                $ref: '#/components/schemas/PaginationResponse'
+    '400':
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+delete:
+  tags:
+    - Upload
+  summary: Deletar imagem específica
+  description: |
+    Endpoint para deletar uma imagem específica.
+    Verifica se a imagem pertence ao usuário e se não está sendo usada em passeio ativo.
+  security:
+    - BearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      description: ID da imagem
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    '200':
+      description: Imagem deletada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Imagem deletada com sucesso"
+    '404':
+      description: Imagem não encontrada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Imagem não encontrada"
+            message: "A imagem solicitada não existe"
+    '403':
+      description: Acesso negado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Acesso negado"
+            message: "Você só pode deletar suas próprias imagens"
+    '409':
+      description: Não é possível deletar
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Não é possível deletar"
+            message: "Imagem está sendo usada em um passeio ativo"
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+put:
+  tags:
+    - Upload
+  summary: Atualizar metadados de imagem
+  description: |
+    Endpoint para atualizar metadados de uma imagem.
+    Se is_primary=true, remove a flag de outras imagens do mesmo passeio.
+  security:
+    - BearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      description: ID da imagem
+      required: true
+      schema:
+        type: integer
+        example: 1
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            description:
+              type: string
+              description: Descrição da imagem
+              maxLength: 500
+              example: "Vista panorâmica da praia de Tambaba"
+            alt_text:
+              type: string
+              description: Texto alternativo para acessibilidade
+              maxLength: 255
+              example: "Praia de Tambaba vista do alto"
+            is_primary:
+              type: boolean
+              description: Se esta é a imagem principal do passeio
+              example: true
+  responses:
+    '200':
+      description: Imagem atualizada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              image:
+                $ref: '#/components/schemas/ImageResponse'
+    '400':
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '404':
+      description: Imagem não encontrada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '403':
+      description: Acesso negado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

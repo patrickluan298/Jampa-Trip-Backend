@@ -37,10 +37,10 @@ func (r *FeedbackRepository) Create(feedback *model.Feedback) error {
 }
 
 // GetByID - busca um feedback pelo ID
-func (r *FeedbackRepository) GetByID(id int) (*model.Feedback, error) {
+func (r *FeedbackRepository) GetByID(ID int) (*model.Feedback, error) {
 	feedback := &model.Feedback{}
 
-	err := r.DB.Raw(query.GetFeedbackByID, id).Row().Scan(
+	err := r.DB.Raw(query.GetFeedbackByID, ID).Row().Scan(
 		&feedback.ID,
 		&feedback.ClienteID,
 		&feedback.EmpresaID,
@@ -63,7 +63,6 @@ func (r *FeedbackRepository) GetByID(id int) (*model.Feedback, error) {
 func (r *FeedbackRepository) GetByClienteID(clienteID int, page, limit int) ([]model.Feedback, int64, error) {
 	offset := (page - 1) * limit
 
-	// Buscar registros
 	rows, err := r.DB.Raw(query.GetFeedbacksByClienteID, clienteID, limit, offset).Rows()
 	if err != nil {
 		return nil, 0, err
@@ -90,10 +89,8 @@ func (r *FeedbackRepository) GetByClienteID(clienteID int, page, limit int) ([]m
 		feedbacks = append(feedbacks, feedback)
 	}
 
-	// Contar total
 	var total int64
-	err = r.DB.Raw(query.CountFeedbacksByClienteID, clienteID).Row().Scan(&total)
-	if err != nil {
+	if err = r.DB.Raw(query.CountFeedbacksByClienteID, clienteID).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
@@ -104,7 +101,6 @@ func (r *FeedbackRepository) GetByClienteID(clienteID int, page, limit int) ([]m
 func (r *FeedbackRepository) GetByEmpresaID(empresaID int, page, limit int) ([]model.Feedback, int64, error) {
 	offset := (page - 1) * limit
 
-	// Buscar registros
 	rows, err := r.DB.Raw(query.GetFeedbacksByEmpresaID, empresaID, limit, offset).Rows()
 	if err != nil {
 		return nil, 0, err
@@ -131,10 +127,8 @@ func (r *FeedbackRepository) GetByEmpresaID(empresaID int, page, limit int) ([]m
 		feedbacks = append(feedbacks, feedback)
 	}
 
-	// Contar total
 	var total int64
-	err = r.DB.Raw(query.CountFeedbacksByEmpresaID, empresaID).Row().Scan(&total)
-	if err != nil {
+	if err = r.DB.Raw(query.CountFeedbacksByEmpresaID, empresaID).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
@@ -145,7 +139,6 @@ func (r *FeedbackRepository) GetByEmpresaID(empresaID int, page, limit int) ([]m
 func (r *FeedbackRepository) GetByStatus(status string, page, limit int) ([]model.Feedback, int64, error) {
 	offset := (page - 1) * limit
 
-	// Buscar registros
 	rows, err := r.DB.Raw(query.GetFeedbacksByStatus, status, limit, offset).Rows()
 	if err != nil {
 		return nil, 0, err
@@ -172,10 +165,8 @@ func (r *FeedbackRepository) GetByStatus(status string, page, limit int) ([]mode
 		feedbacks = append(feedbacks, feedback)
 	}
 
-	// Contar total
 	var total int64
-	err = r.DB.Raw(query.CountFeedbacksByStatus, status).Row().Scan(&total)
-	if err != nil {
+	if err = r.DB.Raw(query.CountFeedbacksByStatus, status).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
@@ -186,7 +177,6 @@ func (r *FeedbackRepository) GetByStatus(status string, page, limit int) ([]mode
 func (r *FeedbackRepository) GetByRating(rating int, page, limit int) ([]model.Feedback, int64, error) {
 	offset := (page - 1) * limit
 
-	// Buscar registros
 	rows, err := r.DB.Raw(query.GetFeedbacksByRating, rating, limit, offset).Rows()
 	if err != nil {
 		return nil, 0, err
@@ -213,10 +203,8 @@ func (r *FeedbackRepository) GetByRating(rating int, page, limit int) ([]model.F
 		feedbacks = append(feedbacks, feedback)
 	}
 
-	// Contar total
 	var total int64
-	err = r.DB.Raw(query.CountFeedbacksByRating, rating).Row().Scan(&total)
-	if err != nil {
+	if err = r.DB.Raw(query.CountFeedbacksByRating, rating).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
@@ -258,8 +246,7 @@ func (r *FeedbackRepository) GetAverageRating(empresaID int) (float64, int, erro
 	var average float64
 	var count int
 
-	err := r.DB.Raw(query.GetAverageRating, empresaID, string(model.StatusFeedbackAtivo)).Row().Scan(&average, &count)
-	if err != nil {
+	if err := r.DB.Raw(query.GetAverageRating, empresaID, string(model.StatusFeedbackAtivo)).Row().Scan(&average, &count); err != nil {
 		return 0, 0, err
 	}
 
@@ -278,8 +265,7 @@ func (r *FeedbackRepository) GetRatingDistribution(empresaID int) (map[int]int, 
 	for rows.Next() {
 		var nota int
 		var count int
-		err := rows.Scan(&nota, &count)
-		if err != nil {
+		if err := rows.Scan(&nota, &count); err != nil {
 			return nil, err
 		}
 		distribution[nota] = count
@@ -293,7 +279,6 @@ func (r *FeedbackRepository) GetRecentFeedbacks(empresaID int, days int, page, l
 	offset := (page - 1) * limit
 	since := time.Now().AddDate(0, 0, -days)
 
-	// Buscar registros
 	rows, err := r.DB.Raw(query.GetRecentFeedbacks, empresaID, since, limit, offset).Rows()
 	if err != nil {
 		return nil, 0, err
@@ -320,10 +305,8 @@ func (r *FeedbackRepository) GetRecentFeedbacks(empresaID int, days int, page, l
 		feedbacks = append(feedbacks, feedback)
 	}
 
-	// Contar total
 	var total int64
-	err = r.DB.Raw(query.CountRecentFeedbacks, empresaID, since).Row().Scan(&total)
-	if err != nil {
+	if err = r.DB.Raw(query.CountRecentFeedbacks, empresaID, since).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
