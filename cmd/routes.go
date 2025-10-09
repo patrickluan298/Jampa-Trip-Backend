@@ -60,6 +60,15 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.DELETE("/tours/:id", handler.TourHandler{}.Delete)
 	protected.GET("/tours/my-tours", handler.TourHandler{}.GetMyTours)
 
+	// FEEDBACK AND COMMENTS
+	e.POST("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.Create)
+	e.GET("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Get)
+	e.GET("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.List)
+	e.PUT("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Update)
+	e.GET("/jampa-trip/api/v1/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
+	e.GET("/jampa-trip/api/v1/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
+	e.GET("/jampa-trip/api/v1/feedback/recent", handler.FeedbackHandler{}.GetRecent)
+
 	// RESERVATIONS
 	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)
 	// e.GET("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Get)
@@ -68,13 +77,4 @@ func ConfigureRoutes(e *echo.Echo) {
 	// e.PUT("/jampa-trip/api/v1/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
 	// e.GET("/jampa-trip/api/v1/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
 	// e.GET("/jampa-trip/api/v1/reservations/history", handler.ReservaHandler{}.GetHistory)
-
-	// FEEDBACK AND COMMENTS
-	// e.POST("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.Create)
-	// e.GET("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Get)
-	// e.GET("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.List)
-	// e.PUT("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Update)
-	// e.GET("/jampa-trip/api/v1/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
-	// e.GET("/jampa-trip/api/v1/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
-	// e.GET("/jampa-trip/api/v1/feedback/recent", handler.FeedbackHandler{}.GetRecent)
 }
