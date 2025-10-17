@@ -27,7 +27,7 @@ func (r *ReservaRepository) Create(reserva *model.Reserva) error {
 // GetByID - busca uma reserva pelo ID
 func (r *ReservaRepository) GetByID(id int) (*model.Reserva, error) {
 	var reserva model.Reserva
-	err := r.DB.Preload("Cliente").Preload("Empresa").Preload("Pagamento").First(&reserva, id).Error
+	err := r.DB.Preload("Tour").Preload("Cliente").Preload("Pagamento").First(&reserva, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -43,13 +43,11 @@ func (r *ReservaRepository) GetByClienteID(clienteID int, page, limit int) ([]mo
 
 	query := r.DB.Model(&model.Reserva{}).Where("cliente_id = ?", clienteID)
 
-	// Contar total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Pagamento").
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
 		Offset(offset).Limit(limit).
 		Order("momento_criacao DESC").
 		Find(&reservas).Error
@@ -57,24 +55,45 @@ func (r *ReservaRepository) GetByClienteID(clienteID int, page, limit int) ([]mo
 	return reservas, total, err
 }
 
-// GetByEmpresaID - busca reservas por empresa
-func (r *ReservaRepository) GetByEmpresaID(empresaID int, page, limit int) ([]model.Reserva, int64, error) {
+// GetByTourID - busca reservas por tour
+func (r *ReservaRepository) GetByTourID(tourID int, page, limit int) ([]model.Reserva, int64, error) {
 	var reservas []model.Reserva
 	var total int64
 
 	offset := (page - 1) * limit
 
-	query := r.DB.Model(&model.Reserva{}).Where("empresa_id = ?", empresaID)
+	query := r.DB.Model(&model.Reserva{}).Where("tour_id = ?", tourID)
 
-	// Contar total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Pagamento").
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
 		Offset(offset).Limit(limit).
 		Order("momento_criacao DESC").
+		Find(&reservas).Error
+
+	return reservas, total, err
+}
+
+// GetByCompanyID - busca reservas por empresa (via tours)
+func (r *ReservaRepository) GetByCompanyID(companyID int, page, limit int) ([]model.Reserva, int64, error) {
+	var reservas []model.Reserva
+	var total int64
+
+	offset := (page - 1) * limit
+
+	query := r.DB.Model(&model.Reserva{}).
+		Joins("INNER JOIN tours ON tours.id = reservations.tour_id").
+		Where("tours.company_id = ?", companyID)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
+		Offset(offset).Limit(limit).
+		Order("reservations.momento_criacao DESC").
 		Find(&reservas).Error
 
 	return reservas, total, err
@@ -89,13 +108,11 @@ func (r *ReservaRepository) GetByStatus(status string, page, limit int) ([]model
 
 	query := r.DB.Model(&model.Reserva{}).Where("status = ?", status)
 
-	// Contar total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Pagamento").
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
 		Offset(offset).Limit(limit).
 		Order("momento_criacao DESC").
 		Find(&reservas).Error
@@ -140,17 +157,15 @@ func (r *ReservaRepository) GetByDateRange(startDate, endDate time.Time, page, l
 
 	offset := (page - 1) * limit
 
-	query := r.DB.Model(&model.Reserva{}).Where("data_passeio BETWEEN ? AND ?", startDate, endDate)
+	query := r.DB.Model(&model.Reserva{}).Where("data_passeio_selecionada BETWEEN ? AND ?", startDate, endDate)
 
-	// Contar total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Pagamento").
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
 		Offset(offset).Limit(limit).
-		Order("data_passeio ASC").
+		Order("data_passeio_selecionada ASC").
 		Find(&reservas).Error
 
 	return reservas, total, err
@@ -164,17 +179,15 @@ func (r *ReservaRepository) GetUpcoming(clienteID int, page, limit int) ([]model
 	offset := (page - 1) * limit
 	now := time.Now()
 
-	query := r.DB.Model(&model.Reserva{}).Where("cliente_id = ? AND data_passeio > ?", clienteID, now)
+	query := r.DB.Model(&model.Reserva{}).Where("cliente_id = ? AND data_passeio_selecionada > ?", clienteID, now)
 
-	// Contar total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Pagamento").
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
 		Offset(offset).Limit(limit).
-		Order("data_passeio ASC").
+		Order("data_passeio_selecionada ASC").
 		Find(&reservas).Error
 
 	return reservas, total, err
@@ -188,17 +201,15 @@ func (r *ReservaRepository) GetHistory(clienteID int, page, limit int) ([]model.
 	offset := (page - 1) * limit
 	now := time.Now()
 
-	query := r.DB.Model(&model.Reserva{}).Where("cliente_id = ? AND data_passeio <= ?", clienteID, now)
+	query := r.DB.Model(&model.Reserva{}).Where("cliente_id = ? AND data_passeio_selecionada <= ?", clienteID, now)
 
-	// Contar total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Pagamento").
+	err := query.Preload("Tour").Preload("Cliente").Preload("Pagamento").
 		Offset(offset).Limit(limit).
-		Order("data_passeio DESC").
+		Order("data_passeio_selecionada DESC").
 		Find(&reservas).Error
 
 	return reservas, total, err

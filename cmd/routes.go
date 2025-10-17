@@ -79,11 +79,11 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.GET("/feedback/recent", handler.FeedbackHandler{}.GetRecent)
 
 	// RESERVATIONS
-	// protected.POST("/reservations", handler.ReservaHandler{}.Create)
-	// protected.GET("/reservations/:id", handler.ReservaHandler{}.Get)
-	// protected.GET("/reservations", handler.ReservaHandler{}.List)
-	// protected.PUT("/reservations/:id", handler.ReservaHandler{}.Update)
-	// protected.PUT("/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
-	// protected.GET("/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
-	// protected.GET("/reservations/history", handler.ReservaHandler{}.GetHistory)
+	protected.POST("/reservations", handler.ReservationHandler{}.Create)
+	protected.GET("/reservations/:id", handler.ReservationHandler{}.Get)
+	protected.GET("/reservations", handler.ReservationHandler{}.List)
+	protected.PUT("/reservations/:id", handler.ReservationHandler{}.Update)
+	protected.PUT("/reservations/:id/cancel", handler.ReservationHandler{}.Cancel)
+	protected.GET("/reservations/upcoming", handler.ReservationHandler{}.GetUpcoming)
+	protected.GET("/reservations/history", handler.ReservationHandler{}.GetHistory)
 }

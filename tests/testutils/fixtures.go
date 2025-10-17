@@ -139,3 +139,38 @@ func (f *Fixtures) WeakPassword() string {
 func (f *Fixtures) StrongPassword() string {
 	return "StrongPassword123!"
 }
+
+// Reserva returns a test reservation
+func (f *Fixtures) Reserva() *model.Reserva {
+	now := time.Now()
+	futureDate := now.AddDate(0, 0, 7)
+
+	return &model.Reserva{
+		ID:                     1,
+		TourID:                 1,
+		ClienteID:              1,
+		PagamentoID:            0,
+		Status:                 "pendente",
+		DataReserva:            now,
+		DataPasseioSelecionada: futureDate,
+		QuantidadePessoas:      2,
+		ValorTotal:             200.00,
+		Observacoes:            "Reserva de teste",
+		MomentoCriacao:         now,
+		MomentoAtualizacao:     now,
+		MomentoCancelamento:    nil,
+	}
+}
+
+// ValidReservaRequest returns a valid reservation creation request
+func (f *Fixtures) ValidReservaRequest() map[string]interface{} {
+	futureDate := time.Now().AddDate(0, 0, 7).Format("2006-01-02")
+
+	return map[string]interface{}{
+		"tour_id":                  1,
+		"cliente_id":               1,
+		"data_passeio_selecionada": futureDate,
+		"quantidade_pessoas":       2,
+		"observacoes":              "Reserva de teste",
+	}
+}

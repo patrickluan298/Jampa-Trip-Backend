@@ -1,9 +1,6 @@
--- =============================================================================
--- JAMPA TRIP DATABASE INITIALIZATION SCRIPT
--- =============================================================================
--- This file is automatically executed when the PostgreSQL container is 
--- started for the first time
--- =============================================================================
+-- =================================================================================================
+-- This file is automatically executed when the PostgreSQL container is started for the first time.
+-- =================================================================================================
 
 -- Connect to database
 \c jampa_trip_db;
@@ -143,7 +140,6 @@ ALTER TABLE images ADD CONSTRAINT chk_images_sort_order CHECK (sort_order >= 0);
 -- FUNCTIONS FOR IMAGES
 -- =============================================================================
 
--- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_images_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -152,11 +148,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to ensure only one primary image per tour
 CREATE OR REPLACE FUNCTION ensure_single_primary_image()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- If setting is_primary to true, remove primary flag from other images in the same tour
     IF NEW.is_primary = TRUE AND NEW.tour_id IS NOT NULL THEN
         UPDATE images 
         SET is_primary = FALSE, updated_at = CURRENT_TIMESTAMP
@@ -173,13 +167,11 @@ $$ LANGUAGE plpgsql;
 -- TRIGGERS FOR IMAGES
 -- =============================================================================
 
--- Trigger to automatically update updated_at
 CREATE TRIGGER trigger_update_images_updated_at
     BEFORE UPDATE ON images
     FOR EACH ROW
     EXECUTE FUNCTION update_images_updated_at();
 
--- Trigger to ensure single primary image per tour
 CREATE TRIGGER trigger_ensure_single_primary_image
     BEFORE INSERT OR UPDATE ON images
     FOR EACH ROW
@@ -189,7 +181,6 @@ CREATE TRIGGER trigger_ensure_single_primary_image
 -- VIEWS FOR IMAGES
 -- =============================================================================
 
--- View for image statistics
 CREATE OR REPLACE VIEW image_stats AS
 SELECT 
     user_id,
@@ -206,7 +197,6 @@ SELECT
 FROM images
 GROUP BY user_id;
 
--- View for tour images with metadata
 CREATE OR REPLACE VIEW tour_images_with_metadata AS
 SELECT 
     i.*,
@@ -254,3 +244,161 @@ CREATE INDEX IF NOT EXISTS idx_feedbacks_momento_criacao ON feedbacks(momento_cr
 COMMENT ON TABLE feedbacks IS 'Tabela para armazenar feedbacks e avaliações de clientes sobre empresas';
 COMMENT ON COLUMN feedbacks.nota IS 'Nota de avaliação de 1 a 5 estrelas';
 COMMENT ON COLUMN feedbacks.status IS 'Status do feedback: ativo, inativo ou moderado';
+
+-- =============================================================================
+-- RESERVATIONS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS reservations (
+    id SERIAL PRIMARY KEY,
+    tour_id INTEGER NOT NULL,
+    cliente_id INTEGER NOT NULL,
+    pagamento_id INTEGER,
+    status VARCHAR(50) NOT NULL DEFAULT 'pendente',
+    data_reserva TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_passeio_selecionada DATE NOT NULL,
+    quantidade_pessoas INTEGER NOT NULL DEFAULT 1,
+    valor_total DECIMAL(10,2) NOT NULL,
+    observacoes TEXT,
+    momento_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_cancelamento TIMESTAMP,
+    
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (cliente_id) REFERENCES clients(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (pagamento_id) REFERENCES pagamentos(id) ON UPDATE CASCADE ON DELETE SET NULL,
+    
+    CONSTRAINT chk_reservations_quantidade_pessoas CHECK (quantidade_pessoas >= 1),
+    CONSTRAINT chk_reservations_valor_total CHECK (valor_total >= 0.01),
+    CONSTRAINT chk_reservations_status CHECK (status IN ('pendente', 'aguardando_pagamento', 'confirmada', 'cancelada', 'concluida'))
+);
+
+-- =============================================================================
+-- INDEXES FOR RESERVATIONS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_reservations_tour_id ON reservations(tour_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_cliente_id ON reservations(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_pagamento_id ON reservations(pagamento_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(status);
+CREATE INDEX IF NOT EXISTS idx_reservations_data_passeio ON reservations(data_passeio_selecionada);
+CREATE INDEX IF NOT EXISTS idx_reservations_momento_criacao ON reservations(momento_criacao);
+CREATE INDEX IF NOT EXISTS idx_reservations_tour_data ON reservations(tour_id, data_passeio_selecionada);
+
+-- =============================================================================
+-- FUNCTIONS FOR RESERVATIONS
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION update_reservations_momento_atualizacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.momento_atualizacao = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION validate_tour_availability()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_max_people INTEGER;
+    v_reserved_count INTEGER;
+BEGIN
+    SELECT max_people INTO v_max_people
+    FROM tours
+    WHERE id = NEW.tour_id;
+    
+    SELECT COALESCE(SUM(quantidade_pessoas), 0) INTO v_reserved_count
+    FROM reservations
+    WHERE tour_id = NEW.tour_id
+        AND data_passeio_selecionada = NEW.data_passeio_selecionada
+        AND status NOT IN ('cancelada')
+        AND id != COALESCE(NEW.id, 0);
+    
+    IF (v_reserved_count + NEW.quantidade_pessoas) > v_max_people THEN
+        RAISE EXCEPTION 'Não há vagas disponíveis para este tour na data selecionada. Vagas disponíveis: %, Solicitadas: %',
+            (v_max_people - v_reserved_count), NEW.quantidade_pessoas;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================================================
+-- TRIGGERS FOR RESERVATIONS
+-- =============================================================================
+
+CREATE TRIGGER trigger_update_reservations_momento_atualizacao
+    BEFORE UPDATE ON reservations
+    FOR EACH ROW
+    EXECUTE FUNCTION update_reservations_momento_atualizacao();
+
+CREATE TRIGGER trigger_validate_tour_availability
+    BEFORE INSERT OR UPDATE ON reservations
+    FOR EACH ROW
+    WHEN (NEW.status NOT IN ('cancelada'))
+    EXECUTE FUNCTION validate_tour_availability();
+
+-- =============================================================================
+-- VIEWS FOR RESERVATIONS
+-- =============================================================================
+
+CREATE OR REPLACE VIEW reservation_details AS
+SELECT 
+    r.id,
+    r.tour_id,
+    r.cliente_id,
+    r.pagamento_id,
+    r.status,
+    r.data_reserva,
+    r.data_passeio_selecionada,
+    r.quantidade_pessoas,
+    r.valor_total,
+    r.observacoes,
+    r.momento_criacao,
+    r.momento_atualizacao,
+    r.momento_cancelamento,
+    t.name as tour_name,
+    t.company_id as empresa_id,
+    c.name as cliente_name,
+    c.email as cliente_email,
+    comp.name as empresa_name,
+    p.status as pagamento_status
+FROM reservations r
+INNER JOIN tours t ON r.tour_id = t.id
+INNER JOIN clients c ON r.cliente_id = c.id
+INNER JOIN companies comp ON t.company_id = comp.id
+LEFT JOIN pagamentos p ON r.pagamento_id = p.id;
+
+CREATE OR REPLACE VIEW tour_availability_stats AS
+SELECT 
+    t.id as tour_id,
+    t.name as tour_name,
+    t.max_people,
+    r.data_passeio_selecionada,
+    COALESCE(SUM(CASE WHEN r.status NOT IN ('cancelada') THEN r.quantidade_pessoas ELSE 0 END), 0) as reserved_spots,
+    t.max_people - COALESCE(SUM(CASE WHEN r.status NOT IN ('cancelada') THEN r.quantidade_pessoas ELSE 0 END), 0) as available_spots,
+    COUNT(DISTINCT r.id) FILTER (WHERE r.status NOT IN ('cancelada')) as total_reservations
+FROM tours t
+LEFT JOIN reservations r ON t.id = r.tour_id
+GROUP BY t.id, t.name, t.max_people, r.data_passeio_selecionada;
+
+-- =============================================================================
+-- COMMENTS FOR DOCUMENTATION
+-- =============================================================================
+
+COMMENT ON TABLE reservations IS 'Tabela para armazenar reservas de tours feitas por clientes';
+COMMENT ON COLUMN reservations.tour_id IS 'ID do tour reservado';
+COMMENT ON COLUMN reservations.cliente_id IS 'ID do cliente que fez a reserva';
+COMMENT ON COLUMN reservations.pagamento_id IS 'ID do pagamento associado à reserva';
+COMMENT ON COLUMN reservations.status IS 'Status da reserva: pendente, aguardando_pagamento, confirmada, cancelada, concluida';
+COMMENT ON COLUMN reservations.data_passeio_selecionada IS 'Data específica do tour escolhida pelo cliente';
+COMMENT ON COLUMN reservations.quantidade_pessoas IS 'Número de pessoas incluídas na reserva';
+COMMENT ON COLUMN reservations.valor_total IS 'Valor total da reserva em BRL';
+
+-- =============================================================================
+-- ADD FOREIGN KEY FROM FEEDBACKS TO RESERVATIONS
+-- =============================================================================
+
+ALTER TABLE feedbacks
+ADD CONSTRAINT fk_feedbacks_reserva_id 
+FOREIGN KEY (reserva_id) REFERENCES reservations(id) ON UPDATE CASCADE ON DELETE SET NULL;
