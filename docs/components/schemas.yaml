@@ -470,7 +470,6 @@ Pagination:
       example: 10
       description: "Total de páginas"
 
-# Tour Schemas
 CreateTourRequest:
   type: object
   required:
@@ -787,3 +786,70 @@ PaginationResponse:
       type: integer
       example: 10
       description: "Itens por página"
+
+ImageResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      description: ID único da imagem
+      example: 1
+    filename:
+      type: string
+      description: Nome do arquivo gerado
+      example: "passeio_tambaba_1.jpg"
+    original_name:
+      type: string
+      description: Nome original do arquivo
+      example: "IMG_20240115_143022.jpg"
+    url:
+      type: string
+      description: URL pública da imagem
+      example: "https://storage.com/images/tour_1_image_1.jpg"
+    thumbnail_url:
+      type: string
+      description: URL pública do thumbnail
+      example: "https://storage.com/images/tour_1_image_1_thumb.jpg"
+    size:
+      type: integer
+      description: Tamanho do arquivo em bytes
+      example: 2048576
+    width:
+      type: integer
+      description: Largura da imagem em pixels
+      example: 1920
+    height:
+      type: integer
+      description: Altura da imagem em pixels
+      example: 1080
+    format:
+      type: string
+      description: Formato da imagem
+      enum: [jpg, jpeg, png, gif, webp]
+      example: "jpg"
+    description:
+      type: string
+      description: Descrição da imagem
+      example: "Vista panorâmica da praia de Tambaba"
+    alt_text:
+      type: string
+      description: Texto alternativo para acessibilidade
+      example: "Praia de Tambaba vista do alto"
+    is_primary:
+      type: boolean
+      description: Se é a imagem principal do passeio
+      example: true
+    tour_id:
+      type: integer
+      description: ID do passeio associado
+      example: 1
+    uploaded_at:
+      type: string
+      format: date-time
+      description: Data e hora do upload
+      example: "2024-01-15T14:30:00Z"
+    updated_at:
+      type: string
+      format: date-time
+      description: Data e hora da última atualização
+      example: "2024-01-15T15:30:00Z"

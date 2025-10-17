@@ -37,8 +37,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 
 			tokenStore := auth.NewRedisTokenStore()
 
-			err = tokenStore.ValidateAccessToken(claims.UserID, claims.UserType, tokenString)
-			if err != nil {
+			if err = tokenStore.ValidateAccessToken(claims.UserID, claims.UserType, tokenString); err != nil {
 				return webserver.ErrorResponse(c, util.WrapError("token não encontrado ou inválido", err, http.StatusUnauthorized))
 			}
 

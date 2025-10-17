@@ -1,0 +1,229 @@
+get:
+  tags:
+    - Feedbacks
+  summary: List Feedbacks
+  description: Lista feedbacks com filtros opcionais
+  operationId: listFeedbacks
+  parameters:
+    - name: cliente_id
+      in: query
+      description: ID do cliente
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+    - name: empresa_id
+      in: query
+      description: ID da empresa
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+    - name: status
+      in: query
+      description: Status do feedback
+      required: false
+      schema:
+        type: string
+        enum: [ativo, inativo, moderado]
+    - name: nota
+      in: query
+      description: Nota de avaliação (1-5)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    - name: page
+      in: query
+      description: Número da página
+      required: false
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+    - name: limit
+      in: query
+      description: Número de itens por página
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+  responses:
+    '200':
+      description: Lista de feedbacks retornada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              feedbacks:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    cliente_id:
+                      type: integer
+                      example: 1
+                    empresa_id:
+                      type: integer
+                      example: 1
+                    reserva_id:
+                      type: integer
+                      example: 1
+                    nota:
+                      type: integer
+                      example: 5
+                    comentario:
+                      type: string
+                      example: "Excelente passeio!"
+                    status:
+                      type: string
+                      example: "ativo"
+                    momento_criacao:
+                      type: string
+                      format: date-time
+                      example: "2024-01-01T10:00:00Z"
+                    momento_atualizacao:
+                      type: string
+                      format: date-time
+                      example: "2024-01-01T10:00:00Z"
+                    status_display:
+                      type: string
+                      example: "Ativo"
+                    rating_display:
+                      type: string
+                      example: "Excelente"
+              total:
+                type: integer
+                example: 100
+              page:
+                type: integer
+                example: 1
+              limit:
+                type: integer
+                example: 10
+              pages:
+                type: integer
+                example: 10
+    '400':
+      description: Parâmetros inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status_code: 400
+            message: "filtros de busca não especificados"
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+post:
+  tags:
+    - Feedbacks
+  summary: Create Feedback
+  description: Cria um novo feedback
+  operationId: createFeedback
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            cliente_id:
+              type: integer
+              description: ID do cliente
+              example: 1
+            empresa_id:
+              type: integer
+              description: ID da empresa
+              example: 1
+            reserva_id:
+              type: integer
+              description: ID da reserva (opcional)
+              example: 1
+            nota:
+              type: integer
+              description: Nota de avaliação (1-5)
+              minimum: 1
+              maximum: 5
+              example: 5
+            comentario:
+              type: string
+              description: Comentário do feedback
+              maxLength: 1000
+              example: "Passeio incrível, recomendo!"
+          required:
+            - cliente_id
+            - empresa_id
+            - nota
+  responses:
+    '200':
+      description: Feedback criado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              feedback:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  cliente_id:
+                    type: integer
+                    example: 1
+                  empresa_id:
+                    type: integer
+                    example: 1
+                  reserva_id:
+                    type: integer
+                    example: 1
+                  nota:
+                    type: integer
+                    example: 5
+                  comentario:
+                    type: string
+                    example: "Passeio incrível, recomendo!"
+                  status:
+                    type: string
+                    example: "ativo"
+                  momento_criacao:
+                    type: string
+                    format: date-time
+                  momento_atualizacao:
+                    type: string
+                    format: date-time
+                  status_display:
+                    type: string
+                    example: "Ativo"
+                  rating_display:
+                    type: string
+                    example: "Excelente"
+              message:
+                type: string
+                example: "Feedback criado com sucesso"
+    '400':
+      description: Dados inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+

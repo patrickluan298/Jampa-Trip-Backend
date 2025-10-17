@@ -43,6 +43,11 @@ func (h ClientHandler) Create(ctx echo.Context) error {
 // Update - realiza a atualização de um cliente existente
 func (h ClientHandler) Update(ctx echo.Context) error {
 
+	ID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return webserver.InvalidIDResponse(ctx, err)
+	}
+
 	request := &contract.UpdateClientRequest{}
 
 	if err := ctx.Bind(request); err != nil {
@@ -51,6 +56,8 @@ func (h ClientHandler) Update(ctx echo.Context) error {
 		}
 		return webserver.BadJSONResponse(ctx, err)
 	}
+
+	request.ID = ID
 
 	if err := request.Validate(); err != nil {
 		return webserver.ErrorResponse(ctx, err)

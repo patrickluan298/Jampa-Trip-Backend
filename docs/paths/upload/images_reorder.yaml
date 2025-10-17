@@ -1,0 +1,78 @@
+post:
+  tags:
+    - Upload
+  summary: Reordenar imagens de um passeio
+  description: |
+    Endpoint para reordenar imagens de um passeio específico.
+    Todas as imagens devem pertencer ao usuário e ao mesmo passeio.
+  security:
+    - BearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - image_ids
+            - tour_id
+          properties:
+            image_ids:
+              type: array
+              items:
+                type: integer
+              description: Array de IDs das imagens na nova ordem
+              minItems: 1
+              maxItems: 50
+              example: [3, 1, 2, 4]
+            tour_id:
+              type: integer
+              description: ID do passeio
+              minimum: 1
+              example: 1
+  responses:
+    '200':
+      description: Ordem das imagens atualizada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Ordem das imagens atualizada com sucesso"
+    '400':
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_request:
+              summary: Request inválido
+              value:
+                success: false
+                error: "image_ids não pode estar vazio"
+            invalid_tour:
+              summary: Passeio inválido
+              value:
+                success: false
+                error: "Todas as imagens devem pertencer ao mesmo passeio"
+    '403':
+      description: Acesso negado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Algumas imagens não foram encontradas ou não pertencem a você"
+    '401':
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

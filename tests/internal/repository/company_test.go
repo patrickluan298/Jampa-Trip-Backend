@@ -260,55 +260,68 @@ func TestCompanyRepository_Update(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		company  *model.Company
+		id       int
+		updates  map[string]interface{}
 		hasError bool
 	}{
 		{
-			name: "Valid company update",
-			company: &model.Company{
-				ID:        1,
-				Name:      "Empresa ABC Updated",
-				Email:     "empresa.updated@example.com",
-				Password:  "new_hashed_password",
-				CNPJ:      "12345678000195",
-				Phone:     "11999999999",
-				Address:   "Rua B, 456",
-				UpdatedAt: time.Now(),
+			name: "Update only name",
+			id:   1,
+			updates: map[string]interface{}{
+				"name":       "Empresa ABC Updated",
+				"updated_at": time.Now(),
+			},
+			hasError: false,
+		},
+		{
+			name: "Update only email",
+			id:   1,
+			updates: map[string]interface{}{
+				"email":      "empresa.updated@example.com",
+				"updated_at": time.Now(),
+			},
+			hasError: false,
+		},
+		{
+			name: "Update multiple fields",
+			id:   1,
+			updates: map[string]interface{}{
+				"name":       "Empresa ABC Updated",
+				"email":      "empresa.updated@example.com",
+				"phone":      "11988888888",
+				"address":    "Rua Nova, 999",
+				"updated_at": time.Now(),
+			},
+			hasError: false,
+		},
+		{
+			name: "Update with password",
+			id:   1,
+			updates: map[string]interface{}{
+				"password":   "new_hashed_password",
+				"updated_at": time.Now(),
 			},
 			hasError: false,
 		},
 		{
 			name: "Update non-existent company",
-			company: &model.Company{
-				ID:        999,
-				Name:      "Non-existent",
-				Email:     "nonexistent@example.com",
-				Password:  "hashed_password",
-				CNPJ:      "12345678000195",
-				Phone:     "11999999999",
-				Address:   "Rua C, 789",
-				UpdatedAt: time.Now(),
+			id:   999,
+			updates: map[string]interface{}{
+				"name":       "Non-existent",
+				"updated_at": time.Now(),
 			},
-			hasError: false, // Update operation doesn't fail if record doesn't exist
+			hasError: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mock.ExpectQuery(`UPDATE companies`).
-				WithArgs(
-					tt.company.Name,
-					tt.company.Email,
-					tt.company.Password,
-					tt.company.CNPJ,
-					tt.company.Phone,
-					tt.company.Address,
-					tt.company.UpdatedAt,
-					tt.company.ID,
-				).
-				WillReturnRows(sqlmock.NewRows([]string{}))
+			mock.ExpectBegin()
+			mock.ExpectExec(`UPDATE "companies"`).
+				WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectCommit()
 
-			err := repo.Update(tt.company)
+			err := repo.Update(tt.id, tt.updates)
 			if (err != nil) != tt.hasError {
 				t.Errorf("Update() error = %v, hasError = %v", err, tt.hasError)
 			}

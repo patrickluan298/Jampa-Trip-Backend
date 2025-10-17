@@ -24,17 +24,17 @@ func ConfigureRoutes(e *echo.Echo) {
 	e.POST("/jampa-trip/api/v1/companies", handler.CompanyHandler{}.Create)
 	e.POST("/jampa-trip/api/v1/clients", handler.ClientHandler{}.Create)
 
-	// GRUPO PROTEGIDO - todas as rotas abaixo precisam de autenticação JWT
+	// PROTECTED GROUP – all routes below require JWT authentication
 	protected := e.Group("/jampa-trip/api/v1")
 	protected.Use(middleware.JWTMiddleware())
 
-	// COMPANIES - Operações protegidas
-	protected.PUT("/companies/:id", handler.CompanyHandler{}.Update)
+	// COMPANIES
+	protected.PATCH("/companies/:id", handler.CompanyHandler{}.Update)
 	protected.GET("/companies", handler.CompanyHandler{}.List)
 	protected.GET("/companies/:id", handler.CompanyHandler{}.Get)
 
-	// CLIENTS - Operações protegidas
-	protected.PUT("/clients/:id", handler.ClientHandler{}.Update)
+	// CLIENTS
+	protected.PATCH("/clients/:id", handler.ClientHandler{}.Update)
 	protected.GET("/clients", handler.ClientHandler{}.List)
 	protected.GET("/clients/:id", handler.ClientHandler{}.Get)
 
@@ -60,21 +60,30 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.DELETE("/tours/:id", handler.TourHandler{}.Delete)
 	protected.GET("/tours/my-tours", handler.TourHandler{}.GetMyTours)
 
-	// RESERVATIONS
-	// e.POST("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.Create)
-	// e.GET("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Get)
-	// e.GET("/jampa-trip/api/v1/reservations", handler.ReservaHandler{}.List)
-	// e.PUT("/jampa-trip/api/v1/reservations/:id", handler.ReservaHandler{}.Update)
-	// e.PUT("/jampa-trip/api/v1/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
-	// e.GET("/jampa-trip/api/v1/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
-	// e.GET("/jampa-trip/api/v1/reservations/history", handler.ReservaHandler{}.GetHistory)
+	// IMAGE UPLOAD
+	protected.POST("/upload/images", handler.ImageHandler{}.UploadImages)
+	protected.GET("/upload/images", handler.ImageHandler{}.ListImages)
+	protected.DELETE("/upload/images/:id", handler.ImageHandler{}.DeleteImage)
+	protected.PUT("/upload/images/:id", handler.ImageHandler{}.UpdateImage)
+	protected.POST("/upload/images/reorder", handler.ImageHandler{}.ReorderImages)
+	protected.GET("/upload/images/:id/info", handler.ImageHandler{}.GetImageInfo)
+	protected.POST("/upload/images/batch-delete", handler.ImageHandler{}.BatchDeleteImages)
 
-	// FEEDBACK AND COMMENTS
-	// e.POST("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.Create)
-	// e.GET("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Get)
-	// e.GET("/jampa-trip/api/v1/feedback", handler.FeedbackHandler{}.List)
-	// e.PUT("/jampa-trip/api/v1/feedback/:id", handler.FeedbackHandler{}.Update)
-	// e.GET("/jampa-trip/api/v1/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
-	// e.GET("/jampa-trip/api/v1/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
-	// e.GET("/jampa-trip/api/v1/feedback/recent", handler.FeedbackHandler{}.GetRecent)
+	// FEEDBACK
+	protected.POST("/feedback", handler.FeedbackHandler{}.Create)
+	protected.GET("/feedback/:id", handler.FeedbackHandler{}.Get)
+	protected.GET("/feedback", handler.FeedbackHandler{}.List)
+	protected.PUT("/feedback/:id", handler.FeedbackHandler{}.Update)
+	protected.GET("/feedback/average-rating", handler.FeedbackHandler{}.GetAverageRating)
+	protected.GET("/feedback/rating-distribution", handler.FeedbackHandler{}.GetRatingDistribution)
+	protected.GET("/feedback/recent", handler.FeedbackHandler{}.GetRecent)
+
+	// RESERVATIONS
+	// protected.POST("/reservations", handler.ReservaHandler{}.Create)
+	// protected.GET("/reservations/:id", handler.ReservaHandler{}.Get)
+	// protected.GET("/reservations", handler.ReservaHandler{}.List)
+	// protected.PUT("/reservations/:id", handler.ReservaHandler{}.Update)
+	// protected.PUT("/reservations/:id/cancel", handler.ReservaHandler{}.Cancel)
+	// protected.GET("/reservations/upcoming", handler.ReservaHandler{}.GetUpcoming)
+	// protected.GET("/reservations/history", handler.ReservaHandler{}.GetHistory)
 }

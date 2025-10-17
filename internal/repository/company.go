@@ -80,20 +80,10 @@ func (receiver *CompanyRepository) Create(company *model.Company) error {
 	return err
 }
 
-// Update - atualiza uma empresa existente
-func (receiver *CompanyRepository) Update(company *model.Company) error {
-	err := receiver.DB.Raw(query.UpdateCompany,
-		company.Name,
-		company.Email,
-		company.Password,
-		company.CNPJ,
-		company.Phone,
-		company.Address,
-		company.UpdatedAt,
-		company.ID,
-	).Row().Scan()
-
-	return err
+// Update - atualiza os campos enviados no map
+func (receiver *CompanyRepository) Update(id int, updates map[string]interface{}) error {
+	result := receiver.DB.Model(&model.Company{}).Where("id = ?", id).Updates(updates)
+	return result.Error
 }
 
 // List - busca todas as empresas

@@ -21,21 +21,18 @@ func Logging() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
-			// Pula o endpoint de health check
 			if c.Request().RequestURI == "/health-check" {
 				return next(c)
 			}
 
 			start := time.Now()
 
-			// Lê o corpo da requisição
 			bodyBytes, err := io.ReadAll(c.Request().Body)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Erro ao processar a requisição")
 			}
 			c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
-			// Wrap response writer para capturar o corpo da resposta
 			responseBody := new(strings.Builder)
 			originalWriter := c.Response().Writer
 			wrapper := &responseWriterWrapper{
@@ -45,15 +42,12 @@ func Logging() echo.MiddlewareFunc {
 			}
 			c.Response().Writer = wrapper
 
-			// Executa o próximo handler
 			err = next(c)
 
-			// Calcula as métricas
 			latency := time.Since(start).Milliseconds()
 			statusCode := wrapper.statusCode
 			severity := mapStatusToSeverity(statusCode)
 
-			// Obtém o corpo da resposta (descomprime se gzipado)
 			responseBodyStr := responseBody.String()
 			if c.Response().Header().Get("Content-Encoding") == "gzip" {
 				if decompressed, err := decompressGzip(responseBodyStr); err == nil {
@@ -61,7 +55,6 @@ func Logging() echo.MiddlewareFunc {
 				}
 			}
 
-			// Constroi o payload do log
 			logPayload := LogPayload{
 				HTTPRequest: HTTPRequestLog{
 					Latency:       fmt.Sprintf("%dms", latency),
@@ -172,7 +165,6 @@ func RecoveryMiddleware() echo.MiddlewareFunc {
 		return func(c echo.Context) (err error) {
 			defer func() {
 				if r := recover(); r != nil {
-					// Captura o stack trace
 					stackTrace := string(debug.Stack())
 
 					logEntry := PanicLogPayload{
@@ -188,7 +180,6 @@ func RecoveryMiddleware() echo.MiddlewareFunc {
 						Timestamp: time.Now().Format(time.RFC3339),
 					}
 
-					// Imprime o log de panic no console
 					jsonLog, jsonErr := json.MarshalIndent(logEntry, "", "  ")
 					if jsonErr != nil {
 						log.Printf("[JAMPA-TRIP] Erro ao converter panic log para JSON: %v", jsonErr)
@@ -196,7 +187,6 @@ func RecoveryMiddleware() echo.MiddlewareFunc {
 						log.Printf("[JAMPA-TRIP] [CRITICAL] %s\n%s", time.Now().Format("2006-01-02 15:04:05"), string(jsonLog))
 					}
 
-					// Retorna uma resposta de erro genérica para o cliente
 					c.JSON(http.StatusInternalServerError, map[string]string{
 						"error": "Internal Server Error",
 					})

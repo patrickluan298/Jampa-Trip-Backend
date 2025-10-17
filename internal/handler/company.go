@@ -40,8 +40,13 @@ func (receiver CompanyHandler) Create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// Update - realiza a atualização de uma empresa existente
+// Update - realiza a atualização parcial de uma empresa existente (PATCH)
 func (receiver CompanyHandler) Update(ctx echo.Context) error {
+
+	ID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return webserver.InvalidIDResponse(ctx, err)
+	}
 
 	request := &contract.UpdateCompanyRequest{}
 
@@ -51,6 +56,8 @@ func (receiver CompanyHandler) Update(ctx echo.Context) error {
 		}
 		return webserver.BadJSONResponse(ctx, err)
 	}
+
+	request.ID = ID
 
 	if err := request.Validate(); err != nil {
 		return webserver.ErrorResponse(ctx, err)

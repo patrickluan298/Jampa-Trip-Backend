@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jampa_trip/internal/model"
+	"github.com/jampa_trip/internal/query"
 	"gorm.io/gorm"
 )
 
@@ -21,166 +22,253 @@ func FeedbackRepositoryNew(DB *gorm.DB) *FeedbackRepository {
 
 // Create - cria um novo feedback
 func (r *FeedbackRepository) Create(feedback *model.Feedback) error {
-	return r.DB.Create(feedback).Error
+	err := r.DB.Raw(query.CreateFeedback,
+		feedback.ClienteID,
+		feedback.EmpresaID,
+		feedback.ReservaID,
+		feedback.Nota,
+		feedback.Comentario,
+		feedback.Status,
+		feedback.MomentoCriacao,
+		feedback.MomentoAtualizacao,
+	).Row().Scan(&feedback.ID)
+
+	return err
 }
 
 // GetByID - busca um feedback pelo ID
-func (r *FeedbackRepository) GetByID(id int) (*model.Feedback, error) {
-	var feedback model.Feedback
-	err := r.DB.Preload("Cliente").Preload("Empresa").Preload("Reserva").First(&feedback, id).Error
+func (r *FeedbackRepository) GetByID(ID int) (*model.Feedback, error) {
+	feedback := &model.Feedback{}
+
+	err := r.DB.Raw(query.GetFeedbackByID, ID).Row().Scan(
+		&feedback.ID,
+		&feedback.ClienteID,
+		&feedback.EmpresaID,
+		&feedback.ReservaID,
+		&feedback.Nota,
+		&feedback.Comentario,
+		&feedback.Status,
+		&feedback.MomentoCriacao,
+		&feedback.MomentoAtualizacao,
+	)
+
 	if err != nil {
 		return nil, err
 	}
-	return &feedback, nil
+
+	return feedback, nil
 }
 
 // GetByClienteID - busca feedbacks por cliente
 func (r *FeedbackRepository) GetByClienteID(clienteID int, page, limit int) ([]model.Feedback, int64, error) {
-	var feedbacks []model.Feedback
-	var total int64
-
 	offset := (page - 1) * limit
 
-	query := r.DB.Model(&model.Feedback{}).Where("cliente_id = ?", clienteID)
+	rows, err := r.DB.Raw(query.GetFeedbacksByClienteID, clienteID, limit, offset).Rows()
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
 
-	// Contar total
-	if err := query.Count(&total).Error; err != nil {
+	var feedbacks []model.Feedback
+	for rows.Next() {
+		feedback := model.Feedback{}
+		err := rows.Scan(
+			&feedback.ID,
+			&feedback.ClienteID,
+			&feedback.EmpresaID,
+			&feedback.ReservaID,
+			&feedback.Nota,
+			&feedback.Comentario,
+			&feedback.Status,
+			&feedback.MomentoCriacao,
+			&feedback.MomentoAtualizacao,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		feedbacks = append(feedbacks, feedback)
+	}
+
+	var total int64
+	if err = r.DB.Raw(query.CountFeedbacksByClienteID, clienteID).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Reserva").
-		Offset(offset).Limit(limit).
-		Order("momento_criacao DESC").
-		Find(&feedbacks).Error
-
-	return feedbacks, total, err
+	return feedbacks, total, nil
 }
 
 // GetByEmpresaID - busca feedbacks por empresa
 func (r *FeedbackRepository) GetByEmpresaID(empresaID int, page, limit int) ([]model.Feedback, int64, error) {
-	var feedbacks []model.Feedback
-	var total int64
-
 	offset := (page - 1) * limit
 
-	query := r.DB.Model(&model.Feedback{}).Where("empresa_id = ?", empresaID)
+	rows, err := r.DB.Raw(query.GetFeedbacksByEmpresaID, empresaID, limit, offset).Rows()
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
 
-	// Contar total
-	if err := query.Count(&total).Error; err != nil {
+	var feedbacks []model.Feedback
+	for rows.Next() {
+		feedback := model.Feedback{}
+		err := rows.Scan(
+			&feedback.ID,
+			&feedback.ClienteID,
+			&feedback.EmpresaID,
+			&feedback.ReservaID,
+			&feedback.Nota,
+			&feedback.Comentario,
+			&feedback.Status,
+			&feedback.MomentoCriacao,
+			&feedback.MomentoAtualizacao,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		feedbacks = append(feedbacks, feedback)
+	}
+
+	var total int64
+	if err = r.DB.Raw(query.CountFeedbacksByEmpresaID, empresaID).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Reserva").
-		Offset(offset).Limit(limit).
-		Order("momento_criacao DESC").
-		Find(&feedbacks).Error
-
-	return feedbacks, total, err
+	return feedbacks, total, nil
 }
 
 // GetByStatus - busca feedbacks por status
 func (r *FeedbackRepository) GetByStatus(status string, page, limit int) ([]model.Feedback, int64, error) {
-	var feedbacks []model.Feedback
-	var total int64
-
 	offset := (page - 1) * limit
 
-	query := r.DB.Model(&model.Feedback{}).Where("status = ?", status)
+	rows, err := r.DB.Raw(query.GetFeedbacksByStatus, status, limit, offset).Rows()
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
 
-	// Contar total
-	if err := query.Count(&total).Error; err != nil {
+	var feedbacks []model.Feedback
+	for rows.Next() {
+		feedback := model.Feedback{}
+		err := rows.Scan(
+			&feedback.ID,
+			&feedback.ClienteID,
+			&feedback.EmpresaID,
+			&feedback.ReservaID,
+			&feedback.Nota,
+			&feedback.Comentario,
+			&feedback.Status,
+			&feedback.MomentoCriacao,
+			&feedback.MomentoAtualizacao,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		feedbacks = append(feedbacks, feedback)
+	}
+
+	var total int64
+	if err = r.DB.Raw(query.CountFeedbacksByStatus, status).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Reserva").
-		Offset(offset).Limit(limit).
-		Order("momento_criacao DESC").
-		Find(&feedbacks).Error
-
-	return feedbacks, total, err
+	return feedbacks, total, nil
 }
 
 // GetByRating - busca feedbacks por nota
 func (r *FeedbackRepository) GetByRating(rating int, page, limit int) ([]model.Feedback, int64, error) {
-	var feedbacks []model.Feedback
-	var total int64
-
 	offset := (page - 1) * limit
 
-	query := r.DB.Model(&model.Feedback{}).Where("nota = ?", rating)
+	rows, err := r.DB.Raw(query.GetFeedbacksByRating, rating, limit, offset).Rows()
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
 
-	// Contar total
-	if err := query.Count(&total).Error; err != nil {
+	var feedbacks []model.Feedback
+	for rows.Next() {
+		feedback := model.Feedback{}
+		err := rows.Scan(
+			&feedback.ID,
+			&feedback.ClienteID,
+			&feedback.EmpresaID,
+			&feedback.ReservaID,
+			&feedback.Nota,
+			&feedback.Comentario,
+			&feedback.Status,
+			&feedback.MomentoCriacao,
+			&feedback.MomentoAtualizacao,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		feedbacks = append(feedbacks, feedback)
+	}
+
+	var total int64
+	if err = r.DB.Raw(query.CountFeedbacksByRating, rating).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Reserva").
-		Offset(offset).Limit(limit).
-		Order("momento_criacao DESC").
-		Find(&feedbacks).Error
-
-	return feedbacks, total, err
+	return feedbacks, total, nil
 }
 
 // Update - atualiza um feedback
 func (r *FeedbackRepository) Update(feedback *model.Feedback) error {
-	return r.DB.Save(feedback).Error
+	err := r.DB.Raw(query.UpdateFeedback,
+		feedback.Nota,
+		feedback.Comentario,
+		feedback.Status,
+		feedback.MomentoAtualizacao,
+		feedback.ID,
+	).Row().Scan()
+
+	return err
 }
 
 // UpdateStatus - atualiza apenas o status de um feedback
 func (r *FeedbackRepository) UpdateStatus(id int, status string) error {
-	return r.DB.Model(&model.Feedback{}).Where("id = ?", id).
-		Updates(map[string]interface{}{
-			"status":              status,
-			"momento_atualizacao": time.Now(),
-		}).Error
+	err := r.DB.Raw(query.UpdateFeedbackStatus,
+		status,
+		time.Now(),
+		id,
+	).Row().Scan()
+
+	return err
 }
 
 // Delete - remove um feedback
 func (r *FeedbackRepository) Delete(id int) error {
-	return r.DB.Delete(&model.Feedback{}, id).Error
+	err := r.DB.Raw(query.DeleteFeedback, id).Row().Scan()
+	return err
 }
 
 // GetAverageRating - calcula a média de avaliações de uma empresa
 func (r *FeedbackRepository) GetAverageRating(empresaID int) (float64, int, error) {
-	var result struct {
-		Average float64
-		Count   int
+	var average float64
+	var count int
+
+	if err := r.DB.Raw(query.GetAverageRating, empresaID, string(model.StatusFeedbackAtivo)).Row().Scan(&average, &count); err != nil {
+		return 0, 0, err
 	}
 
-	err := r.DB.Model(&model.Feedback{}).
-		Select("AVG(nota) as average, COUNT(*) as count").
-		Where("empresa_id = ? AND status = ?", empresaID, string(model.StatusFeedbackAtivo)).
-		Scan(&result).Error
-
-	return result.Average, result.Count, err
+	return average, count, nil
 }
 
 // GetRatingDistribution - obtém a distribuição de notas de uma empresa
 func (r *FeedbackRepository) GetRatingDistribution(empresaID int) (map[int]int, error) {
-	var results []struct {
-		Nota  int
-		Count int
-	}
-
-	err := r.DB.Model(&model.Feedback{}).
-		Select("nota, COUNT(*) as count").
-		Where("empresa_id = ? AND status = ?", empresaID, string(model.StatusFeedbackAtivo)).
-		Group("nota").
-		Order("nota").
-		Scan(&results).Error
-
+	rows, err := r.DB.Raw(query.GetRatingDistribution, empresaID, string(model.StatusFeedbackAtivo)).Rows()
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	distribution := make(map[int]int)
-	for _, result := range results {
-		distribution[result.Nota] = result.Count
+	for rows.Next() {
+		var nota int
+		var count int
+		if err := rows.Scan(&nota, &count); err != nil {
+			return nil, err
+		}
+		distribution[nota] = count
 	}
 
 	return distribution, nil
@@ -188,24 +276,39 @@ func (r *FeedbackRepository) GetRatingDistribution(empresaID int) (map[int]int, 
 
 // GetRecentFeedbacks - busca feedbacks recentes
 func (r *FeedbackRepository) GetRecentFeedbacks(empresaID int, days int, page, limit int) ([]model.Feedback, int64, error) {
-	var feedbacks []model.Feedback
-	var total int64
-
 	offset := (page - 1) * limit
 	since := time.Now().AddDate(0, 0, -days)
 
-	query := r.DB.Model(&model.Feedback{}).Where("empresa_id = ? AND momento_criacao >= ?", empresaID, since)
+	rows, err := r.DB.Raw(query.GetRecentFeedbacks, empresaID, since, limit, offset).Rows()
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
 
-	// Contar total
-	if err := query.Count(&total).Error; err != nil {
+	var feedbacks []model.Feedback
+	for rows.Next() {
+		feedback := model.Feedback{}
+		err := rows.Scan(
+			&feedback.ID,
+			&feedback.ClienteID,
+			&feedback.EmpresaID,
+			&feedback.ReservaID,
+			&feedback.Nota,
+			&feedback.Comentario,
+			&feedback.Status,
+			&feedback.MomentoCriacao,
+			&feedback.MomentoAtualizacao,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		feedbacks = append(feedbacks, feedback)
+	}
+
+	var total int64
+	if err = r.DB.Raw(query.CountRecentFeedbacks, empresaID, since).Row().Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	// Buscar registros
-	err := query.Preload("Cliente").Preload("Empresa").Preload("Reserva").
-		Offset(offset).Limit(limit).
-		Order("momento_criacao DESC").
-		Find(&feedbacks).Error
-
-	return feedbacks, total, err
+	return feedbacks, total, nil
 }

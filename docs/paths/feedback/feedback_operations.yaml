@@ -1,0 +1,177 @@
+get:
+  tags:
+    - Feedbacks
+  summary: Get Feedback by ID
+  description: Busca um feedback específico pelo ID
+  operationId: getFeedback
+  parameters:
+    - name: id
+      in: path
+      description: ID do feedback
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: Feedback encontrado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              cliente_id:
+                type: integer
+                example: 1
+              empresa_id:
+                type: integer
+                example: 1
+              reserva_id:
+                type: integer
+                example: 1
+              nota:
+                type: integer
+                example: 5
+              comentario:
+                type: string
+                example: "Excelente passeio!"
+              status:
+                type: string
+                example: "ativo"
+              momento_criacao:
+                type: string
+                format: date-time
+                example: "2024-01-01T10:00:00Z"
+              momento_atualizacao:
+                type: string
+                format: date-time
+                example: "2024-01-01T10:00:00Z"
+              status_display:
+                type: string
+                example: "Ativo"
+              rating_display:
+                type: string
+                example: "Excelente"
+    '400':
+      description: ID inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '404':
+      description: Feedback não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+put:
+  tags:
+    - Feedbacks
+  summary: Update Feedback
+  description: Atualiza um feedback existente
+  operationId: updateFeedback
+  parameters:
+    - name: id
+      in: path
+      description: ID do feedback
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            nota:
+              type: integer
+              description: Nota de avaliação (1-5)
+              minimum: 1
+              maximum: 5
+              example: 4
+            comentario:
+              type: string
+              description: Comentário do feedback
+              maxLength: 1000
+              example: "Atualização do comentário"
+            status:
+              type: string
+              description: Status do feedback
+              enum: [ativo, inativo, moderado]
+              example: "ativo"
+  responses:
+    '200':
+      description: Feedback atualizado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              feedback:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  cliente_id:
+                    type: integer
+                    example: 1
+                  empresa_id:
+                    type: integer
+                    example: 1
+                  reserva_id:
+                    type: integer
+                    example: 1
+                  nota:
+                    type: integer
+                    example: 4
+                  comentario:
+                    type: string
+                    example: "Atualização do comentário"
+                  status:
+                    type: string
+                    example: "ativo"
+                  momento_criacao:
+                    type: string
+                    format: date-time
+                  momento_atualizacao:
+                    type: string
+                    format: date-time
+                  status_display:
+                    type: string
+                    example: "Ativo"
+                  rating_display:
+                    type: string
+                    example: "Bom"
+              message:
+                type: string
+                example: "Feedback atualizado com sucesso"
+    '400':
+      description: Dados inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '404':
+      description: Feedback não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+

@@ -1,0 +1,112 @@
+get:
+  tags:
+    - Feedbacks
+  summary: Get Recent Feedbacks
+  description: Obtém feedbacks recentes de uma empresa
+  operationId: getRecentFeedbacks
+  parameters:
+    - name: empresa_id
+      in: query
+      description: ID da empresa
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    - name: days
+      in: query
+      description: Número de dias
+      required: false
+      schema:
+        type: integer
+        default: 30
+        minimum: 1
+    - name: page
+      in: query
+      description: Número da página
+      required: false
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+    - name: limit
+      in: query
+      description: Número de itens por página
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+  responses:
+    '200':
+      description: Feedbacks recentes retornados com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              feedbacks:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    cliente_id:
+                      type: integer
+                      example: 1
+                    empresa_id:
+                      type: integer
+                      example: 1
+                    reserva_id:
+                      type: integer
+                      example: 1
+                    nota:
+                      type: integer
+                      example: 5
+                    comentario:
+                      type: string
+                      example: "Excelente passeio!"
+                    status:
+                      type: string
+                      example: "ativo"
+                    momento_criacao:
+                      type: string
+                      format: date-time
+                      example: "2024-01-01T10:00:00Z"
+                    momento_atualizacao:
+                      type: string
+                      format: date-time
+                      example: "2024-01-01T10:00:00Z"
+                    status_display:
+                      type: string
+                      example: "Ativo"
+                    rating_display:
+                      type: string
+                      example: "Excelente"
+              total:
+                type: integer
+                example: 50
+              page:
+                type: integer
+                example: 1
+              limit:
+                type: integer
+                example: 10
+              pages:
+                type: integer
+                example: 5
+    '400':
+      description: Parâmetros inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+

@@ -221,7 +221,7 @@ func TestClientHandler_Update(t *testing.T) {
 			jsonData, _ := json.Marshal(tt.requestBody)
 			body := bytes.NewBuffer(jsonData)
 
-			req := httptest.NewRequest(http.MethodPut, "/clients/"+tt.id, body)
+			req := httptest.NewRequest(http.MethodPatch, "/clients/"+tt.id, body)
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -448,7 +448,7 @@ func TestClientHandler_Integration(t *testing.T) {
 		jsonData, _ = json.Marshal(updateData)
 		body = bytes.NewBuffer(jsonData)
 
-		req = httptest.NewRequest(http.MethodPut, "/clients/1", body)
+		req = httptest.NewRequest(http.MethodPatch, "/clients/1", body)
 		req.Header.Set("Content-Type", "application/json")
 		rec = httptest.NewRecorder()
 		c = e.NewContext(req, rec)

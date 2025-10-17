@@ -1,0 +1,45 @@
+get:
+  tags:
+    - Feedbacks
+  summary: Get Average Rating
+  description: Obtém a média de avaliações de uma empresa
+  operationId: getAverageRating
+  parameters:
+    - name: empresa_id
+      in: query
+      description: ID da empresa
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Média calculada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              empresa_id:
+                type: integer
+                example: 1
+              average:
+                type: number
+                format: float
+                example: 4.5
+              count:
+                type: integer
+                example: 100
+    '400':
+      description: empresa_id inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
