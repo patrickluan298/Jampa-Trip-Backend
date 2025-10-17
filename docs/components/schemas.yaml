@@ -470,7 +470,6 @@ Pagination:
       example: 10
       description: "Total de páginas"
 
-# Tour Schemas
 CreateTourRequest:
   type: object
   required:
@@ -788,7 +787,6 @@ PaginationResponse:
       example: 10
       description: "Itens por página"
 
-# Image Upload Schemas
 ImageResponse:
   type: object
   properties:

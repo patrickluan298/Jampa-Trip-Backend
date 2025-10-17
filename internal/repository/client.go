@@ -80,20 +80,10 @@ func (receiver *ClientRepository) Create(client *model.Client) error {
 	return err
 }
 
-// Update - atualiza um cliente existente
-func (receiver *ClientRepository) Update(client *model.Client) error {
-	err := receiver.DB.Raw(query.UpdateClient,
-		client.Name,
-		client.Email,
-		client.Password,
-		client.CPF,
-		client.Phone,
-		client.BirthDate,
-		client.UpdatedAt,
-		client.ID,
-	).Row().Scan()
-
-	return err
+// Update - atualiza os campos enviados no map
+func (receiver *ClientRepository) Update(id int, updates map[string]interface{}) error {
+	result := receiver.DB.Model(&model.Client{}).Where("id = ?", id).Updates(updates)
+	return result.Error
 }
 
 // List - busca todos os clientes

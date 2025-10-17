@@ -155,50 +155,62 @@ func TestClientService_Update(t *testing.T) {
 
 	service := service.ClientServiceNew(db)
 
+	// Helper function to create string pointers
+	strPtr := func(s string) *string { return &s }
+
 	tests := []struct {
 		name     string
 		request  *contract.UpdateClientRequest
 		hasError bool
 	}{
 		{
-			name: "Valid client update",
+			name: "Valid partial update - only name",
 			request: &contract.UpdateClientRequest{
-				ID:       1,
-				Name:     "João Silva Updated",
-				Email:    "joao.updated@example.com",
-				Password: "NewPassword123!",
-				// ConfirmPassword field doesn't exist in the struct
-				CPF:       "12345678901",
-				Phone:     "11999999999",
-				BirthDate: "1990-01-01",
+				ID:   1,
+				Name: strPtr("João Silva Updated"),
+			},
+			hasError: false,
+		},
+		{
+			name: "Valid partial update - name and email",
+			request: &contract.UpdateClientRequest{
+				ID:    1,
+				Name:  strPtr("João Silva Updated"),
+				Email: strPtr("joao.updated@example.com"),
+			},
+			hasError: false,
+		},
+		{
+			name: "Valid partial update - with password",
+			request: &contract.UpdateClientRequest{
+				ID:              1,
+				Password:        strPtr("NewPassword123!"),
+				ConfirmPassword: strPtr("NewPassword123!"),
 			},
 			hasError: false,
 		},
 		{
 			name: "Password mismatch",
 			request: &contract.UpdateClientRequest{
-				ID:       1,
-				Name:     "João Silva",
-				Email:    "joao@example.com",
-				Password: "Password123!",
-				// ConfirmPassword field doesn't exist in the struct
-				CPF:       "12345678901",
-				Phone:     "11999999999",
-				BirthDate: "1990-01-01",
+				ID:              1,
+				Password:        strPtr("Password123!"),
+				ConfirmPassword: strPtr("DifferentPassword123!"),
 			},
 			hasError: true,
 		},
 		{
 			name: "Non-existent client",
 			request: &contract.UpdateClientRequest{
-				ID:       999,
-				Name:     "Non-existent",
-				Email:    "nonexistent@example.com",
-				Password: "Password123!",
-				// ConfirmPassword field doesn't exist in the struct
-				CPF:       "12345678901",
-				Phone:     "11999999999",
-				BirthDate: "1990-01-01",
+				ID:   999,
+				Name: strPtr("Non-existent"),
+			},
+			hasError: true,
+		},
+		{
+			name: "Email already exists for another client",
+			request: &contract.UpdateClientRequest{
+				ID:    1,
+				Email: strPtr("existing@example.com"),
 			},
 			hasError: true,
 		},
@@ -218,25 +230,29 @@ func TestClientService_Update(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "cpf", "phone", "birth_date", "created_at", "updated_at"}))
 			}
 
-			// Mock email existence check for another client
-			if !tt.hasError && tt.request.ID != 999 {
+			// Mock email existence check if email is being updated
+			if tt.request.Email != nil && !tt.hasError && tt.request.ID != 999 {
+				emailCount := 0
+				if *tt.request.Email == "existing@example.com" {
+					emailCount = 1
+				}
 				mock.ExpectQuery(`SELECT count`).
-					WithArgs(tt.request.Email, tt.request.ID).
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+					WithArgs(*tt.request.Email, tt.request.ID).
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(emailCount))
+			}
 
-				// Mock client update
-				mock.ExpectExec(`UPDATE clients`).
-					WithArgs(
-						tt.request.Name,
-						tt.request.Email,
-						sqlmock.AnyArg(), // hashed password
-						tt.request.CPF,
-						tt.request.Phone,
-						sqlmock.AnyArg(), // parsed birth date
-						sqlmock.AnyArg(), // updated_at
-						tt.request.ID,
-					).
-					WillReturnResult(sqlmock.NewResult(1, 1))
+			// Mock GORM update operation
+			if !tt.hasError && tt.request.ID != 999 {
+				mock.ExpectBegin()
+				mock.ExpectExec(`UPDATE "clients"`).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+
+				// Mock fetching updated client
+				mock.ExpectQuery(`SELECT`).
+					WithArgs(tt.request.ID).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "cpf", "phone", "birth_date", "created_at", "updated_at"}).
+						AddRow(tt.request.ID, "João Silva Updated", "joao.updated@example.com", "new_hash", "12345678901", "11999999999", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), time.Now(), time.Now()))
 			}
 
 			result, err := service.Update(tt.request)
@@ -425,15 +441,11 @@ func TestClientService_EmailValidation(t *testing.T) {
 
 	// Test email exists for another client scenario
 	t.Run("Email exists for another client", func(t *testing.T) {
+		strPtr := func(s string) *string { return &s }
+
 		request := &contract.UpdateClientRequest{
-			ID:       1,
-			Name:     "João Silva",
-			Email:    "existing@example.com",
-			Password: "Password123!",
-			// ConfirmPassword field doesn't exist in the struct
-			CPF:       "12345678901",
-			Phone:     "11999999999",
-			BirthDate: "1990-01-01",
+			ID:    1,
+			Email: strPtr("existing@example.com"),
 		}
 
 		// Mock existing client check
@@ -444,7 +456,7 @@ func TestClientService_EmailValidation(t *testing.T) {
 
 		// Mock email exists for another client
 		mock.ExpectQuery(`SELECT count`).
-			WithArgs(request.Email, request.ID).
+			WithArgs(*request.Email, request.ID).
 			WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
 
 		result, err := service.Update(request)
