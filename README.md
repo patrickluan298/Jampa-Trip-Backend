@@ -668,7 +668,7 @@ CREATE TABLE pagamentos (
 
 ### Fluxos de Pagamento
 
-#### 1. Fluxo de Pagamento com Cartão de Crédito
+#### 1. Cartão de Crédito
 
 ```mermaid
 sequenceDiagram
@@ -696,7 +696,7 @@ sequenceDiagram
     PaymentHandler-->>Client: 400/500 {erro}
 ```
 
-#### 2. Fluxo de Pagamento com Cartão de Débito
+#### 2. Cartão de Débito
 
 ```mermaid
 sequenceDiagram
@@ -717,7 +717,7 @@ sequenceDiagram
     PaymentHandler-->>Client: 200 OK {pagamento aprovado}
 ```
 
-#### 3. Fluxo de Pagamento PIX
+#### 3. PIX
 
 ```mermaid
 sequenceDiagram
@@ -743,7 +743,7 @@ sequenceDiagram
     Database-->>PaymentService: Status atualizado
 ```
 
-#### 4. Fluxo de Gestão de Cartões
+#### 4. Gestão de Cartões
 
 ```mermaid
 sequenceDiagram

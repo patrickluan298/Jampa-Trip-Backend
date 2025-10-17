@@ -79,59 +79,77 @@ func (receiver *CompanyService) Create(request *contract.CreateCompanyRequest) (
 // Update - realiza a atualização de uma empresa existente
 func (receiver *CompanyService) Update(request *contract.UpdateCompanyRequest) (*contract.UpdateCompanyResponse, error) {
 
-	if request.Password != request.ConfirmPassword {
-		return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
-	}
-
-	existingCompany, err := receiver.CompanyRepository.GetByID(request.ID)
-	if err != nil {
+	if _, err := receiver.CompanyRepository.GetByID(request.ID); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, util.WrapError("Empresa não encontrada", nil, http.StatusNotFound)
 		}
 		return nil, util.WrapError("Erro ao buscar empresa", err, http.StatusInternalServerError)
 	}
 
-	emailExists, err := receiver.CompanyRepository.EmailExisteParaOutraEmpresa(request.Email, request.ID)
-	if err != nil {
-		return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
+	updates := make(map[string]interface{})
+
+	if request.Name != nil {
+		updates["name"] = *request.Name
 	}
 
-	if emailExists {
-		return nil, util.WrapError("O email informado já está cadastrado para outra empresa", nil, http.StatusConflict)
+	if request.Email != nil {
+		emailExists, err := receiver.CompanyRepository.EmailExisteParaOutraEmpresa(*request.Email, request.ID)
+		if err != nil {
+			return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
+		}
+
+		if emailExists {
+			return nil, util.WrapError("O email informado já está cadastrado para outra empresa", nil, http.StatusConflict)
+		}
+		updates["email"] = *request.Email
 	}
 
-	passwordHash, err := util.CriptografarSenha(request.Password)
-	if err != nil {
-		return nil, util.WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+	if request.Password != nil && request.ConfirmPassword != nil {
+		if *request.Password != *request.ConfirmPassword {
+			return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
+		}
+
+		passwordHash, err := util.CriptografarSenha(*request.Password)
+		if err != nil {
+			return nil, util.WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+		}
+		updates["password"] = passwordHash
 	}
 
-	company := &model.Company{
-		ID:        request.ID,
-		Name:      request.Name,
-		Email:     request.Email,
-		Password:  passwordHash,
-		CNPJ:      request.CNPJ,
-		Phone:     request.Phone,
-		Address:   request.Address,
-		CreatedAt: existingCompany.CreatedAt,
-		UpdatedAt: time.Now(),
+	if request.CNPJ != nil {
+		updates["cnpj"] = *request.CNPJ
 	}
 
-	if err := receiver.CompanyRepository.Update(company); err != nil {
+	if request.Phone != nil {
+		updates["phone"] = *request.Phone
+	}
+
+	if request.Address != nil {
+		updates["address"] = *request.Address
+	}
+
+	updates["updated_at"] = time.Now()
+
+	if err := receiver.CompanyRepository.Update(request.ID, updates); err != nil {
 		return nil, util.WrapError("Erro ao atualizar empresa", err, http.StatusInternalServerError)
+	}
+
+	updatedCompany, err := receiver.CompanyRepository.GetByID(request.ID)
+	if err != nil {
+		return nil, util.WrapError("Erro ao buscar empresa atualizada", err, http.StatusInternalServerError)
 	}
 
 	response := &contract.UpdateCompanyResponse{
 		Message: "Empresa atualizada com sucesso",
 		Data: contract.Company{
-			ID:        company.ID,
-			Name:      company.Name,
-			Email:     company.Email,
-			CNPJ:      company.CNPJ,
-			Phone:     company.Phone,
-			Address:   company.Address,
-			CreatedAt: company.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: company.UpdatedAt.Format("2006-01-02 15:04:05"),
+			ID:        updatedCompany.ID,
+			Name:      updatedCompany.Name,
+			Email:     updatedCompany.Email,
+			CNPJ:      updatedCompany.CNPJ,
+			Phone:     updatedCompany.Phone,
+			Address:   updatedCompany.Address,
+			CreatedAt: updatedCompany.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: updatedCompany.UpdatedAt.Format("2006-01-02 15:04:05"),
 		},
 	}
 

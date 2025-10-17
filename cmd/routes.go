@@ -29,12 +29,12 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.Use(middleware.JWTMiddleware())
 
 	// COMPANIES
-	protected.PUT("/companies/:id", handler.CompanyHandler{}.Update)
+	protected.PATCH("/companies/:id", handler.CompanyHandler{}.Update)
 	protected.GET("/companies", handler.CompanyHandler{}.List)
 	protected.GET("/companies/:id", handler.CompanyHandler{}.Get)
 
 	// CLIENTS
-	protected.PUT("/clients/:id", handler.ClientHandler{}.Update)
+	protected.PATCH("/clients/:id", handler.ClientHandler{}.Update)
 	protected.GET("/clients", handler.ClientHandler{}.List)
 	protected.GET("/clients/:id", handler.ClientHandler{}.Get)
 

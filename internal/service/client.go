@@ -84,64 +84,81 @@ func (receiver *ClientService) Create(request *contract.CreateClientRequest) (*c
 // Update - realiza a atualização de um cliente existente
 func (receiver *ClientService) Update(request *contract.UpdateClientRequest) (*contract.UpdateClientResponse, error) {
 
-	if request.Password != request.ConfirmPassword {
-		return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
-	}
-
-	existingClient, err := receiver.ClientRepository.GetByID(request.ID)
-	if err != nil {
+	if _, err := receiver.ClientRepository.GetByID(request.ID); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, util.WrapError("Cliente não encontrado", nil, http.StatusNotFound)
 		}
 		return nil, util.WrapError("Erro ao buscar cliente", err, http.StatusInternalServerError)
 	}
 
-	emailExists, err := receiver.ClientRepository.EmailExisteParaOutroCliente(request.Email, request.ID)
-	if err != nil {
-		return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
+	updates := make(map[string]interface{})
+
+	if request.Name != nil {
+		updates["name"] = *request.Name
 	}
 
-	if emailExists {
-		return nil, util.WrapError("O email informado já está cadastrado para outro cliente", nil, http.StatusConflict)
+	if request.Email != nil {
+		emailExists, err := receiver.ClientRepository.EmailExisteParaOutroCliente(*request.Email, request.ID)
+		if err != nil {
+			return nil, util.WrapError("Erro ao verificar email", err, http.StatusInternalServerError)
+		}
+
+		if emailExists {
+			return nil, util.WrapError("O email informado já está cadastrado para outro cliente", nil, http.StatusConflict)
+		}
+		updates["email"] = *request.Email
 	}
 
-	passwordHash, err := util.CriptografarSenha(request.Password)
-	if err != nil {
-		return nil, util.WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+	if request.Password != nil && request.ConfirmPassword != nil {
+		if *request.Password != *request.ConfirmPassword {
+			return nil, util.WrapError("As senhas não coincidem", nil, http.StatusUnprocessableEntity)
+		}
+
+		passwordHash, err := util.CriptografarSenha(*request.Password)
+		if err != nil {
+			return nil, util.WrapError("Erro ao criptografar senha", err, http.StatusInternalServerError)
+		}
+		updates["password"] = passwordHash
 	}
 
-	birthDate, err := time.Parse("2006-01-02", request.BirthDate)
-	if err != nil {
-		return nil, util.WrapError("Formato de data inválido. Use YYYY-MM-DD", err, http.StatusUnprocessableEntity)
+	if request.CPF != nil {
+		updates["cpf"] = *request.CPF
 	}
 
-	client := &model.Client{
-		ID:        request.ID,
-		Name:      request.Name,
-		Email:     request.Email,
-		Password:  passwordHash,
-		CPF:       request.CPF,
-		Phone:     request.Phone,
-		BirthDate: birthDate,
-		CreatedAt: existingClient.CreatedAt,
-		UpdatedAt: time.Now(),
+	if request.Phone != nil {
+		updates["phone"] = *request.Phone
 	}
 
-	if err := receiver.ClientRepository.Update(client); err != nil {
+	if request.BirthDate != nil {
+		birthDate, err := time.Parse("2006-01-02", *request.BirthDate)
+		if err != nil {
+			return nil, util.WrapError("Formato de data inválido. Use YYYY-MM-DD", err, http.StatusUnprocessableEntity)
+		}
+		updates["birth_date"] = birthDate
+	}
+
+	updates["updated_at"] = time.Now()
+
+	if err := receiver.ClientRepository.Update(request.ID, updates); err != nil {
 		return nil, util.WrapError("Erro ao atualizar cliente", err, http.StatusInternalServerError)
+	}
+
+	updatedClient, err := receiver.ClientRepository.GetByID(request.ID)
+	if err != nil {
+		return nil, util.WrapError("Erro ao buscar cliente atualizado", err, http.StatusInternalServerError)
 	}
 
 	response := &contract.UpdateClientResponse{
 		Message: "Cliente atualizado com sucesso",
 		Data: contract.Client{
-			ID:        client.ID,
-			Name:      client.Name,
-			Email:     client.Email,
-			CPF:       client.CPF,
-			Phone:     client.Phone,
-			BirthDate: client.BirthDate.Format("2006-01-02"),
-			CreatedAt: client.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: client.UpdatedAt.Format("2006-01-02 15:04:05"),
+			ID:        updatedClient.ID,
+			Name:      updatedClient.Name,
+			Email:     updatedClient.Email,
+			CPF:       updatedClient.CPF,
+			Phone:     updatedClient.Phone,
+			BirthDate: updatedClient.BirthDate.Format("2006-01-02"),
+			CreatedAt: updatedClient.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: updatedClient.UpdatedAt.Format("2006-01-02 15:04:05"),
 		},
 	}
 
