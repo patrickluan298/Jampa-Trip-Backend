@@ -1,0 +1,120 @@
+post:
+  tags:
+    - Orders
+  summary: Processar ordem online
+  description: Processa pagamento de uma ordem com cartão ou outro método
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID da ordem no Mercado Pago
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - payment_method_id
+            - installments
+            - payer
+          properties:
+            payment_method_id:
+              type: string
+              example: "visa"
+              description: ID do método de pagamento
+            token:
+              type: string
+              example: "card_token_123abc"
+              description: Token do cartão
+            installments:
+              type: integer
+              minimum: 1
+              maximum: 12
+              example: 3
+              description: Número de parcelas
+            issuer_id:
+              type: string
+              example: "123"
+              description: ID do emissor do cartão
+            payer:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  example: "joao.silva@example.com"
+                first_name:
+                  type: string
+                  example: "João"
+                last_name:
+                  type: string
+                  example: "Silva"
+                identification:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: "CPF"
+                    number:
+                      type: string
+                      example: "12345678900"
+            metadata:
+              type: object
+              additionalProperties:
+                type: string
+  responses:
+    '200':
+      description: Ordem processada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/components/schemas/Order'
+              payment_details:
+                type: object
+                properties:
+                  payment_id:
+                    type: integer
+                    example: 987654321
+                  status:
+                    type: string
+                    example: "approved"
+                  status_detail:
+                    type: string
+                    example: "accredited"
+                  payment_method_id:
+                    type: string
+                    example: "visa"
+                  payment_type_id:
+                    type: string
+                    example: "credit_card"
+                  transaction_amount:
+                    type: number
+                    format: float
+                    example: 150.50
+                  date_created:
+                    type: string
+                    format: date-time
+                  date_approved:
+                    type: string
+                    format: date-time
+              message:
+                type: string
+                example: "Pagamento aprovado com sucesso"
+    '400':
+      description: Erro de validação ou pagamento rejeitado
+    '404':
+      description: Ordem não encontrada
+    '401':
+      description: Não autenticado
+    '500':
+      description: Erro interno do servidor
+

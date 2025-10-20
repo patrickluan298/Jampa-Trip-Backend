@@ -70,6 +70,24 @@ paths:
   /jampa-trip/api/v1/feedback/recent:
     $ref: './paths/feedback/recent_feedbacks.yaml'
 
+  # ORDERS
+  /jampa-trip/api/v1/orders:
+    $ref: './paths/orders/orders.yaml'
+  /jampa-trip/api/v1/orders/{id}:
+    $ref: './paths/orders/order_operations.yaml'
+  /jampa-trip/api/v1/orders/{id}/capture:
+    $ref: './paths/orders/order_capture.yaml'
+  /jampa-trip/api/v1/orders/{id}/cancel:
+    $ref: './paths/orders/order_cancel.yaml'
+  /jampa-trip/api/v1/orders/{id}/refund:
+    $ref: './paths/orders/order_refund.yaml'
+  /jampa-trip/api/v1/orders/{id}/process:
+    $ref: './paths/orders/order_process.yaml'
+  /jampa-trip/api/v1/orders/{id}/transactions:
+    $ref: './paths/orders/order_transactions.yaml'
+  /jampa-trip/api/v1/orders/{id}/transactions/{transaction_id}:
+    $ref: './paths/orders/order_transaction_operations.yaml'
+
 components:
   schemas:
     $ref: './components/schemas.yaml'

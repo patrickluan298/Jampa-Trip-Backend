@@ -853,3 +853,148 @@ ImageResponse:
       format: date-time
       description: Data e hora da última atualização
       example: "2024-01-15T15:30:00Z"
+
+Order:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: ID local da ordem
+    cliente_id:
+      type: integer
+      example: 1
+      description: ID do cliente
+    empresa_id:
+      type: integer
+      example: 1
+      description: ID da empresa
+    mercado_pago_order_id:
+      type: string
+      example: "ORD-12345678"
+      description: ID da ordem no Mercado Pago
+    external_reference:
+      type: string
+      example: "ORDER-2025-001"
+      description: Referência externa da ordem
+    total_amount:
+      type: number
+      format: float
+      example: 150.50
+      description: Valor total da ordem
+    currency:
+      type: string
+      example: "BRL"
+      description: Moeda da ordem
+    status:
+      type: string
+      enum: [pending, processing, paid, authorized, cancelled, refunded, expired]
+      example: "paid"
+      description: Status da ordem
+    status_detail:
+      type: string
+      example: "accredited"
+      description: Detalhes do status
+    description:
+      type: string
+      example: "Pacote turístico João Pessoa"
+      description: Descrição da ordem
+    notification_url:
+      type: string
+      example: "https://api.example.com/webhooks/mercadopago"
+      description: URL para notificações
+    momento_criacao:
+      type: string
+      format: date-time
+      example: "2025-01-20T10:00:00Z"
+      description: Data de criação
+    momento_atualizacao:
+      type: string
+      format: date-time
+      example: "2025-01-20T10:05:00Z"
+      description: Data de atualização
+    momento_expiracao:
+      type: string
+      format: date-time
+      nullable: true
+      example: "2025-01-27T10:00:00Z"
+      description: Data de expiração
+    status_display:
+      type: string
+      example: "Pago"
+      description: Status em formato amigável
+    transactions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Transaction'
+      description: Transações associadas à ordem
+
+Transaction:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+      description: ID local da transação
+    order_id:
+      type: integer
+      example: 1
+      description: ID da ordem associada
+    mercado_pago_transaction_id:
+      type: string
+      example: "TXN-987654321"
+      description: ID da transação no Mercado Pago
+    payment_id:
+      type: integer
+      format: int64
+      example: 123456789
+      description: ID do pagamento no Mercado Pago
+    type:
+      type: string
+      enum: [payment, refund]
+      example: "payment"
+      description: Tipo da transação
+    status:
+      type: string
+      enum: [pending, approved, authorized, rejected, cancelled, refunded]
+      example: "approved"
+      description: Status da transação
+    status_detail:
+      type: string
+      example: "accredited"
+      description: Detalhes do status
+    amount:
+      type: number
+      format: float
+      example: 150.50
+      description: Valor da transação
+    currency:
+      type: string
+      example: "BRL"
+      description: Moeda da transação
+    payment_method_id:
+      type: string
+      example: "visa"
+      description: Método de pagamento
+    payment_type_id:
+      type: string
+      example: "credit_card"
+      description: Tipo do método de pagamento
+    momento_criacao:
+      type: string
+      format: date-time
+      example: "2025-01-20T10:00:00Z"
+      description: Data de criação
+    momento_atualizacao:
+      type: string
+      format: date-time
+      example: "2025-01-20T10:05:00Z"
+      description: Data de atualização
+    status_display:
+      type: string
+      example: "Aprovado"
+      description: Status em formato amigável
+    type_display:
+      type: string
+      example: "Pagamento"
+      description: Tipo em formato amigável

@@ -817,16 +817,135 @@ O sistema inclui **logs estruturados** para monitoramento de pagamentos:
 - **Debug e auditoria** facilitados
 - **Status em tempo real** dos pagamentos
 
-### Arquivos Implementados
+## 📦 Módulo de Orders
 
-1. **`pkg/config/config.go`** - Configurações do Mercado Pago
-2. **`pkg/mercadopago/client.go`** - Cliente HTTP para API
-3. **`internal/model/pagamento.go`** - Modelo de dados
-4. **`internal/service/pagamento.go`** - Lógica de negócio
-5. **`internal/handler/pagamento.go`** - Handlers HTTP
-6. **`internal/repository/pagamento.go`** - Acesso a dados
-7. **`internal/contract/pagamento_request.go`** - Contratos de request
-8. **`internal/contract/pagamento_response.go`** - Contratos de response
+O projeto implementa o **módulo completo de Orders do Mercado Pago**, oferecendo gerenciamento avançado de pedidos, transações e fluxos de pagamento.
+
+### Visão Geral
+
+O módulo Orders permite:
+- Criar pedidos estruturados com múltiplos itens
+- Gerenciar transações associadas a um pedido
+- Capturar, cancelar e reembolsar pedidos
+- Processar pagamentos online vinculados a pedidos
+- Rastrear o ciclo de vida completo de pedidos e transações
+
+### Status de Orders
+
+| Status | Descrição |
+|--------|-----------|
+| `pending` | Ordem pendente de pagamento |
+| `processing` | Ordem em processamento |
+| `paid` | Ordem paga com sucesso |
+| `authorized` | Ordem autorizada (aguardando captura) |
+| `cancelled` | Ordem cancelada |
+| `refunded` | Ordem reembolsada |
+| `expired` | Ordem expirada |
+
+### Tipos de Transactions
+
+| Tipo | Descrição |
+|------|-----------|
+| `payment` | Transação de pagamento |
+| `refund` | Transação de reembolso |
+
+### Fluxos de Operação
+
+#### 1. Criar Ordem
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant OrderHandler
+    participant OrderService
+    participant MercadoPago
+    participant Database
+
+    Client->>OrderHandler: POST /orders
+    OrderHandler->>OrderService: Create(request)
+    OrderService->>OrderService: Validar dados
+    OrderService->>MercadoPago: CreateOrder(items, payer, amount)
+    MercadoPago-->>OrderService: {order_id, status}
+    OrderService->>Database: Salvar ordem localmente
+    Database-->>OrderService: Ordem criada
+    OrderService-->>OrderHandler: OrderResponse
+    OrderHandler-->>Client: 201 {order, message}
+```
+
+#### 2. Processar Pagamento de Ordem
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant OrderHandler
+    participant OrderService
+    participant MercadoPago
+    participant Database
+
+    Client->>OrderHandler: POST /orders/:id/process
+    OrderHandler->>OrderService: ProcessOrder(orderID, paymentData)
+    OrderService->>Database: Buscar ordem
+    Database-->>OrderService: Ordem encontrada
+    OrderService->>MercadoPago: ProcessOrder(card, installments)
+    MercadoPago-->>OrderService: {payment_id, status: approved}
+    OrderService->>Database: Criar transaction (type: payment)
+    OrderService->>Database: Atualizar order status = paid
+    Database-->>OrderService: Atualizado
+    OrderService-->>OrderHandler: ProcessOrderResponse
+    OrderHandler-->>Client: 200 {order, payment_details}
+```
+
+#### 3. Capturar Ordem Autorizada
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant OrderHandler
+    participant OrderService
+    participant MercadoPago
+    participant Database
+
+    Client->>OrderHandler: POST /orders/:id/capture
+    OrderHandler->>OrderService: Capture(orderID)
+    OrderService->>Database: Buscar ordem
+    Database-->>OrderService: Status = authorized
+    OrderService->>MercadoPago: CaptureOrder(orderID)
+    MercadoPago-->>OrderService: {status: paid}
+    OrderService->>Database: Atualizar status
+    Database-->>OrderService: Status atualizado
+    OrderService-->>OrderHandler: CaptureOrderResponse
+    OrderHandler-->>Client: 200 {order captured}
+```
+
+#### 4. Reembolsar Ordem
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant OrderHandler
+    participant OrderService
+    participant MercadoPago
+    participant Database
+
+    Client->>OrderHandler: POST /orders/:id/refund
+    OrderHandler->>OrderService: Refund(orderID, amount?)
+    OrderService->>Database: Buscar ordem (status = paid)
+    Database-->>OrderService: Ordem encontrada
+    OrderService->>MercadoPago: RefundOrder(orderID)
+    MercadoPago-->>OrderService: {status: refunded}
+    OrderService->>Database: Criar transaction (type: refund)
+    OrderService->>Database: Atualizar order status
+    Database-->>OrderService: Atualizado
+    OrderService-->>OrderHandler: RefundOrderResponse
+    OrderHandler-->>Client: 200 {order, refund_details}
+```
+
+### Sincronização com Mercado Pago
+
+O sistema sincroniza automaticamente o status das ordens:
+- Ao buscar uma ordem (GET), o status é atualizado do Mercado Pago
+- Transações são criadas localmente após operações no MP
+- Status Detail é sempre mantido atualizado
 
 ## 📋 Fluxo de Reservas
 

@@ -1,0 +1,68 @@
+post:
+  tags:
+    - Orders
+  summary: Reembolsar ordem
+  description: Solicita reembolso total ou parcial de uma ordem paga
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID da ordem no Mercado Pago
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            amount:
+              type: number
+              format: float
+              description: Valor a reembolsar (opcional, se omitido reembolsa o valor total)
+              example: 75.25
+            metadata:
+              type: object
+              additionalProperties:
+                type: string
+              description: Metadados adicionais
+  responses:
+    '200':
+      description: Reembolso solicitado com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/components/schemas/Order'
+              refund_details:
+                type: object
+                properties:
+                  refund_id:
+                    type: integer
+                    example: 12345
+                  amount:
+                    type: number
+                    format: float
+                    example: 75.25
+                  status:
+                    type: string
+                    example: "approved"
+                  date_created:
+                    type: string
+                    format: date-time
+              message:
+                type: string
+                example: "Ordem reembolsada com sucesso"
+    '400':
+      description: Ordem não pode ser reembolsada
+    '404':
+      description: Ordem não encontrada
+    '401':
+      description: Não autenticado
+    '500':
+      description: Erro interno do servidor
+

@@ -86,4 +86,16 @@ func ConfigureRoutes(e *echo.Echo) {
 	protected.PUT("/reservations/:id/cancel", handler.ReservationHandler{}.Cancel)
 	protected.GET("/reservations/upcoming", handler.ReservationHandler{}.GetUpcoming)
 	protected.GET("/reservations/history", handler.ReservationHandler{}.GetHistory)
+
+	// ORDERS
+	protected.POST("/orders", handler.OrderHandler{}.Create)
+	protected.GET("/orders", handler.OrderHandler{}.List)
+	protected.GET("/orders/:id", handler.OrderHandler{}.Get)
+	protected.POST("/orders/:id/capture", handler.OrderHandler{}.Capture)
+	protected.POST("/orders/:id/cancel", handler.OrderHandler{}.Cancel)
+	protected.POST("/orders/:id/refund", handler.OrderHandler{}.Refund)
+	protected.POST("/orders/:id/transactions", handler.OrderHandler{}.AddTransaction)
+	protected.PUT("/orders/:id/transactions/:transaction_id", handler.OrderHandler{}.UpdateTransaction)
+	protected.DELETE("/orders/:id/transactions/:transaction_id", handler.OrderHandler{}.DeleteTransaction)
+	protected.POST("/orders/:id/process", handler.OrderHandler{}.ProcessOrder)
 }

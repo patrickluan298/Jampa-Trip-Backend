@@ -1,0 +1,31 @@
+get:
+  tags:
+    - Orders
+  summary: Obter ordem por ID
+  description: Retorna os detalhes de uma ordem específica
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID da ordem no Mercado Pago
+  responses:
+    '200':
+      description: Detalhes da ordem
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/components/schemas/Order'
+    '404':
+      description: Ordem não encontrada
+    '401':
+      description: Não autenticado
+    '500':
+      description: Erro interno do servidor
+

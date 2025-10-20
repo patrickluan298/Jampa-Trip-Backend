@@ -238,14 +238,6 @@ CREATE INDEX IF NOT EXISTS idx_feedbacks_status ON feedbacks(status);
 CREATE INDEX IF NOT EXISTS idx_feedbacks_momento_criacao ON feedbacks(momento_criacao);
 
 -- =============================================================================
--- COMMENTS FOR DOCUMENTATION
--- =============================================================================
-
-COMMENT ON TABLE feedbacks IS 'Tabela para armazenar feedbacks e avaliações de clientes sobre empresas';
-COMMENT ON COLUMN feedbacks.nota IS 'Nota de avaliação de 1 a 5 estrelas';
-COMMENT ON COLUMN feedbacks.status IS 'Status do feedback: ativo, inativo ou moderado';
-
--- =============================================================================
 -- RESERVATIONS TABLE
 -- =============================================================================
 
@@ -383,22 +375,274 @@ LEFT JOIN reservations r ON t.id = r.tour_id
 GROUP BY t.id, t.name, t.max_people, r.data_passeio_selecionada;
 
 -- =============================================================================
--- COMMENTS FOR DOCUMENTATION
--- =============================================================================
-
-COMMENT ON TABLE reservations IS 'Tabela para armazenar reservas de tours feitas por clientes';
-COMMENT ON COLUMN reservations.tour_id IS 'ID do tour reservado';
-COMMENT ON COLUMN reservations.cliente_id IS 'ID do cliente que fez a reserva';
-COMMENT ON COLUMN reservations.pagamento_id IS 'ID do pagamento associado à reserva';
-COMMENT ON COLUMN reservations.status IS 'Status da reserva: pendente, aguardando_pagamento, confirmada, cancelada, concluida';
-COMMENT ON COLUMN reservations.data_passeio_selecionada IS 'Data específica do tour escolhida pelo cliente';
-COMMENT ON COLUMN reservations.quantidade_pessoas IS 'Número de pessoas incluídas na reserva';
-COMMENT ON COLUMN reservations.valor_total IS 'Valor total da reserva em BRL';
-
--- =============================================================================
 -- ADD FOREIGN KEY FROM FEEDBACKS TO RESERVATIONS
 -- =============================================================================
 
 ALTER TABLE feedbacks
 ADD CONSTRAINT fk_feedbacks_reserva_id 
 FOREIGN KEY (reserva_id) REFERENCES reservations(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+-- =============================================================================
+-- PAGAMENTOS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS pagamentos (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    empresa_id INTEGER NOT NULL,
+    mercado_pago_order_id VARCHAR(255) UNIQUE,
+    mercado_pago_payment_id VARCHAR(255),
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    status_detail VARCHAR(100),
+    valor DECIMAL(10,2) NOT NULL,
+    moeda VARCHAR(3) NOT NULL DEFAULT 'BRL',
+    metodo_pagamento VARCHAR(50) NOT NULL,
+    descricao TEXT,
+    numero_parcelas INTEGER DEFAULT 1,
+    token_cartao VARCHAR(255),
+    chave_pix VARCHAR(255),
+    qr_code TEXT,
+    last_four_digits VARCHAR(4),
+    first_six_digits VARCHAR(6),
+    payment_method_id VARCHAR(50),
+    issuer_id VARCHAR(50),
+    cardholder_name VARCHAR(255),
+    captured BOOLEAN DEFAULT FALSE,
+    transaction_amount_refunded DECIMAL(10,2) DEFAULT 0,
+    momento_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_aprovacao TIMESTAMP,
+    momento_cancelamento TIMESTAMP,
+    momento_autorizacao TIMESTAMP,
+    momento_captura TIMESTAMP,
+    
+    FOREIGN KEY (cliente_id) REFERENCES clients(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (empresa_id) REFERENCES companies(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    
+    CONSTRAINT chk_pagamentos_valor CHECK (valor >= 0.01),
+    CONSTRAINT chk_pagamentos_numero_parcelas CHECK (numero_parcelas >= 1),
+    CONSTRAINT chk_pagamentos_status CHECK (status IN ('pending', 'approved', 'authorized', 'in_process', 'in_mediation', 'rejected', 'cancelled', 'refunded', 'charged_back')),
+    CONSTRAINT chk_pagamentos_metodo_pagamento CHECK (metodo_pagamento IN ('credit_card', 'debit_card', 'pix'))
+);
+
+-- =============================================================================
+-- INDEXES FOR PAGAMENTOS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_pagamentos_cliente_id ON pagamentos(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_pagamentos_empresa_id ON pagamentos(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_pagamentos_mercado_pago_order_id ON pagamentos(mercado_pago_order_id);
+CREATE INDEX IF NOT EXISTS idx_pagamentos_mercado_pago_payment_id ON pagamentos(mercado_pago_payment_id);
+CREATE INDEX IF NOT EXISTS idx_pagamentos_status ON pagamentos(status);
+CREATE INDEX IF NOT EXISTS idx_pagamentos_metodo_pagamento ON pagamentos(metodo_pagamento);
+CREATE INDEX IF NOT EXISTS idx_pagamentos_momento_criacao ON pagamentos(momento_criacao DESC);
+
+-- =============================================================================
+-- FUNCTIONS FOR PAGAMENTOS
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION update_pagamentos_momento_atualizacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.momento_atualizacao = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================================================
+-- TRIGGERS FOR PAGAMENTOS
+-- =============================================================================
+
+CREATE TRIGGER trigger_update_pagamentos_momento_atualizacao
+    BEFORE UPDATE ON pagamentos
+    FOR EACH ROW
+    EXECUTE FUNCTION update_pagamentos_momento_atualizacao();
+
+-- =============================================================================
+-- ORDERS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    empresa_id INTEGER NOT NULL,
+    mercado_pago_order_id VARCHAR(255) UNIQUE,
+    external_reference VARCHAR(256),
+    total_amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'BRL',
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    status_detail VARCHAR(255),
+    description TEXT,
+    notification_url VARCHAR(512),
+    momento_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_expiracao TIMESTAMP,
+    
+    FOREIGN KEY (cliente_id) REFERENCES clients(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (empresa_id) REFERENCES companies(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    
+    CONSTRAINT chk_orders_total_amount CHECK (total_amount >= 0.01),
+    CONSTRAINT chk_orders_status CHECK (status IN ('pending', 'processing', 'paid', 'authorized', 'cancelled', 'refunded', 'expired'))
+);
+
+-- =============================================================================
+-- INDEXES FOR ORDERS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_orders_cliente_id ON orders(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_orders_empresa_id ON orders(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_orders_mercado_pago_order_id ON orders(mercado_pago_order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_external_reference ON orders(external_reference);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_momento_criacao ON orders(momento_criacao DESC);
+
+-- =============================================================================
+-- FUNCTIONS FOR ORDERS
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION update_orders_momento_atualizacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.momento_atualizacao = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================================================
+-- TRIGGERS FOR ORDERS
+-- =============================================================================
+
+CREATE TRIGGER trigger_update_orders_momento_atualizacao
+    BEFORE UPDATE ON orders
+    FOR EACH ROW
+    EXECUTE FUNCTION update_orders_momento_atualizacao();
+
+-- =============================================================================
+-- TRANSACTIONS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL,
+    mercado_pago_transaction_id VARCHAR(255),
+    payment_id BIGINT,
+    type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    status_detail VARCHAR(255),
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'BRL',
+    payment_method_id VARCHAR(100),
+    payment_type_id VARCHAR(100),
+    momento_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    momento_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    
+    CONSTRAINT chk_transactions_amount CHECK (amount >= 0.01),
+    CONSTRAINT chk_transactions_type CHECK (type IN ('payment', 'refund')),
+    CONSTRAINT chk_transactions_status CHECK (status IN ('pending', 'approved', 'authorized', 'rejected', 'cancelled', 'refunded'))
+);
+
+-- =============================================================================
+-- INDEXES FOR TRANSACTIONS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_transactions_order_id ON transactions(order_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_mercado_pago_transaction_id ON transactions(mercado_pago_transaction_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_payment_id ON transactions(payment_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_momento_criacao ON transactions(momento_criacao DESC);
+
+-- =============================================================================
+-- COMPOSITE INDEXES FOR TRANSACTIONS
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_transactions_order_status ON transactions(order_id, status);
+CREATE INDEX IF NOT EXISTS idx_transactions_order_type ON transactions(order_id, type);
+
+-- =============================================================================
+-- FUNCTIONS FOR TRANSACTIONS
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION update_transactions_momento_atualizacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.momento_atualizacao = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================================================
+-- TRIGGERS FOR TRANSACTIONS
+-- =============================================================================
+
+CREATE TRIGGER trigger_update_transactions_momento_atualizacao
+    BEFORE UPDATE ON transactions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_transactions_momento_atualizacao();
+
+-- =============================================================================
+-- VIEWS FOR ORDERS
+-- =============================================================================
+
+CREATE OR REPLACE VIEW order_details AS
+SELECT 
+    o.id,
+    o.cliente_id,
+    o.empresa_id,
+    o.mercado_pago_order_id,
+    o.external_reference,
+    o.total_amount,
+    o.currency,
+    o.status,
+    o.status_detail,
+    o.description,
+    o.notification_url,
+    o.momento_criacao,
+    o.momento_atualizacao,
+    o.momento_expiracao,
+    c.name as cliente_name,
+    c.email as cliente_email,
+    comp.name as empresa_name,
+    comp.email as empresa_email,
+    COUNT(t.id) as total_transactions,
+    COALESCE(SUM(CASE WHEN t.type = 'payment' THEN t.amount ELSE 0 END), 0) as total_payments,
+    COALESCE(SUM(CASE WHEN t.type = 'refund' THEN t.amount ELSE 0 END), 0) as total_refunds
+FROM orders o
+INNER JOIN clients c ON o.cliente_id = c.id
+INNER JOIN companies comp ON o.empresa_id = comp.id
+LEFT JOIN transactions t ON o.id = t.order_id
+GROUP BY o.id, o.cliente_id, o.empresa_id, o.mercado_pago_order_id, o.external_reference,
+         o.total_amount, o.currency, o.status, o.status_detail, o.description,
+         o.notification_url, o.momento_criacao, o.momento_atualizacao, o.momento_expiracao,
+         c.name, c.email, comp.name, comp.email;
+
+CREATE OR REPLACE VIEW order_transaction_summary AS
+SELECT 
+    o.id as order_id,
+    o.mercado_pago_order_id,
+    o.external_reference,
+    o.total_amount as order_total,
+    o.status as order_status,
+    t.id as transaction_id,
+    t.mercado_pago_transaction_id,
+    t.payment_id,
+    t.type as transaction_type,
+    t.status as transaction_status,
+    t.amount as transaction_amount,
+    t.payment_method_id,
+    t.payment_type_id,
+    t.momento_criacao as transaction_date
+FROM orders o
+LEFT JOIN transactions t ON o.id = t.order_id
+ORDER BY o.momento_criacao DESC, t.momento_criacao DESC;
+
+-- =============================================================================
+-- UPDATE RESERVATIONS TABLE TO REFERENCE PAGAMENTOS
+-- =============================================================================
+
+ALTER TABLE reservations DROP CONSTRAINT IF EXISTS reservations_pagamento_id_fkey;
+ALTER TABLE reservations
+ADD CONSTRAINT fk_reservations_pagamento_id 
+FOREIGN KEY (pagamento_id) REFERENCES pagamentos(id) ON UPDATE CASCADE ON DELETE SET NULL;

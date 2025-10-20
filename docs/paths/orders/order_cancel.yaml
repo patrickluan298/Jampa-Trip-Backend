@@ -1,0 +1,36 @@
+post:
+  tags:
+    - Orders
+  summary: Cancelar ordem
+  description: Cancela uma ordem pendente ou autorizada
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID da ordem no Mercado Pago
+  responses:
+    '200':
+      description: Ordem cancelada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/components/schemas/Order'
+              message:
+                type: string
+                example: "Ordem cancelada com sucesso"
+    '400':
+      description: Ordem não pode ser cancelada
+    '404':
+      description: Ordem não encontrada
+    '401':
+      description: Não autenticado
+    '500':
+      description: Erro interno do servidor
+

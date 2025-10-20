@@ -1241,3 +1241,412 @@ func (c *Client) DeleteCustomerCard(ctx context.Context, customerID, cardID stri
 
 	return nil
 }
+
+// ===== ORDERS API =====
+
+// OrderTransactionRequest - representa a requisição para adicionar uma transação à ordem
+type OrderTransactionRequest struct {
+	PaymentID       int64   `json:"payment_id"`
+	PaymentMethodID string  `json:"payment_method_id"`
+	Amount          float64 `json:"amount"`
+}
+
+// OrderTransactionResponse - representa uma transação da ordem
+type OrderTransactionResponse struct {
+	ID              string  `json:"id"`
+	PaymentID       int64   `json:"payment_id"`
+	Status          string  `json:"status"`
+	StatusDetail    string  `json:"status_detail"`
+	Amount          float64 `json:"amount"`
+	PaymentMethodID string  `json:"payment_method_id"`
+	PaymentTypeID   string  `json:"payment_type_id"`
+	DateCreated     string  `json:"date_created"`
+	DateLastUpdated string  `json:"date_last_updated"`
+}
+
+// OrderOnlineRequest - representa a requisição para processar uma ordem online
+type OrderOnlineRequest struct {
+	TransactionAmount float64           `json:"transaction_amount"`
+	Token             string            `json:"token,omitempty"`
+	Description       string            `json:"description"`
+	Installments      int               `json:"installments"`
+	PaymentMethodID   string            `json:"payment_method_id"`
+	IssuerID          string            `json:"issuer_id,omitempty"`
+	Payer             OrderOnlinePayer  `json:"payer"`
+	Metadata          map[string]string `json:"metadata,omitempty"`
+}
+
+// OrderOnlinePayer - representa o pagador na ordem online
+type OrderOnlinePayer struct {
+	Email          string                    `json:"email"`
+	Identification OrderOnlineIdentification `json:"identification,omitempty"`
+	FirstName      string                    `json:"first_name,omitempty"`
+	LastName       string                    `json:"last_name,omitempty"`
+}
+
+// OrderOnlineIdentification - representa a identificação do pagador
+type OrderOnlineIdentification struct {
+	Type   string `json:"type"`
+	Number string `json:"number"`
+}
+
+// MPCreateOrder - cria uma nova ordem no Mercado Pago (via API /v1/orders)
+func (c *Client) MPCreateOrder(ctx context.Context, orderReq *OrderRequest) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders", c.BaseURL)
+
+	jsonData, err := json.Marshal(orderReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar order", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPGetOrder - obtém informações de uma ordem específica
+func (c *Client) MPGetOrder(ctx context.Context, orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s", c.BaseURL, orderID)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPCaptureOrder - captura uma ordem totalmente
+func (c *Client) MPCaptureOrder(ctx context.Context, orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/capture", c.BaseURL, orderID)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPCancelOrder - cancela uma ordem (já existe, mas renomeando para consistência)
+func (c *Client) MPCancelOrder(ctx context.Context, orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/cancel", c.BaseURL, orderID)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPRefundOrder - solicita reembolso de uma ordem
+func (c *Client) MPRefundOrder(ctx context.Context, orderID string) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/refund", c.BaseURL, orderID)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, nil)
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPAddTransaction - adiciona uma transação a uma ordem
+func (c *Client) MPAddTransaction(ctx context.Context, orderID string, transactionReq *OrderTransactionRequest) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/transactions", c.BaseURL, orderID)
+
+	jsonData, err := json.Marshal(transactionReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar transação", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPUpdateTransaction - atualiza uma transação existente
+func (c *Client) MPUpdateTransaction(ctx context.Context, orderID, transactionID string, transactionReq *OrderTransactionRequest) (*OrderResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/transactions/%s", c.BaseURL, orderID, transactionID)
+
+	jsonData, err := json.Marshal(transactionReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar transação", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var orderResp OrderResponse
+	if err := json.Unmarshal(body, &orderResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &orderResp, nil
+}
+
+// MPDeleteTransaction - deleta uma transação
+func (c *Client) MPDeleteTransaction(ctx context.Context, orderID, transactionID string) error {
+	url := fmt.Sprintf("%s/v1/orders/%s/transactions/%s", c.BaseURL, orderID, transactionID)
+
+	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
+	if err != nil {
+		return util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d)", resp.StatusCode), err, resp.StatusCode)
+		}
+
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	return nil
+}
+
+// MPProcessOrder - processa uma ordem online (pagamento)
+func (c *Client) MPProcessOrder(ctx context.Context, orderID string, processReq *OrderOnlineRequest) (*PaymentResponse, error) {
+	url := fmt.Sprintf("%s/v1/orders/%s/process", c.BaseURL, orderID)
+
+	jsonData, err := json.Marshal(processReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao serializar requisição de processo", err, http.StatusInternalServerError)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, util.WrapError("erro ao criar requisição", err, http.StatusInternalServerError)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, util.WrapError("erro ao executar requisição", err, http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, util.WrapError("erro ao ler resposta", err, http.StatusInternalServerError)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var errorResp ErrorResponse
+		if err := json.Unmarshal(body, &errorResp); err != nil {
+			return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago (status %d): %s", resp.StatusCode, string(body)), err, resp.StatusCode)
+		}
+		return nil, util.WrapError(fmt.Sprintf("erro na API do Mercado Pago: %s", errorResp.Message), nil, resp.StatusCode)
+	}
+
+	var paymentResp PaymentResponse
+	if err := json.Unmarshal(body, &paymentResp); err != nil {
+		return nil, util.WrapError("erro ao deserializar resposta", err, http.StatusInternalServerError)
+	}
+
+	return &paymentResp, nil
+}

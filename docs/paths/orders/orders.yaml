@@ -1,0 +1,191 @@
+post:
+  tags:
+    - Orders
+  summary: Criar uma nova ordem
+  description: Cria uma nova ordem no Mercado Pago e persiste localmente
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - cliente_id
+            - empresa_id
+            - external_reference
+            - total_amount
+            - items
+            - payer
+          properties:
+            cliente_id:
+              type: integer
+              example: 1
+            empresa_id:
+              type: integer
+              example: 1
+            external_reference:
+              type: string
+              example: "ORDER-2025-001"
+            total_amount:
+              type: number
+              format: float
+              example: 150.50
+            description:
+              type: string
+              example: "Pacote turístico João Pessoa"
+            notification_url:
+              type: string
+              example: "https://api.example.com/webhooks/mercadopago"
+            items:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                  - title
+                  - quantity
+                  - currency_id
+                  - unit_price
+                properties:
+                  id:
+                    type: string
+                    example: "TOUR-001"
+                  title:
+                    type: string
+                    example: "City Tour João Pessoa"
+                  description:
+                    type: string
+                    example: "Tour completo pela cidade"
+                  quantity:
+                    type: integer
+                    example: 2
+                  currency_id:
+                    type: string
+                    example: "BRL"
+                  unit_price:
+                    type: number
+                    format: float
+                    example: 75.25
+            payer:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "João Silva"
+                email:
+                  type: string
+                  example: "joao.silva@example.com"
+                phone:
+                  type: object
+                  properties:
+                    area_code:
+                      type: string
+                      example: "83"
+                    number:
+                      type: string
+                      example: "987654321"
+                address:
+                  type: object
+                  properties:
+                    street_name:
+                      type: string
+                      example: "Av. Epitácio Pessoa"
+                    street_number:
+                      type: integer
+                      example: 1000
+                    zip_code:
+                      type: string
+                      example: "58030-000"
+  responses:
+    '201':
+      description: Ordem criada com sucesso
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/components/schemas/Order'
+              message:
+                type: string
+                example: "Ordem criada com sucesso"
+    '400':
+      description: Erro de validação
+    '401':
+      description: Não autenticado
+    '500':
+      description: Erro interno do servidor
+
+get:
+  tags:
+    - Orders
+  summary: Listar ordens
+  description: Lista todas as ordens com filtros opcionais
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: cliente_id
+      in: query
+      schema:
+        type: integer
+      description: Filtrar por ID do cliente
+    - name: empresa_id
+      in: query
+      schema:
+        type: integer
+      description: Filtrar por ID da empresa
+    - name: external_reference
+      in: query
+      schema:
+        type: string
+      description: Filtrar por referência externa
+    - name: status
+      in: query
+      schema:
+        type: string
+        enum: [pending, processing, paid, authorized, cancelled, refunded, expired]
+      description: Filtrar por status
+    - name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+      description: Offset para paginação
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Limite de resultados por página
+  responses:
+    '200':
+      description: Lista de ordens
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              orders:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+              total:
+                type: integer
+                example: 50
+              offset:
+                type: integer
+                example: 0
+              limit:
+                type: integer
+                example: 20
+              has_more:
+                type: boolean
+                example: true
+    '401':
+      description: Não autenticado
+    '500':
+      description: Erro interno do servidor
+
